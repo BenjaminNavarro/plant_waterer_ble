@@ -50,8 +50,16 @@ extern "C" void app_main(void) {
     QueueHandle_t watering_schedule_queue =
         xQueueCreate(1, sizeof(plant::WateringSchedule));
     {
-        plant::WateringSchedule schedule;
-        xQueueSendToBack(watering_schedule_queue, schedule.data(), 0);
+        if (auto saved_schedule = plant::read_schedule_from_storage()) {
+            ESP_LOGI("main", "Schedule read from storage");
+            xQueueSendToBack(watering_schedule_queue, &saved_schedule.value(),
+                             0);
+        } else {
+            ESP_LOGI("main",
+                     "No schedule saved in storage, creating a default one");
+            plant::WateringSchedule default_schedule;
+            xQueueSendToBack(watering_schedule_queue, &default_schedule, 0);
+        }
     }
 
     plant::create_blink_task();

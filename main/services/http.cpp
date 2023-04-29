@@ -83,8 +83,12 @@ static esp_err_t schedule_post_handler(httpd_req_t* req) {
 
     ESP_LOGI("schedule_post", "Request parsed");
 
+    ESP_LOGI("schedule_post", "Saving schedule to storage");
+    plant::write_schedule_from_storage(schedule);
+    ESP_LOGI("schedule_post", "Schedule saved to storage");
+
     ESP_LOGI("schedule_post", "Posting schedule to queue...");
-    xQueueOverwrite(ctx->watering_schedule, schedule.data());
+    xQueueOverwrite(ctx->watering_schedule, &schedule);
     ESP_LOGI("schedule_post", "Schedule posted to queue");
 
     httpd_resp_sendstr(req, "ok");

@@ -48,8 +48,7 @@ void watering_task(void* arg) {
     const TickType_t task_frequency = 1000 / portTICK_PERIOD_MS;
 
     while (true) {
-        xQueuePeek(watering_schedule_queue, watering_schedule.data(),
-                   portMAX_DELAY);
+        xQueuePeek(watering_schedule_queue, &watering_schedule, portMAX_DELAY);
 
         struct timeval now_tv;
         gettimeofday(&now_tv, nullptr);

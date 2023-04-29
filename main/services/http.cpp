@@ -1,4 +1,5 @@
 #include <services/http.hpp>
+#include <data/watering_schedule.hpp>
 
 #include <cJSON.h>
 #include <esp_chip_info.h>
@@ -23,14 +24,20 @@ static const char* rest_tag = "esp-rest";
 constexpr size_t scratch_bufsize = 10240;
 
 struct RestServerContext {
+    explicit RestServerContext(QueueHandle_t schedule)
+        : watering_schedule{schedule} {
+    }
+
     std::array<char, scratch_bufsize> scratch{};
+    QueueHandle_t watering_schedule{};
 };
 
-/* Simple handler for light brightness control */
-static esp_err_t light_brightness_post_handler(httpd_req_t* req) {
+static esp_err_t schedule_post_handler(httpd_req_t* req) {
+    ESP_LOGI("schedule_post", "Schedule modification request received");
     std::size_t total_len = req->content_len;
     int cur_len = 0;
-    char* buf = ((RestServerContext*)(req->user_ctx))->scratch.data();
+    auto* ctx = reinterpret_cast<RestServerContext*>(req->user_ctx);
+    char* buf = ctx->scratch.data();
     int received = 0;
     if (total_len >= scratch_bufsize) {
         /* Respond with 500 Internal Server Error */
@@ -50,18 +57,75 @@ static esp_err_t light_brightness_post_handler(httpd_req_t* req) {
     }
     buf[total_len] = '\0';
 
-    cJSON* root = cJSON_Parse(buf);
-    int red = cJSON_GetObjectItem(root, "red")->valueint;
-    int green = cJSON_GetObjectItem(root, "green")->valueint;
-    int blue = cJSON_GetObjectItem(root, "blue")->valueint;
-    ESP_LOGI(rest_tag, "Light control: red = %d, green = %d, blue = %d", red,
-             green, blue);
+    plant::WateringSchedule schedule;
+
+    ESP_LOGI("schedule_post", "Parsing the request...");
+    auto* root = cJSON_Parse(buf);
+    auto* schedule_json = cJSON_GetObjectItem(root, "schedule");
+    if (cJSON_GetArraySize(schedule_json) != schedule.size()) {
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR,
+                            "Invalid number of group schedules");
+        return ESP_FAIL;
+    }
+    for (int i = 0; i < schedule.size(); i++) {
+        const auto* entry = cJSON_GetArrayItem(schedule_json, i);
+        auto& group = schedule[i];
+        auto get = [entry](const char* name) {
+            return cJSON_GetObjectItem(entry, name)->valueint;
+        };
+
+        group.enabled = get("enabled") == 1;
+        group.start_time = get("start_time");
+        group.watering_period = get("watering_period");
+        group.watering_duration = get("watering_duration");
+    }
     cJSON_Delete(root);
-    httpd_resp_sendstr(req, "Post control value successfully");
+
+    ESP_LOGI("schedule_post", "Request parsed");
+
+    ESP_LOGI("schedule_post", "Posting schedule to queue...");
+    xQueueOverwrite(ctx->watering_schedule, schedule.data());
+    ESP_LOGI("schedule_post", "Schedule posted to queue");
+
+    httpd_resp_sendstr(req, "ok");
+
     return ESP_OK;
 }
 
-/* Simple handler for getting system handler */
+static esp_err_t schedule_get_handler(httpd_req_t* req) {
+    ESP_LOGI("schedule_get", "Schedule consultation request received");
+
+    const auto* ctx = reinterpret_cast<RestServerContext*>(req->user_ctx);
+    plant::WateringSchedule schedule;
+    xQueuePeek(ctx->watering_schedule, schedule.data(), portMAX_DELAY);
+
+    ESP_LOGI("schedule_get", "Generating the JSON representation");
+    httpd_resp_set_type(req, "application/json");
+    cJSON* root = cJSON_CreateObject();
+    auto* schedule_json = cJSON_AddArrayToObject(root, "schedule");
+    for (const auto& group : schedule) {
+        auto* entry = cJSON_CreateObject();
+        auto set = [entry](const char* name, std::uint64_t value) {
+            cJSON_AddNumberToObject(entry, name, static_cast<double>(value));
+        };
+
+        set("enabled", group.enabled ? 1 : 0);
+        set("start_time", group.start_time);
+        set("watering_period", group.watering_period);
+        set("watering_duration", group.watering_duration);
+
+        cJSON_AddItemToArray(schedule_json, entry);
+    }
+
+    ESP_LOGI("schedule_get", "Convert the JSON to text");
+    const char* schedule_str = cJSON_Print(root);
+    ESP_LOGI("schedule_get", "Send the response");
+    httpd_resp_sendstr(req, schedule_str);
+    free((void*)schedule_str);
+    cJSON_Delete(root);
+    return ESP_OK;
+}
+
 static esp_err_t system_info_get_handler(httpd_req_t* req) {
     httpd_resp_set_type(req, "application/json");
     cJSON* root = cJSON_CreateObject();
@@ -76,22 +140,10 @@ static esp_err_t system_info_get_handler(httpd_req_t* req) {
     return ESP_OK;
 }
 
-/* Simple handler for getting temperature data */
-static esp_err_t temperature_data_get_handler(httpd_req_t* req) {
-    httpd_resp_set_type(req, "application/json");
-    cJSON* root = cJSON_CreateObject();
-    cJSON_AddNumberToObject(root, "raw", esp_random() % 20);
-    const char* sys_info = cJSON_Print(root);
-    httpd_resp_sendstr(req, sys_info);
-    free((void*)sys_info);
-    cJSON_Delete(root);
-    return ESP_OK;
-}
-
 namespace plant {
 
-esp_err_t start_http_service() {
-    auto* rest_context = new RestServerContext;
+esp_err_t start_http_service(QueueHandle_t watering_schedule) {
+    auto* rest_context = new RestServerContext{watering_schedule};
     REST_CHECK(rest_context, "No memory for rest context",
                [] { return ESP_FAIL; });
 
@@ -106,28 +158,23 @@ esp_err_t start_http_service() {
                    return ESP_FAIL;
                });
 
-    /* URI handler for fetching system info */
     httpd_uri_t system_info_get_uri = {.uri = "/api/v1/system/info",
                                        .method = HTTP_GET,
                                        .handler = system_info_get_handler,
                                        .user_ctx = rest_context};
     httpd_register_uri_handler(server, &system_info_get_uri);
 
-    /* URI handler for fetching temperature data */
-    httpd_uri_t temperature_data_get_uri = {.uri = "/api/v1/temp/raw",
-                                            .method = HTTP_GET,
-                                            .handler =
-                                                temperature_data_get_handler,
-                                            .user_ctx = rest_context};
-    httpd_register_uri_handler(server, &temperature_data_get_uri);
+    httpd_uri_t schedule_get_uri = {.uri = "/api/v1/schedule/read",
+                                    .method = HTTP_GET,
+                                    .handler = schedule_get_handler,
+                                    .user_ctx = rest_context};
+    httpd_register_uri_handler(server, &schedule_get_uri);
 
-    /* URI handler for light brightness control */
-    httpd_uri_t light_brightness_post_uri = {.uri = "/api/v1/light/brightness",
-                                             .method = HTTP_POST,
-                                             .handler =
-                                                 light_brightness_post_handler,
-                                             .user_ctx = rest_context};
-    httpd_register_uri_handler(server, &light_brightness_post_uri);
+    httpd_uri_t schedule_post_uri = {.uri = "/api/v1/schedule/write",
+                                     .method = HTTP_POST,
+                                     .handler = schedule_post_handler,
+                                     .user_ctx = rest_context};
+    httpd_register_uri_handler(server, &schedule_post_uri);
 
     return ESP_OK;
 }

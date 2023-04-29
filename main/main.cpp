@@ -49,11 +49,15 @@ extern "C" void app_main(void) {
 
     QueueHandle_t watering_schedule_queue =
         xQueueCreate(1, sizeof(plant::WateringSchedule));
+    {
+        plant::WateringSchedule schedule;
+        xQueueSendToBack(watering_schedule_queue, schedule.data(), 0);
+    }
 
     plant::create_blink_task();
     auto* watering_task = plant::create_watering_task(watering_schedule_queue);
 
     ESP_ERROR_CHECK(plant::start_mdns_service());
     ESP_ERROR_CHECK(plant::start_ntp_service(watering_task));
-    ESP_ERROR_CHECK(plant::start_http_service());
+    ESP_ERROR_CHECK(plant::start_http_service(watering_schedule_queue));
 }

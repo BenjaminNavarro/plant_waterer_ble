@@ -1,0 +1,51 @@
+/* HTTP Restful API Server Example
+
+   This example code is in the Public Domain (or CC0 licensed, at your option.)
+
+   Unless required by applicable law or agreed to in writing, this
+   software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+   CONDITIONS OF ANY KIND, either express or implied.
+*/
+
+#include <tasks/blink.hpp>
+#include <tasks/watering.hpp>
+
+#include <services/ntp.hpp>
+#include <services/mdns.hpp>
+#include <services/http.hpp>
+
+#include <driver/gpio.h>
+#include <esp_event.h>
+#include <esp_netif.h>
+#include <esp_netif_sntp.h>
+#include <esp_sntp.h>
+#include <esp_log.h>
+#include <lwip/apps/netbiosns.h>
+#include <mdns.h>
+#include <nvs_flash.h>
+#include <protocol_examples_common.h>
+#include <sdkconfig.h>
+
+#include <array>
+#include <ctime>
+#include <sys/time.h>
+
+esp_err_t start_rest_server();
+
+extern "C" void app_main(void) {
+    ESP_ERROR_CHECK(nvs_flash_init());
+    ESP_ERROR_CHECK(esp_netif_init());
+    ESP_ERROR_CHECK(esp_event_loop_create_default());
+
+    netbiosns_init();
+    netbiosns_set_name(CONFIG_EXAMPLE_MDNS_HOST_NAME);
+
+    ESP_ERROR_CHECK(example_connect());
+
+    plant::create_blink_task();
+    auto* watering_task = plant::create_watering_task();
+
+    ESP_ERROR_CHECK(plant::start_mdns_service());
+    ESP_ERROR_CHECK(plant::start_ntp_service(watering_task));
+    ESP_ERROR_CHECK(plant::start_http_service());
+}

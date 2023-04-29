@@ -1,0 +1,24 @@
+{
+  "C_Cpp.intelliSenseEngine": "Tag Parser",
+  "idf.flashType": "UART",
+  "idf.port": "/dev/ttyUSB0",
+  "files.associations": {
+    "*.sdf": "xml",
+    "esp_log.h": "c",
+    "sdkconfig.h": "c",
+    "array": "cpp",
+    "chrono": "cpp",
+    "compare": "cpp",
+    "functional": "cpp",
+    "ratio": "cpp",
+    "tuple": "cpp",
+    "type_traits": "cpp",
+    "utility": "cpp",
+    "fstream": "cpp"
+  },
+  "clangd.arguments": [
+    "-header-insertion=never",
+    "--query-driver=/home/benjamin/.espressif/tools/xtensa-esp32-elf/**/xtensa-esp32-elf*"
+  ],
+  "idf.adapterTargetName": "esp32"
+}

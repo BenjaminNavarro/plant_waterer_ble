@@ -1,0 +1,11 @@
+idf_component_register(
+    SRCS
+        "main.cpp"
+        "services/http.cpp"
+        "services/mdns.cpp"
+        "services/ntp.cpp"
+        "tasks/blink.cpp"
+        "tasks/watering.cpp"
+    INCLUDE_DIRS
+        "."
+)

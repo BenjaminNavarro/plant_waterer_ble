@@ -32,7 +32,15 @@ struct RestServerContext {
     QueueHandle_t watering_schedule{};
 };
 
-static esp_err_t schedule_post_handler(httpd_req_t* req) {
+void add_cors_headers(httpd_req_t* req) {
+    httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
+    httpd_resp_set_hdr(req, "Access-Control-Allow-Methods", "*");
+    httpd_resp_set_hdr(req, "Access-Control-Allow-Headers", "*");
+}
+
+esp_err_t schedule_post_handler(httpd_req_t* req) {
+    add_cors_headers(req);
+
     ESP_LOGI("schedule_post", "Schedule modification request received");
     std::size_t total_len = req->content_len;
     int cur_len = 0;
@@ -96,7 +104,7 @@ static esp_err_t schedule_post_handler(httpd_req_t* req) {
     return ESP_OK;
 }
 
-static esp_err_t schedule_get_handler(httpd_req_t* req) {
+esp_err_t schedule_get_handler(httpd_req_t* req) {
     ESP_LOGI("schedule_get", "Schedule consultation request received");
 
     const auto* ctx = reinterpret_cast<RestServerContext*>(req->user_ctx);
@@ -105,6 +113,8 @@ static esp_err_t schedule_get_handler(httpd_req_t* req) {
 
     ESP_LOGI("schedule_get", "Generating the JSON representation");
     httpd_resp_set_type(req, "application/json");
+    add_cors_headers(req);
+
     cJSON* root = cJSON_CreateObject();
     auto* schedule_json = cJSON_AddArrayToObject(root, "schedule");
     for (const auto& group : schedule) {
@@ -130,8 +140,10 @@ static esp_err_t schedule_get_handler(httpd_req_t* req) {
     return ESP_OK;
 }
 
-static esp_err_t system_info_get_handler(httpd_req_t* req) {
+esp_err_t system_info_get_handler(httpd_req_t* req) {
     httpd_resp_set_type(req, "application/json");
+    add_cors_headers(req);
+
     cJSON* root = cJSON_CreateObject();
     esp_chip_info_t chip_info;
     esp_chip_info(&chip_info);

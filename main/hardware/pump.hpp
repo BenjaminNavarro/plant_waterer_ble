@@ -7,6 +7,7 @@ namespace plant {
 class WaterPump {
 public:
     explicit WaterPump(Relay relay) : relay_{relay} {
+        disable();
     }
 
     void enable() {

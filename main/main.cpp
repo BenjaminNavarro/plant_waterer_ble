@@ -14,6 +14,8 @@
 #include <services/mdns.hpp>
 #include <services/http.hpp>
 
+#include <data/watering_schedule.hpp>
+
 #include <driver/gpio.h>
 #include <esp_event.h>
 #include <esp_netif.h>
@@ -25,6 +27,9 @@
 #include <nvs_flash.h>
 #include <protocol_examples_common.h>
 #include <sdkconfig.h>
+
+#include <freertos/FreeRTOS.h>
+#include <freertos/queue.h>
 
 #include <array>
 #include <ctime>
@@ -42,8 +47,11 @@ extern "C" void app_main(void) {
 
     ESP_ERROR_CHECK(example_connect());
 
+    QueueHandle_t watering_schedule_queue =
+        xQueueCreate(1, sizeof(plant::WateringSchedule));
+
     plant::create_blink_task();
-    auto* watering_task = plant::create_watering_task();
+    auto* watering_task = plant::create_watering_task(watering_schedule_queue);
 
     ESP_ERROR_CHECK(plant::start_mdns_service());
     ESP_ERROR_CHECK(plant::start_ntp_service(watering_task));

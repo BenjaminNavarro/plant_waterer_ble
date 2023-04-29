@@ -7,6 +7,7 @@ namespace plant {
 class Valve {
 public:
     explicit Valve(Relay relay) : relay_{relay} {
+        close();
     }
 
     void open() {

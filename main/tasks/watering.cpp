@@ -19,7 +19,7 @@ void watering_task(void* arg);
 TaskHandle_t create_watering_task(QueueHandle_t watering_schedule) {
     TaskHandle_t watering_handle;
     xTaskCreate(&watering_task, "watering", configMINIMAL_STACK_SIZE * 4,
-                watering_schedule, tskIDLE_PRIORITY + 2, &watering_handle);
+                watering_schedule, tskIDLE_PRIORITY + 1, &watering_handle);
     return watering_handle;
 }
 
@@ -39,21 +39,17 @@ void watering_task(void* arg) {
 
     auto compute_watering_start = [](const PlantGroupSchedule& schedule,
                                      std::uint64_t now) {
-        std::uint64_t last_watering = schedule.start_time;
-        while (now > last_watering + schedule.watering_period) {
-            last_watering += schedule.watering_period;
-        }
-        return last_watering;
+        const auto cycles =
+            (now - schedule.start_time) / schedule.watering_period;
+        return schedule.start_time + cycles * schedule.watering_period;
     };
 
     TickType_t last_wake_time = xTaskGetTickCount();
-    const TickType_t task_frequency = 1;
+    const TickType_t task_frequency = 1000 / portTICK_PERIOD_MS;
 
     while (true) {
-        if (xQueueReceive(watering_schedule_queue, watering_schedule.data(),
-                          0) == pdTRUE) {
-            ESP_LOGI("watering_task", "New schedule received");
-        }
+        xQueuePeek(watering_schedule_queue, watering_schedule.data(),
+                   portMAX_DELAY);
 
         struct timeval now_tv;
         gettimeofday(&now_tv, nullptr);
@@ -75,12 +71,12 @@ void watering_task(void* arg) {
 
             if (now >= watering_start and now < watering_end) {
                 if (not valve.is_open()) {
-                    ESP_LOGI("watering_task", "Opening valve %lu", i + 1);
+                    ESP_LOGI("watering_task", "Opening valve %d", (int)i + 1);
                 }
                 valve.open();
             } else {
                 if (valve.is_open()) {
-                    ESP_LOGI("watering_task", "Closing valve %lu", i + 1);
+                    ESP_LOGI("watering_task", "Closing valve %d", (int)i + 1);
                 }
                 valve.close();
             }
@@ -102,7 +98,7 @@ void watering_task(void* arg) {
             water_pump.disable();
         }
 
-        vTaskDelayUntil(&last_wake_time, task_frequency)
+        vTaskDelayUntil(&last_wake_time, task_frequency);
     }
 }
 

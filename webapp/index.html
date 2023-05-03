@@ -14,17 +14,6 @@
         integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
     <script src="fomantic/semantic.min.js"></script>
 
-    <link rel="stylesheet" type="text/css" href="fomantic/components/reset.css">
-    <link rel="stylesheet" type="text/css" href="fomantic/components/site.css">
-
-    <link rel="stylesheet" type="text/css" href="fomantic/components/container.css">
-    <link rel="stylesheet" type="text/css" href="fomantic/components/menu.css">
-    <link rel="stylesheet" type="text/css" href="fomantic/components/input.css">
-    <link rel="stylesheet" type="text/css" href="fomantic/components/header.css">
-    <link rel="stylesheet" type="text/css" href="fomantic/components/calendar.css">
-    <link rel="stylesheet" type="text/css" href="fomantic/components/grid.css">
-    <link rel="stylesheet" type="text/css" href="fomantic/components/dropdown.css">
-
     <style type="text/css">
         body {
             background-color: #FFFFFF;
@@ -55,23 +44,36 @@
 </head>
 
 <body>
-
-    <div class="ui fixed inverted menu">
-        <div class="ui container">
-            <a href="#" class="header item">
-                Système d'arrosage
-            </a>
-            <div class="ui action input">
-                <input id="system_address_input" type="text" placeholder="Adresse du système" value="esp-home.local">
-                <button id="connect_button" class="ui button">Connexion</button>
+    <div class="ui menu inverted" style="padding: 1em;">
+        <div class="ui two column grid" style="width: 100%;">
+            <div class="four column row">
+                <div class="left floated column">
+                    <div class="row">
+                        <h2 style="color: white;">
+                            Système d'arrosage
+                        </h2>
+                        <div class="ui action input">
+                            <input id="system_address_input" type="text" placeholder="Adresse du système"
+                                value="esp-home.local" style="max-width: 40%;">
+                            <button id="connect_button" class="ui button">Connexion</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="status_bar" class="right floated column" style="display: none;">
+                    <h3 id="status_text" style="color: white; text-align: center; vertical-align: baseline;">
+                    </h3>
+                    <div class="ui inverted segment">
+                        <div id="status_loader" class="ui active inverted centered inline loader">
+                            <div class="ui large loader"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-
     <div class="ui container">
-        <h1 class="ui header">Semantic UI Fixed Template</h1>
-        <div>
-            <select class="ui selection dropdown" style="min-height: 3em; margin: 2em 0 2em 0;">
+        <div style="margin: 1em 0 1em 0;">
+            <select class="ui search selection dropdown">
                 <option value="0">Sortie 1</option>
                 <option value="1">Sortie 2</option>
                 <option value="2">Sortie 3</option>
@@ -81,11 +83,12 @@
                 <option value="6">Sortie 7</option>
                 <option value="7">Sortie 8</option>
             </select>
+            <div class="ui divider" style="padding-bottom: 1rem;"></div>
         </div>
-        <div class="ui two column grid">
+        <div class="ui two column vertically divided grid">
             <div class="row">
                 <div class="four wide column">Programme actif</div>
-                <div class="six wide column">
+                <div class="twelve wide column">
                     <div class="ui toggle checkbox">
                         <input type="checkbox" name="public">
                         <label></label>
@@ -94,59 +97,59 @@
             </div>
             <div class="row">
                 <div class="four wide column">Date de début</div>
-                <div class="six wide column">
+                <div class="twelve wide column">
                     <div class="ui calendar" id="standard_calendar">
                         <div class="ui fluid input left icon">
                             <i class="calendar icon"></i>
-                            <input type="text" placeholder="Date/Time">
+                            <input type="text" placeholder="Date/Heure">
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="row" style="height: 4em;">
+            <div class="row">
                 <div class="four wide column">Durée d'arrosage</div>
-                <div class="six wide column">
-                    <div class="ui two column grid">
-                        <div class="column">
-                            <input style="width: 80%; height: 100%;" type="number">
-                        </div>
-                        <div class="column">
-                            <select class="ui selection dropdown" style="height: 100%; max-width: 50%;">
-                                <option value="0">Secondes</option>
-                                <option value="1">Minutes</option>
-                                <option value="2">Heures</option>
-                            </select>
+                <div class="twelve wide column">
+                    <div class="ui right labeled input">
+                        <input type="number" placeholder="0" style="max-width: 11em;">
+                        <div class="ui dropdown label">
+                            <div class="text">Secondes</div>
+                            <i class="dropdown icon"></i>
+                            <div class="menu">
+                                <div class="item">Secondes</div>
+                                <div class="item">Minutes</div>
+                                <div class="item">Heures</div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="row" style="height: 4em;">
+            <div class="row">
                 <div class="four wide column">Répétition</div>
-                <div class="six wide column">
-                    <div class="ui two column grid">
-                        <div class="column">
-                            <input style="width: 80%; height: 100%;" type="number">
-                        </div>
-                        <div class="column">
-                            <select class="ui selection dropdown" style="height: 100%;">
-                                <option value="0">Minutes</option>
-                                <option value="1">Heures</option>
-                                <option value="2">Jours</option>
-                            </select>
+                <div class="twelve wide column">
+                    <div class="ui right labeled input">
+                        <input type="number" placeholder="0" style="max-width: 11em;">
+                        <div class="ui dropdown label">
+                            <div class="text">Heures</div>
+                            <i class="dropdown icon"></i>
+                            <div class="menu">
+                                <div class="item">Minutes</div>
+                                <div class="item">Heures</div>
+                                <div class="item">Jours</div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="row" style="margin: 2em 0 2em 0;">
-                <div>
-                    <button class="ui button">Tester</button>
-                </div>
-                <div>
-                    <button class="ui button">Appliquer</button>
-                </div>
-                <div>
-                    <button class="ui button">Réinitialiser</button>
-                </div>
+        </div>
+    </div>
+    <div class="ui container">
+        <div class="ui equal width  grid">
+            <div class="column">
+                <button id="test_btn" class="ui button" style="width: 100%;">Tester</button>
+                <button id="stop_btn" class="ui button" style="width: 100%; display: none;">Stop</button>
+            </div>
+            <div class="column">
+                <button id="apply_btn" class="ui button" style="width: 100%;">Appliquer</button>
             </div>
         </div>
     </div>
@@ -157,12 +160,52 @@
                 firstDayOfWeek: 1
             });
 
+            $('.ui.dropdown').dropdown();
+
+            var loader_timer = null
+
             $("#connect_button").click(function () {
-                const address = $("#system_address_input").val();
-                const url = "http://" + address + "/api/v1/schedule/read";
-                $.getJSON(url, data => {
-                    console.log(data);
-                });
+                // const address = $("#system_address_input").val();
+                // const url = "http://" + address + "/api/v1/schedule/read";
+                // $.getJSON(url, data => {
+                //     console.log(data);
+                // });
+                $("#status_text").html("Connexion");
+                $("#status_bar").css('display', 'block');
+                $('#status_loader').css('display', 'block');
+
+                loader_timer = setInterval(function () {
+                    $('#status_loader').css('display', 'none');
+                    $("#status_text").html("Connecté");
+                    clearInterval(loader_timer);
+                }, 1000);
+            });
+
+
+            $("#test_btn").click(function () {
+                $("#test_btn").css('display', 'none');
+                $("#stop_btn").css('display', 'block');
+
+                $("#status_text").html("Arrosage");
+                $('#status_loader').css('display', 'block');
+
+                loader_timer = setInterval(function () {
+                    $("#test_btn").css('display', 'block');
+                    $("#stop_btn").css('display', 'none');
+                    $('#status_loader').css('display', 'none');
+                    $("#status_text").html("Connecté");
+                    clearInterval(loader_timer);
+                }, 2000);
+            });
+
+            $("#stop_btn").click(function () {
+                $("#test_btn").css('display', 'block');
+                $("#stop_btn").css('display', 'none');
+
+                $("#status_text").html("Connecté");
+                $('#status_loader').css('display', 'none');
+
+                clearInterval(loader_timer);
             });
         });
     </script>

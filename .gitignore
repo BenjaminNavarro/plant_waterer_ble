@@ -2,3 +2,4 @@
 .clangd
 build
 sdkconfig.old
+node_modules

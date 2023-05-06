@@ -39,7 +39,41 @@
             margin: 5em 0em 0em;
             padding: 5em 0em;
         }
+
+        .vertical-center {
+            margin: 0;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .prog.grid>.row {
+            padding-top: 0;
+            padding-bottom: 0;
+        }
     </style>
+
+    <script>
+        function interpolate(template, params) {
+            const replaceTags = {
+                '&': '& amp;', '<': '& lt;', '>': '& gt;', '(': '% 28', ')': '% 29'
+            };
+            const safeInnerHTML = text => text.toString()
+                .replace(/[&<>\(\)]/g, tag => replaceTags[tag] || tag);
+            const keys = Object.keys(params);
+            const keyVals = Object.values(params).map(safeInnerHTML);
+            return new Function(...keys, `return \`${template}\``)(...keyVals);
+        }
+    </script>
+
+    <template id="test_output_template">
+        <div class="column">
+            <div class="ui test toggle checkbox">
+                <input type="checkbox" name="test_output_${index}">
+                <label>Sortie ${index}</label>
+            </div>
+        </div>
+    </template>
 
 </head>
 
@@ -71,88 +105,107 @@
             </div>
         </div>
     </div>
-    <div class="ui container">
-        <div style="margin: 1em 0 1em 0;">
-            <select class="ui search selection dropdown">
-                <option value="0">Sortie 1</option>
-                <option value="1">Sortie 2</option>
-                <option value="2">Sortie 3</option>
-                <option value="3">Sortie 4</option>
-                <option value="4">Sortie 5</option>
-                <option value="5">Sortie 6</option>
-                <option value="6">Sortie 7</option>
-                <option value="7">Sortie 8</option>
-            </select>
-            <div class="ui divider" style="padding-bottom: 1rem;"></div>
+    <div id="main_view" class="ui container">
+        <div class="ui top attached tabular menu">
+            <a class="item active" data-tab="programming">Programmation</a>
+            <a class="item" data-tab="testing">Test</a>
         </div>
-        <div class="ui two column vertically divided grid">
-            <div class="row">
-                <div class="four wide column">Programme actif</div>
-                <div class="twelve wide column">
-                    <div class="ui toggle checkbox">
-                        <input type="checkbox" name="public">
-                        <label></label>
+        <div class="ui bottom attached tab segment active" data-tab="programming">
+            <div class="ui prog two column vertically divided grid">
+                <div class="row" style="padding-top: 1rem;">
+                    <div class="column">
+                        <select class="ui search selection dropdown">
+                            <option value="0">Sortie 1</option>
+                            <option value="1">Sortie 2</option>
+                            <option value="2">Sortie 3</option>
+                            <option value="3">Sortie 4</option>
+                            <option value="4">Sortie 5</option>
+                            <option value="5">Sortie 6</option>
+                            <option value="6">Sortie 7</option>
+                            <option value="7">Sortie 8</option>
+                        </select>
                     </div>
                 </div>
-            </div>
-            <div class="row">
-                <div class="four wide column">Date de début</div>
-                <div class="twelve wide column">
-                    <div class="ui calendar" id="standard_calendar">
-                        <div class="ui fluid input left icon">
-                            <i class="calendar icon"></i>
-                            <input type="text" placeholder="Date/Heure">
+                <div class="row">
+                    <div class="six wide column">
+                        <p class="vertical-center">Programme actif</p>
+                    </div>
+                    <div class="ten wide column">
+                        <div class="ui toggle checkbox">
+                            <input type="checkbox" name="public">
+                            <label></label>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="row">
-                <div class="four wide column">Durée d'arrosage</div>
-                <div class="twelve wide column">
-                    <div class="ui right labeled input">
-                        <input type="number" placeholder="0" style="max-width: 11em;">
-                        <div class="ui dropdown label">
-                            <div class="text">Secondes</div>
-                            <i class="dropdown icon"></i>
-                            <div class="menu">
-                                <div class="item">Secondes</div>
-                                <div class="item">Minutes</div>
-                                <div class="item">Heures</div>
+                <div class="row">
+                    <div class="six wide column">
+                        <p class="vertical-center">Date de début</p>
+                    </div>
+                    <div class="ten wide column">
+                        <div class="ui calendar" id="standard_calendar">
+                            <div class="ui fluid input left icon">
+                                <i class="calendar icon"></i>
+                                <input type="text" placeholder="Date/Heure">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="six wide column">
+                        <p class="vertical-center">Durée d'arrosage</p>
+                    </div>
+                    <div class="ten wide column">
+                        <div class="ui right labeled input">
+                            <input type="number" placeholder="0" style="max-width: 6rem;">
+                            <div class="ui dropdown label">
+                                <div class="text">Secondes</div>
+                                <i class="dropdown icon"></i>
+                                <div class="menu">
+                                    <div class="item">Secondes</div>
+                                    <div class="item">Minutes</div>
+                                    <div class="item">Heures</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="six wide column">
+                        <p class="vertical-center">Répétition</p>
+                    </div>
+                    <div class="ten wide column">
+                        <div class="ui right labeled input">
+                            <input type="number" placeholder="0" style="max-width: 6rem;">
+                            <div class="ui dropdown label">
+                                <div class="text">Heures</div>
+                                <i class="dropdown icon"></i>
+                                <div class="menu">
+                                    <div class="item">Minutes</div>
+                                    <div class="item">Heures</div>
+                                    <div class="item">Jours</div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="four wide column">Répétition</div>
-                <div class="twelve wide column">
-                    <div class="ui right labeled input">
-                        <input type="number" placeholder="0" style="max-width: 11em;">
-                        <div class="ui dropdown label">
-                            <div class="text">Heures</div>
-                            <i class="dropdown icon"></i>
-                            <div class="menu">
-                                <div class="item">Minutes</div>
-                                <div class="item">Heures</div>
-                                <div class="item">Jours</div>
-                            </div>
-                        </div>
-                    </div>
+            <div class="ui equal width grid">
+                <div class="column">
+                    <button id="test_btn" class="ui button" style="width: 100%;">Tester</button>
+                    <button id="stop_btn" class="ui button" style="width: 100%; display: none;">Stop</button>
+                </div>
+                <div class="column">
+                    <button id="apply_btn" class="ui button" style="width: 100%;">Appliquer</button>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="ui container">
-        <div class="ui equal width  grid">
-            <div class="column">
-                <button id="test_btn" class="ui button" style="width: 100%;">Tester</button>
-                <button id="stop_btn" class="ui button" style="width: 100%; display: none;">Stop</button>
-            </div>
-            <div class="column">
-                <button id="apply_btn" class="ui button" style="width: 100%;">Appliquer</button>
-            </div>
+        <div class="ui bottom attached tab segment" data-tab="testing">
+            <div id="test_output_container" class="ui two column grid" style="margin: 1rem 0 2rem 0;"></div>
+            <button id="pump_on_btn" class="ui button" style="width: 100%;">Activer la pompe</button>
+            <button id="pump_off_btn" class="ui button" style="width: 100%; display: none;">Désactiver la pompe</button>
         </div>
     </div>
+
 
     <script>
         $(document).ready(function () {
@@ -161,6 +214,11 @@
             });
 
             $('.ui.dropdown').dropdown();
+
+            $('.menu .item').tab();
+
+            var main_view = $('#main_view');
+            main_view.css('display', 'none');
 
             var loader_timer = null
 
@@ -176,6 +234,7 @@
 
                 loader_timer = setInterval(function () {
                     $('#status_loader').css('display', 'none');
+                    main_view.css('display', 'block');
                     $("#status_text").html("Connecté");
                     clearInterval(loader_timer);
                 }, 1000);
@@ -207,6 +266,24 @@
 
                 clearInterval(loader_timer);
             });
+
+            $("#pump_on_btn").click(function () {
+                $('#pump_on_btn').css('display', 'none');
+                $('#pump_off_btn').css('display', 'block');
+            });
+
+            $("#pump_off_btn").click(function () {
+                $('#pump_on_btn').css('display', 'block');
+                $('#pump_off_btn').css('display', 'none');
+            });
+
+            var test_output_container = document.getElementById("test_output_container");
+            var test_output_template = document.getElementById("test_output_template");
+            for (let index = 1; index <= 8; index++) {
+                var data = { index: index };
+                test_output_container.innerHTML += interpolate(test_output_template.innerHTML.toString().trim(), data);
+
+            }
         });
     </script>
 </body>

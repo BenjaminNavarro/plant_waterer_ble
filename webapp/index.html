@@ -19,7 +19,7 @@
     <template id="test_output_template">
         <div class="column">
             <div class="ui test toggle checkbox">
-                <input type="checkbox" name="test_output_${index}">
+                <input type="checkbox" name="test_output_${index}" id="test_output_${index}" data-value="${index}">
                 <label>Sortie ${index}</label>
             </div>
         </div>
@@ -57,14 +57,14 @@
     </div>
     <div id="main_view" class="ui container">
         <div class="ui top attached tabular menu">
-            <a class="item active" data-tab="programming">Programmation</a>
-            <a class="item" data-tab="testing">Test</a>
+            <a class="item active" data-tab="automatic">Programmation</a>
+            <a class="item" data-tab="manual">Test</a>
         </div>
-        <div class="ui bottom attached tab segment active" data-tab="programming">
+        <div class="ui bottom attached tab segment active" data-tab="automatic">
             <div class="ui prog two column vertically divided grid">
                 <div class="row">
                     <div id="output_select" class="column">
-                        <select class="ui search selection dropdown">
+                        <select id="program_selection" class="ui search selection dropdown">
                             <option value="0">Sortie 1</option>
                             <option value="1">Sortie 2</option>
                             <option value="2">Sortie 3</option>
@@ -81,8 +81,8 @@
                         <p class="vertical-center">Programme actif</p>
                     </div>
                     <div class="ten wide column">
-                        <div class="ui toggle checkbox">
-                            <input type="checkbox" name="public">
+                        <div id="program_enabled" class="ui toggle checkbox">
+                            <input id="program_enabled_input" type="checkbox" name="public">
                             <label></label>
                         </div>
                     </div>
@@ -106,16 +106,13 @@
                     </div>
                     <div class="ten wide column">
                         <div class="ui right labeled input">
-                            <input type="number" placeholder="0">
-                            <div class="ui dropdown label">
-                                <div class="text">Secondes</div>
-                                <i class="dropdown icon"></i>
-                                <div class="menu">
-                                    <div class="item">Secondes</div>
-                                    <div class="item">Minutes</div>
-                                    <div class="item">Heures</div>
-                                </div>
-                            </div>
+                            <input id="program_duration" type="number" placeholder="0">
+                            <select id="program_duration_time_type"
+                                class="ui selection dropdown label time_length_input">
+                                <option value="s">Secondes</option>
+                                <option value="m">Minutes</option>
+                                <option value="h">Heures</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -125,16 +122,13 @@
                     </div>
                     <div class="ten wide column">
                         <div class="ui right labeled input">
-                            <input type="number" placeholder="0">
-                            <div class="ui dropdown label">
-                                <div class="text">Heures</div>
-                                <i class="dropdown icon"></i>
-                                <div class="menu">
-                                    <div class="item">Minutes</div>
-                                    <div class="item">Heures</div>
-                                    <div class="item">Jours</div>
-                                </div>
-                            </div>
+                            <input id="program_period" type="number" placeholder="0">
+                            <select id="program_period_time_type" class="ui selection dropdown label time_length_input">
+                                <option value="d" class="item">Jours</option>
+                                <option value="h" class="item">Heures</option>
+                                <option value="m" class="item">Minutes</option>
+                                <option value="s" class="item">Secondes</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -149,7 +143,7 @@
                 </div>
             </div>
         </div>
-        <div class="ui bottom attached tab segment" data-tab="testing">
+        <div class="ui bottom attached tab segment" data-tab="manual">
             <div id="test_output_container" class="ui two column grid" style="margin: 1rem 0 2rem 0;"></div>
             <button id="pump_on_btn" class="ui fullwidth button">Activer la pompe</button>
             <button id="pump_off_btn" class="ui fullwidth button">Désactiver la pompe</button>

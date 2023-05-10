@@ -7,6 +7,17 @@ idf_component_register(
         services/ntp.cpp
         tasks/blink.cpp
         tasks/watering.cpp
+        tasks/test.cpp
+        tasks/watering_test.cpp
+        tasks/hardware.cpp
     INCLUDE_DIRS
         .
+        pid-utils/hashed-string
+        pid-utils/unreachable
+)
+
+target_compile_definitions(
+    __idf_main
+    PRIVATE
+        PID_UTILS_CXX17_AVAILABLE=1
 )

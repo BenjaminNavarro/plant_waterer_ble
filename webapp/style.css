@@ -22,12 +22,20 @@
     color: white;
 }
 
-.ui.input>input {
-    max-width: 6rem;
+.ui.input>input[type=number] {
+    max-width: 5rem;
 }
 
 .ui.fullwidth.button {
     width: 100%;
+}
+
+.time_length_input {
+    color: rgba(0, 0, 0, .6) !important;
+    outline-color: rgba(0, 0, 0, .6) !important;
+    background-color: #e8e8e8 !important;
+    border-color: rgb(0, 0, 0, 0) !important;
+    min-width: 9rem !important;
 }
 
 #status_text {

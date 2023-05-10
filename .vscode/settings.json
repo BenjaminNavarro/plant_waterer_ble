@@ -76,5 +76,14 @@
     "-header-insertion=never",
     "--query-driver=/home/benjamin/.espressif/tools/xtensa-esp32-elf/**/xtensa-esp32-elf*"
   ],
-  "idf.adapterTargetName": "esp32"
+  "idf.adapterTargetName": "esp32",
+  "spellright.language": [
+    "en_US",
+    "fr_FR"
+  ],
+  "spellright.documentTypes": [
+    "markdown",
+    "latex",
+    "plaintext"
+  ]
 }

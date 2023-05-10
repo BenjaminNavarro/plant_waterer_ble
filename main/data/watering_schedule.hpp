@@ -15,6 +15,16 @@ struct PlantGroupSchedule {
 
 using WateringSchedule = std::array<PlantGroupSchedule, 8>;
 
+struct HardwareState {
+    std::array<bool, 8> output_state{};
+    bool pump_state{};
+};
+
+struct WateringTest {
+    std::size_t output{};
+    std::uint64_t duration{};
+};
+
 std::optional<WateringSchedule> read_schedule_from_storage();
 void write_schedule_from_storage(const WateringSchedule& schedule);
 

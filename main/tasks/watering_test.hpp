@@ -6,11 +6,11 @@
 
 namespace plant {
 
-struct WateringTaskParams {
-    QueueHandle_t watering_schedule_queue;
+struct WateringTestParams {
+    QueueHandle_t watering_test_queue;
     QueueHandle_t hardware_queue;
 };
 
-[[nodiscard]] TaskHandle_t create_watering_task(WateringTaskParams params);
+[[nodiscard]] TaskHandle_t create_watering_test_task(WateringTestParams params);
 
 } // namespace plant

@@ -1,4 +1,5 @@
 #include <services/ntp.hpp>
+#include <tasks/watering.hpp>
 
 #include <esp_log.h>
 #include <esp_netif_sntp.h>
@@ -9,7 +10,7 @@
 namespace plant {
 
 namespace {
-TaskHandle_t task_to_notify{nullptr};
+QueueHandle_t saved_mode_switch_queue{nullptr};
 }
 
 void time_sync_notification_cb(struct timeval* timeval) {
@@ -22,13 +23,14 @@ void time_sync_notification_cb(struct timeval* timeval) {
              now.tm_mday, now.tm_mon + 1, now.tm_year + 1900, now.tm_hour,
              now.tm_min, now.tm_sec);
 
-    if (task_to_notify != nullptr) {
-        xTaskNotifyGive(task_to_notify);
+    if (saved_mode_switch_queue != nullptr) {
+        const auto mode{Mode::Automatic};
+        xQueueSend(saved_mode_switch_queue, &mode, portMAX_DELAY);
     }
 }
 
-[[nodiscard]] esp_err_t start_ntp_service(TaskHandle_t to_notify) {
-    task_to_notify = to_notify;
+[[nodiscard]] esp_err_t start_ntp_service(QueueHandle_t mode_switch_queue) {
+    saved_mode_switch_queue = mode_switch_queue;
 
     setenv("TZ", "CET-1CEST,M3.5.0,M10.5.0/3", 1);
     tzset();

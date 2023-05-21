@@ -89,6 +89,19 @@
                 </div>
                 <div class="row">
                     <div class="six wide column">
+                        <p class="vertical-center">Débit</p>
+                    </div>
+                    <div class="ten wide column">
+                        <div class="ui right labeled input">
+                            <input id="program_flow_speed" type="number" placeholder="100" min="0" max="100">
+                            <div class="ui basic label">
+                                %
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="six wide column">
                         <p class="vertical-center">Date de début</p>
                     </div>
                     <div class="ten wide column">
@@ -144,7 +157,19 @@
             </div>
         </div>
         <div class="ui bottom attached tab segment" data-tab="manual">
-            <div id="test_output_container" class="ui two column grid" style="margin: 1rem 0 2rem 0;"></div>
+            <div id="test_output_container" class="ui two column grid" style="margin: 1rem 0 1rem 0;">
+                <div class="column">
+                    <p class="vertical-center">Débit</p>
+                </div>
+                <div class="column">
+                    <div class="ui right labeled input">
+                        <input id="test_flow_speed" type="number" placeholder="100" min="0" max="100">
+                        <div class="ui basic label">
+                            %
+                        </div>
+                    </div>
+                </div>
+            </div>
             <button id="pump_on_btn" class="ui fullwidth button">Activer la pompe</button>
             <button id="pump_off_btn" class="ui fullwidth button">Désactiver la pompe</button>
         </div>

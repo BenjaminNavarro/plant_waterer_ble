@@ -1,5 +1,6 @@
 #include <services/http.hpp>
 #include <data/watering_schedule.hpp>
+#include <tasks/watering.hpp>
 
 #include <cJSON.h>
 #include <esp_chip_info.h>
@@ -14,6 +15,8 @@
 #include <array>
 #include <cstring>
 #include <string_view>
+
+namespace plant {
 
 static const char* rest_tag = "esp-rest";
 #define REST_CHECK(a, str, callback, ...)                                      \
@@ -34,24 +37,7 @@ struct RestServerContext {
 
     std::array<char, scratch_bufsize> scratch{};
     plant::HttpServiceParams params;
-
-    enum class Mode { Automatic, Manual, WateringTest, Invalid };
-    Mode mode{Mode::Automatic};
 };
-
-constexpr std::string_view to_string(RestServerContext::Mode mode) {
-    switch (mode) {
-    case RestServerContext::Mode::Automatic:
-        return "automatic";
-    case RestServerContext::Mode::Manual:
-        return "manual";
-    case RestServerContext::Mode::WateringTest:
-        return "watering_test";
-    case RestServerContext::Mode::Invalid:
-        return "invalid";
-    }
-    pid::unreachable();
-}
 
 void add_cors_headers(httpd_req_t* req) {
     httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
@@ -99,26 +85,33 @@ esp_err_t schedule_post_handler(httpd_req_t* req) {
     for (int i = 0; i < schedule.size(); i++) {
         const auto* entry = cJSON_GetArrayItem(schedule_json, i);
         auto& group = schedule[i];
-        auto get = [entry](const char* name) {
+        auto get_int = [entry](const char* name) {
             return cJSON_GetObjectItem(entry, name)->valueint;
         };
+        auto get_float = [entry](const char* name) {
+            return cJSON_GetObjectItem(entry, name)->valuedouble;
+        };
 
-        group.enabled = get("enabled") == 1;
-        group.start_time = get("start_time");
-        group.watering_period = get("watering_period");
-        group.watering_duration = get("watering_duration");
+        group.enabled = get_int("enabled") == 1;
+        group.start_time = get_int("start_time");
+        group.watering_period = get_int("watering_period");
+        group.watering_duration = get_int("watering_duration");
+        group.flow_speed = FlowSpeed{get_float("flow_speed")};
     }
     cJSON_Delete(root);
 
     ESP_LOGI("schedule_post", "Request parsed");
 
     ESP_LOGI("schedule_post", "Saving schedule to storage");
-    plant::write_schedule_from_storage(schedule);
+    plant::write_schedule_to_storage(schedule);
     ESP_LOGI("schedule_post", "Schedule saved to storage");
 
     ESP_LOGI("schedule_post", "Posting schedule to queue...");
     xQueueOverwrite(ctx->params.watering_schedule_queue, &schedule);
     ESP_LOGI("schedule_post", "Schedule posted to queue");
+
+    constexpr auto mode{plant::Mode::Automatic};
+    xQueueSend(ctx->params.mode_switch_queue, &mode, portMAX_DELAY);
 
     httpd_resp_sendstr(req, "ok");
 
@@ -141,7 +134,7 @@ esp_err_t schedule_get_handler(httpd_req_t* req) {
     auto* schedule_json = cJSON_AddArrayToObject(root, "schedule");
     for (const auto& group : schedule) {
         auto* entry = cJSON_CreateObject();
-        auto set = [entry](const char* name, std::uint64_t value) {
+        auto set = [entry](const char* name, auto value) {
             cJSON_AddNumberToObject(entry, name, static_cast<double>(value));
         };
 
@@ -149,6 +142,7 @@ esp_err_t schedule_get_handler(httpd_req_t* req) {
         set("start_time", group.start_time);
         set("watering_period", group.watering_period);
         set("watering_duration", group.watering_duration);
+        set("flow_speed", group.flow_speed);
 
         cJSON_AddItemToArray(schedule_json, entry);
     }
@@ -193,7 +187,8 @@ esp_err_t test_post_handler(httpd_req_t* req) {
 
     ESP_LOGI("test_post", "Parsing the request...");
     auto* root = cJSON_Parse(buf);
-    config.pump_state = cJSON_GetObjectItem(root, "pump_state")->valueint == 1;
+    config.flow_speed =
+        plant::FlowSpeed{cJSON_GetObjectItem(root, "flow_speed")->valuedouble};
     auto* output_state = cJSON_GetObjectItem(root, "output_state");
     if (cJSON_GetArraySize(output_state) != config.output_state.size()) {
         httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR,
@@ -213,6 +208,9 @@ esp_err_t test_post_handler(httpd_req_t* req) {
     xQueueOverwrite(ctx->params.test_configuration_queue, &config);
     ESP_LOGI("test_post", "test config posted to queue");
 
+    constexpr auto mode{plant::Mode::Manual};
+    xQueueSend(ctx->params.mode_switch_queue, &mode, portMAX_DELAY);
+
     httpd_resp_sendstr(req, "ok");
 
     return ESP_OK;
@@ -230,7 +228,7 @@ esp_err_t test_get_handler(httpd_req_t* req) {
     add_cors_headers(req);
 
     cJSON* root = cJSON_CreateObject();
-    cJSON_AddNumberToObject(root, "pump_state", config.pump_state ? 1 : 0);
+    cJSON_AddNumberToObject(root, "flow_speed", config.flow_speed.value());
     auto* output_state = cJSON_AddArrayToObject(root, "output_state");
     for (const auto& state : config.output_state) {
         auto* number = cJSON_CreateNumber(state ? 1 : 0);
@@ -275,76 +273,22 @@ esp_err_t mode_post_handler(httpd_req_t* req) {
 
     ESP_LOGI("mode_post", "Parsing the request...");
     auto* root = cJSON_Parse(buf);
-    auto* mode = cJSON_GetObjectItem(root, "mode");
+    auto* mode_name = cJSON_GetObjectItem(root, "mode");
 
-    using namespace pid::literals;
-    switch (pid::hashed_string(mode->valuestring)) {
-    case "automatic"_hs:
-        if (ctx->mode != RestServerContext::Mode::Automatic) {
-            ESP_LOGI("mode_post", "Switching to automatic mode");
-
-            // Clear the test queue to let the task exit its loop and suspend itself
-            xQueueReset(ctx->params.test_configuration_queue);
-
-            vTaskResume(ctx->params.watering_task);
-
-            ctx->mode = RestServerContext::Mode::Automatic;
-        }
-        break;
-    case "manual"_hs:
-        if (ctx->mode != RestServerContext::Mode::Manual) {
-            ESP_LOGI("mode_post", "Switching to manual mode");
-
-            // Reset the test configuration
-            plant::HardwareState config;
-            xQueueOverwrite(ctx->params.test_configuration_queue, &config);
-
-            vTaskSuspend(ctx->params.watering_task);
-            vTaskResume(ctx->params.test_task);
-
-            ctx->mode = RestServerContext::Mode::Manual;
-        }
-        break;
-    default:
-        ctx->mode = RestServerContext::Mode::Invalid;
-        vTaskSuspend(ctx->params.watering_task);
-        vTaskSuspend(ctx->params.test_task);
-        break;
-    }
+    const auto mode =
+        mode_from_string(std::string_view{mode_name->valuestring});
 
     cJSON_Delete(root);
 
     ESP_LOGI("mode_post", "Request parsed");
 
-    if (ctx->mode != RestServerContext::Mode::Invalid) {
+    if (mode) {
+        xQueueSend(ctx->params.mode_switch_queue, &mode, portMAX_DELAY);
         httpd_resp_sendstr(req, "ok");
     } else {
         httpd_resp_sendstr(req, "fail");
     }
 
-    return ESP_OK;
-}
-
-esp_err_t mode_get_handler(httpd_req_t* req) {
-    ESP_LOGI("mode_get", "Test config consultation request received");
-
-    const auto* ctx = reinterpret_cast<RestServerContext*>(req->user_ctx);
-    plant::HardwareState config;
-    xQueuePeek(ctx->params.test_configuration_queue, &config, portMAX_DELAY);
-
-    ESP_LOGI("mode_get", "Generating the JSON representation");
-    httpd_resp_set_type(req, "application/json");
-    add_cors_headers(req);
-
-    cJSON* root = cJSON_CreateObject();
-    cJSON_AddStringToObject(root, "mode", to_string(ctx->mode).data());
-
-    ESP_LOGI("mode_get", "Convert the JSON to text");
-    const char* config_str = cJSON_PrintUnformatted(root);
-    ESP_LOGI("mode_get", "Send the response");
-    httpd_resp_sendstr(req, config_str);
-    free((void*)config_str);
-    cJSON_Delete(root);
     return ESP_OK;
 }
 
@@ -364,10 +308,10 @@ esp_err_t system_info_get_handler(httpd_req_t* req) {
     return ESP_OK;
 }
 
-esp_err_t watering_test_post_handler(httpd_req_t* req) {
+esp_err_t program_test_post_handler(httpd_req_t* req) {
     add_cors_headers(req);
 
-    ESP_LOGI("watering_test_post", "Watering test request received");
+    ESP_LOGI("program_test_post", "Watering test request received");
     std::size_t total_len = req->content_len;
     int cur_len = 0;
     auto* ctx = reinterpret_cast<RestServerContext*>(req->user_ctx);
@@ -393,30 +337,33 @@ esp_err_t watering_test_post_handler(httpd_req_t* req) {
 
     plant::WateringTest config;
 
-    ESP_LOGI("watering_test_post", "Parsing the request...");
+    ESP_LOGI("program_test_post", "Parsing the request...");
     auto* root = cJSON_Parse(buf);
-    config.output = cJSON_GetObjectItem(root, "ouput")->valueint;
+    config.output = cJSON_GetObjectItem(root, "output")->valueint;
     if (config.output > 8) {
         httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR,
                             "Output is out of range");
         return ESP_FAIL;
     }
     config.duration = cJSON_GetObjectItem(root, "duration")->valueint;
+    config.flow_speed =
+        plant::FlowSpeed{cJSON_GetObjectItem(root, "flow_speed")->valuedouble};
 
     cJSON_Delete(root);
 
-    ESP_LOGI("watering_test_post", "Request parsed");
+    ESP_LOGI("program_test_post", "Request parsed");
 
-    ESP_LOGI("watering_test_post", "Posting watering test to queue...");
-    xQueueSend(ctx->params.watering_test_queue, &config, portMAX_DELAY);
-    ESP_LOGI("watering_test_post", "watering test posted to queue");
+    ESP_LOGI("program_test_post", "Posting watering test to queue...");
+    xQueueSend(ctx->params.program_test_queue, &config, portMAX_DELAY);
+    ESP_LOGI("program_test_post", "watering test posted to queue");
+
+    constexpr auto mode{plant::Mode::WateringTest};
+    xQueueSend(ctx->params.mode_switch_queue, &mode, portMAX_DELAY);
 
     httpd_resp_sendstr(req, "ok");
 
     return ESP_OK;
 }
-
-namespace plant {
 
 esp_err_t start_http_service(HttpServiceParams params) {
     auto* rest_context = new RestServerContext{params};
@@ -452,23 +399,17 @@ esp_err_t start_http_service(HttpServiceParams params) {
                                      .user_ctx = rest_context};
     httpd_register_uri_handler(server, &schedule_post_uri);
 
-    httpd_uri_t test_get_uri = {.uri = "/api/v1/test/read",
+    httpd_uri_t test_get_uri = {.uri = "/api/v1/manual/read",
                                 .method = HTTP_GET,
                                 .handler = test_get_handler,
                                 .user_ctx = rest_context};
     httpd_register_uri_handler(server, &test_get_uri);
 
-    httpd_uri_t test_post_uri = {.uri = "/api/v1/test/write",
+    httpd_uri_t test_post_uri = {.uri = "/api/v1/manual/write",
                                  .method = HTTP_POST,
                                  .handler = test_post_handler,
                                  .user_ctx = rest_context};
     httpd_register_uri_handler(server, &test_post_uri);
-
-    httpd_uri_t mode_get_uri = {.uri = "/api/v1/mode/read",
-                                .method = HTTP_GET,
-                                .handler = mode_get_handler,
-                                .user_ctx = rest_context};
-    httpd_register_uri_handler(server, &mode_get_uri);
 
     httpd_uri_t mode_post_uri = {.uri = "/api/v1/mode/write",
                                  .method = HTTP_POST,
@@ -476,11 +417,11 @@ esp_err_t start_http_service(HttpServiceParams params) {
                                  .user_ctx = rest_context};
     httpd_register_uri_handler(server, &mode_post_uri);
 
-    httpd_uri_t watering_test_post_uri = {.uri = "/api/v1/watering_test/write",
-                                          .method = HTTP_POST,
-                                          .handler = watering_test_post_handler,
-                                          .user_ctx = rest_context};
-    httpd_register_uri_handler(server, &watering_test_post_uri);
+    httpd_uri_t program_test_post_uri = {.uri = "/api/v1/program_test/write",
+                                         .method = HTTP_POST,
+                                         .handler = program_test_post_handler,
+                                         .user_ctx = rest_context};
+    httpd_register_uri_handler(server, &program_test_post_uri);
 
     return ESP_OK;
 }

@@ -7,8 +7,6 @@ idf_component_register(
         services/ntp.cpp
         tasks/blink.cpp
         tasks/watering.cpp
-        tasks/test.cpp
-        tasks/watering_test.cpp
         tasks/hardware.cpp
     INCLUDE_DIRS
         .

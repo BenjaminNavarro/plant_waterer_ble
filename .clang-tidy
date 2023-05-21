@@ -8,6 +8,7 @@ Checks: >
         -readability-magic-numbers,
         -readability-else-after-return,
         -readability-function-cognitive-complexity,
+        -readability-uppercase-literal-suffix,
     modernize-*,
         -modernize-use-trailing-return-type,
     misc-misplaced-const,

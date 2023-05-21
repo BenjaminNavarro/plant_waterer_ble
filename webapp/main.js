@@ -19,6 +19,13 @@ $(document).ready(function () {
     elem.css('display', 'block')
   }
 
+  const testOutputContainer = document.getElementById('test_output_container')
+  const testOutputTemplate = document.getElementById('test_output_template')
+  for (let index = 1; index <= 8; index++) {
+    const data = { index}
+    testOutputContainer.innerHTML += interpolate(testOutputTemplate.innerHTML.toString().trim(), data)
+  }
+
   const mainView = $('#main_view')
   const statusBar = $('#status_bar')
   const statusText = $('#status_text')
@@ -27,23 +34,25 @@ $(document).ready(function () {
   const testBtn = $('#test_btn')
   const stopBtn = $('#stop_btn')
   const applyBtn = $('#apply_btn')
+  const testFlowSpeed = $('#test_flow_speed')
   const pumpOnBtn = $('#pump_on_btn')
   const pumpOffBtn = $('#pump_off_btn')
   const calendar = $('#standard_calendar')
   const programSelection = $('#program_selection')
   const programEnabled = $('#program_enabled')
+  const programFlowSpeed = $('#program_flow_speed')
   const programEnabledInput = $('#program_enabled_input')
   const programDuration = $('#program_duration')
   const programPeriod = $('#program_period')
   const programDurationTimeSelection = $('#program_duration_time_type')
   const programPeriodTimeSelection = $('#program_period_time_type')
 
-  let loaderTimer = null
-  let pumpState = false
   let program = {}
   let programDurationTimeType = 's'
   let programPeriodTimeType = 'd'
-  const outputState = [false, false, false, false, false, false, false, false]
+  let testConfig = {}
+  testConfig.outputState = [false, false, false, false, false, false, false, false]
+  testConfig.flowSpeed = 0
 
   const address = $('#system_address_input').val()
   const apiBaseUrl = 'http://' + address + '/api/v1/'
@@ -70,16 +79,16 @@ $(document).ready(function () {
     })
   }
 
-  function sendTestConfig () {
+  function sendTestConfig (flowSpeed) {
     const request = {}
-    request.pump_state = pumpState ? 1 : 0
+    request.flow_speed = flowSpeed / 100
     request.output_state = []
     for (let index = 0; index < 8; index++) {
-      request.output_state.push(outputState[index] ? 1 : 0)
+      request.output_state.push(testConfig.outputState[index] ? 1 : 0)
     }
     statusText.html('Envoi')
     writeApi(
-      'test/write',
+      'manual/write',
       request,
       function (resp) {
         if (resp.responseText === 'ok') {
@@ -97,6 +106,22 @@ $(document).ready(function () {
     writeApi(
       'schedule/write',
       program,
+      function (resp) {
+        if (resp.responseText === 'ok') {
+          statusText.html('Ok')
+        } else {
+          statusText.html('Erreur')
+        }
+        hide(statusLoader)
+      })
+    show(statusLoader)
+  }
+
+  function sendProgramTest (config) {
+    statusText.html('Envoi')
+    writeApi(
+      'program_test/write',
+      config,
       function (resp) {
         if (resp.responseText === 'ok') {
           statusText.html('Ok')
@@ -128,6 +153,7 @@ $(document).ready(function () {
   function updateProgram () {
     const schedule = displayedSchedule()
     programEnabledInput.prop('checked', schedule.enabled === 1)
+    programFlowSpeed.val(schedule.flow_speed * 100)
     calendar.calendar('set date', new Date(schedule.start_time * 1000), true, false)
 
     if (schedule.watering_duration > 3600) {
@@ -175,6 +201,11 @@ $(document).ready(function () {
       const schedule = displayedSchedule()
       schedule.enabled = false
     }
+  })
+
+  programFlowSpeed.on('change', function (value) {
+    const schedule = displayedSchedule()
+    schedule.flow_speed = parseFloat(value.currentTarget.value) / 100
   })
 
   calendar.calendar({
@@ -289,20 +320,15 @@ $(document).ready(function () {
   })
 
   testBtn.click(function () {
-    console.log(program)
-    // hide(testBtn)
-    // show(stopBtn)
+    const index = parseInt(programSelection.val())
+    const schedule = program.schedule[index]
 
-    // statusText.html('Arrosage')
-    // show(statusLoader)
-
-  // loaderTimer = setInterval(function () {
-  //   show(testBtn)
-  //   hide(stopBtn)
-  //   hide(statusLoader)
-  //   statusText.html('Connecté')
-  //   clearInterval(loaderTimer)
-  // }, 2000)
+    const config = {}
+    config.output = index
+    config.duration = schedule.watering_duration
+    config.flow_speed = schedule.flow_speed
+    console.log(config)
+    sendProgramTest(config)
   })
 
   stopBtn.click(function () {
@@ -311,8 +337,6 @@ $(document).ready(function () {
 
     statusText.html('Connecté')
     hide(statusLoader)
-
-    clearInterval(loaderTimer)
   })
 
   applyBtn.click(function () {
@@ -322,33 +346,28 @@ $(document).ready(function () {
   pumpOnBtn.click(function () {
     hide(pumpOnBtn)
     show(pumpOffBtn)
-    pumpState = true
-    sendTestConfig()
+    sendTestConfig(testConfig.flowSpeed)
   })
 
   pumpOffBtn.click(function () {
     show(pumpOnBtn)
     hide(pumpOffBtn)
-    pumpState = false
-    sendTestConfig()
+    sendTestConfig(0)
   })
 
-  const testOutputContainer = document.getElementById('test_output_container')
-  const testOutputTemplate = document.getElementById('test_output_template')
-  for (let index = 1; index <= 8; index++) {
-    const data = { index}
-    testOutputContainer.innerHTML += interpolate(testOutputTemplate.innerHTML.toString().trim(), data)
-  }
+  testFlowSpeed.on('change', function (value) {
+    testConfig.flowSpeed = value.currentTarget.value
+  })
 
   $('.ui.test.toggle.checkbox').checkbox({
     onChecked: function () {
       const index = parseInt($(this).data('value'))
-      outputState[index - 1] = true
+      testConfig.outputState[index - 1] = true
       sendTestConfig()
     },
     onUnchecked: function () {
       const index = parseInt($(this).data('value'))
-      outputState[index - 1] = false
+      testConfig.outputState[index - 1] = false
       sendTestConfig()
     }
   })

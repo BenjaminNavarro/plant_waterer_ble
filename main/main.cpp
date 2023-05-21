@@ -9,8 +9,6 @@
 
 #include <tasks/blink.hpp>
 #include <tasks/watering.hpp>
-#include <tasks/watering_test.hpp>
-#include <tasks/test.hpp>
 #include <tasks/hardware.hpp>
 
 #include <services/ntp.hpp>
@@ -66,37 +64,32 @@ extern "C" void app_main(void) {
         }
     }
 
+    QueueHandle_t mode_switch_queue = xQueueCreate(1, sizeof(plant::Mode));
+
     QueueHandle_t hardware_queue =
         xQueueCreate(1, sizeof(plant::HardwareState));
 
     QueueHandle_t test_configuration_queue =
         xQueueCreate(1, sizeof(plant::HardwareState));
 
-    QueueHandle_t watering_test_queue =
+    QueueHandle_t program_test_queue =
         xQueueCreate(1, sizeof(plant::WateringTest));
 
     plant::create_hardware_task(hardware_queue);
 
-    auto* watering_task = plant::create_watering_task(
-        {.watering_schedule_queue = watering_schedule_queue,
-         .hardware_queue = hardware_queue});
-
-    auto* test_task =
-        plant::create_test_task({.test_queue = test_configuration_queue,
-                                 .hardware_queue = hardware_queue});
-
-    auto* watering_test_task = plant::create_watering_test_task(
-        {.watering_test_queue = watering_test_queue,
-         .hardware_queue = hardware_queue});
-
-    ESP_ERROR_CHECK(plant::start_ntp_service(watering_task));
-    ESP_ERROR_CHECK(plant::start_http_service(
-        {.watering_task = watering_task,
-         .test_task = test_task,
-         .watering_test_task = watering_test_task,
+    plant::create_watering_task(
+        {.mode_switch_queue = mode_switch_queue,
+         .hardware_queue = hardware_queue,
          .watering_schedule_queue = watering_schedule_queue,
          .test_configuration_queue = test_configuration_queue,
-         .watering_test_queue = watering_test_queue}));
+         .program_test_queue = program_test_queue});
+
+    ESP_ERROR_CHECK(plant::start_ntp_service(mode_switch_queue));
+    ESP_ERROR_CHECK(plant::start_http_service(
+        {.mode_switch_queue = mode_switch_queue,
+         .watering_schedule_queue = watering_schedule_queue,
+         .test_configuration_queue = test_configuration_queue,
+         .program_test_queue = program_test_queue}));
 
     plant::create_blink_task();
 }

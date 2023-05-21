@@ -14,11 +14,9 @@ std::optional<WateringSchedule> read_schedule_from_storage() {
         nvs_get_blob(nvs_handle, "schedule", nullptr, &required_size);
     ESP_ERROR_CHECK(err == ESP_OK or err == ESP_ERR_NVS_NOT_FOUND ? ESP_OK
                                                                   : ESP_FAIL);
-    if (required_size == 0) {
+    if (required_size != sizeof(WateringSchedule)) {
         nvs_close(nvs_handle);
         return {};
-    } else if (required_size != sizeof(WateringSchedule)) {
-        ESP_ERROR_CHECK(ESP_FAIL);
     }
 
     WateringSchedule schedule;
@@ -29,7 +27,7 @@ std::optional<WateringSchedule> read_schedule_from_storage() {
     return schedule;
 }
 
-void write_schedule_from_storage(const WateringSchedule& schedule) {
+void write_schedule_to_storage(const WateringSchedule& schedule) {
     nvs_handle_t nvs_handle;
     ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &nvs_handle));
 

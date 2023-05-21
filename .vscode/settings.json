@@ -70,7 +70,9 @@
     "thread": "cpp",
     "cinttypes": "cpp",
     "typeinfo": "cpp",
-    "optional": "cpp"
+    "optional": "cpp",
+    "unordered_set": "cpp",
+    "iomanip": "cpp"
   },
   "clangd.arguments": [
     "-header-insertion=never",

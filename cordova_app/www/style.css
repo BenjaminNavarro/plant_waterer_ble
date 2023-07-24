@@ -1,0 +1,52 @@
+.vertical-center {
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.prog.grid>.row {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.ui.menu.inverted {
+    padding: 1em;
+}
+
+.ui.menu.inverted h2 {
+    color: white;
+}
+
+.ui.menu.inverted h3 {
+    color: white;
+}
+
+.ui.input>input[type=number] {
+    max-width: 5rem;
+}
+
+.ui.fullwidth.button {
+    width: 100%;
+}
+
+.time_length_input {
+    color: rgba(0, 0, 0, .6) !important;
+    outline-color: rgba(0, 0, 0, .6) !important;
+    background-color: #e8e8e8 !important;
+    border-color: rgb(0, 0, 0, 0) !important;
+    min-width: 9rem !important;
+}
+
+#status_text {
+    text-align: center;
+    vertical-align: baseline;
+}
+
+#system_address_input {
+    max-width: 40%;
+}
+
+#output_select {
+    padding-top: 1rem;
+}

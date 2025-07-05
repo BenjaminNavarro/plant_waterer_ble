@@ -107,8 +107,8 @@ private:
 
     Params params_;
     WateringSchedule watering_schedule_;
-    std::array<std::uint64_t, 8> start_delay_{};
-    std::array<std::uint64_t, 8> last_watering_start_{};
+    std::array<std::uint64_t, valve_count> start_delay_{};
+    std::array<std::uint64_t, valve_count> last_watering_start_{};
 };
 
 class ManualControl {

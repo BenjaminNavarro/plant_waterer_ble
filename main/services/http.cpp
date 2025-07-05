@@ -340,7 +340,7 @@ esp_err_t program_test_post_handler(httpd_req_t* req) {
     ESP_LOGI("program_test_post", "Parsing the request...");
     auto* root = cJSON_Parse(buf);
     config.output = cJSON_GetObjectItem(root, "output")->valueint;
-    if (config.output > 8) {
+    if (config.output > valve_count) {
         httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR,
                             "Output is out of range");
         return ESP_FAIL;

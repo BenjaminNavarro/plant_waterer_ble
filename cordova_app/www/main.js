@@ -1,4 +1,10 @@
-function interpolate (template, params) {
+/* global mainPage, deviceList, refreshButton */
+/* global detailPage, batteryState, batteryStateButton, disconnectButton */
+/* global ble  */
+/* jshint browser: true , devel: true*/
+'use strict';
+
+function interpolate(template, params) {
   const replaceTags = {
     '&': '& amp;', '<': '& lt;', '>': '& gt;', '(': '% 28', ')': '% 29'
   }
@@ -11,18 +17,21 @@ function interpolate (template, params) {
 }
 
 $(document).ready(function () {
-  function hide (elem) {
+  function hide(elem) {
     elem.css('display', 'none')
   }
 
-  function show (elem) {
+  function show(elem) {
     elem.css('display', 'block')
   }
+
+  const deviceListContainer = document.getElementById('device_list')
+  const deviceListEntryTemplate = document.getElementById('device_list_entry_template')
 
   const testOutputContainer = document.getElementById('test_output_container')
   const testOutputTemplate = document.getElementById('test_output_template')
   for (let index = 1; index <= 8; index++) {
-    const data = { index}
+    const data = { index }
     testOutputContainer.innerHTML += interpolate(testOutputTemplate.innerHTML.toString().trim(), data)
   }
 
@@ -30,7 +39,7 @@ $(document).ready(function () {
   const statusBar = $('#status_bar')
   const statusText = $('#status_text')
   const statusLoader = $('#status_loader')
-  const connectBtn = $('#connect_btn')
+  const searchBtn = $('#search_btn')
   const testBtn = $('#test_btn')
   const stopBtn = $('#stop_btn')
   const applyBtn = $('#apply_btn')
@@ -54,32 +63,7 @@ $(document).ready(function () {
   testConfig.outputState = [false, false, false, false, false, false, false, false]
   testConfig.flowSpeed = 0
 
-  const address = $('#system_address_input').val()
-  const apiBaseUrl = 'http://' + address + '/api/v1/'
-
-  function readApi (endpoint, onSuccess = null , onError = null) {
-    $.ajax({
-      url: apiBaseUrl + endpoint,
-      type: 'GET',
-      dataType: 'json',
-      timeout: 5000,
-      success: onSuccess,
-      error: onError
-    })
-  }
-
-  function writeApi (endpoint, data, onComplete = null) {
-    $.ajax({
-      url: apiBaseUrl + endpoint,
-      type: 'POST',
-      dataType: 'json',
-      data: JSON.stringify(data),
-      timeout: 5000,
-      complete: onComplete
-    })
-  }
-
-  function sendTestConfig (flowSpeed) {
+  function sendTestConfig(flowSpeed) {
     const request = {}
     request.flow_speed = flowSpeed / 100
     request.output_state = []
@@ -101,7 +85,7 @@ $(document).ready(function () {
     show(statusLoader)
   }
 
-  function sendProgram () {
+  function sendProgram() {
     statusText.html('Envoi')
     writeApi(
       'schedule/write',
@@ -117,7 +101,7 @@ $(document).ready(function () {
     show(statusLoader)
   }
 
-  function sendProgramTest (config) {
+  function sendProgramTest(config) {
     statusText.html('Envoi')
     writeApi(
       'program_test/write',
@@ -133,12 +117,12 @@ $(document).ready(function () {
     show(statusLoader)
   }
 
-  function displayedSchedule () {
+  function displayedSchedule() {
     const index = parseInt(programSelection.val())
     return program.schedule[index]
   }
 
-  function toSeconds (value, unit) {
+  function toSeconds(value, unit) {
     if (unit === 'm') {
       return value * 60
     } else if (unit === 'h') {
@@ -150,7 +134,7 @@ $(document).ready(function () {
     }
   }
 
-  function updateProgram () {
+  function updateProgram() {
     const schedule = displayedSchedule()
     programEnabledInput.prop('checked', schedule.enabled === 1)
     programFlowSpeed.val(schedule.flow_speed * 100)
@@ -284,39 +268,104 @@ $(document).ready(function () {
   hide(stopBtn)
   hide(pumpOffBtn)
 
-  connectBtn.click(function () {
-    statusText.html('Connexion')
+  searchBtn.click(function () {
+    statusText.html('Recherche')
     show(statusBar)
     show(statusLoader)
 
-    readApi(
-      'schedule/read',
-      function (data) {
-        hide(statusLoader)
-        show(mainView)
-        statusText.html('Connecté')
+    const debug = document.getElementById('debug')
+    debug.innerHTML = ''
+    deviceListContainer.innerHTML = ''
+    var index = 0
+    ble.startScanWithOptions(
+      [],
+      { scanMode: 'lowLatency' },
+      function (device) {
+        console.log(device)
+        if (device.name && device.name.startsWith('NimBLE_GATT')) {
+          const name = device.name
+          const id = device.id
+          const data = { index, name, id }
+          const entryHTML = interpolate(deviceListEntryTemplate.innerHTML.toString().trim(), data)
+          console.log(entryHTML)
+          deviceListContainer.innerHTML += entryHTML
+          document.getElementById('device_list_name_' + index).onclick = function () {
+            ble.connect(device.id, function (services) {
+              // connected
+              console.log("connected");
+              console.log(services);
+              debug.innerHTML += JSON.stringify(services) + '<br/>'
+            }, function () {
+              console.log("disconnected");
+              // disconnected
+            });
 
-        program = data
-        updateProgram()
+          };
+          // document.getElementById('device_list_id_' + index).innerHTML = device.id;
 
-        const connectionCheckTimer = setInterval(function () {
-          readApi(
-            'system/info',
-            function () {
-              console.log('Still connected')
-            },
-            function () {
-              hide(mainView)
-              statusText.html('Déconnecté')
-              clearInterval(connectionCheckTimer)
-            })
-        }, 10000)
+          ++index
+
+        }
       },
       function () {
         hide(statusLoader)
         statusText.html('Echec')
       }
-    )
+    );
+
+    setTimeout(
+      ble.stopScan,
+      5000,
+      function () {
+        hide(statusLoader)
+        // show(mainView)
+        statusText.html('')
+      },
+      function () {
+        hide(statusLoader)
+        statusText.html('Echec')
+      }
+    );
+    // ble.scan(
+    //   [],
+    //   5,
+    //   function (device) {
+    //     debug.innerHTML += JSON.stringify(device) + '<br/>';
+    //   },
+    //   function () {
+    //     hide(statusLoader)
+    //     statusText.html('Echec')
+    //   }
+    // )
+
+    // readApi(
+    //   'schedule/read',
+    //   function (data) {
+    //     hide(statusLoader)
+    //     show(mainView)
+    //     statusText.html('Connecté')
+
+    //     program = data
+    //     updateProgram()
+
+    //     const connectionCheckTimer = setInterval(function () {
+    //       readApi(
+    //         'system/info',
+    //         function () {
+    //           console.log('Still connected')
+    //         },
+    //         function () {
+    //           hide(mainView)
+    //           statusText.html('Déconnecté')
+    //           clearInterval(connectionCheckTimer)
+    //         })
+    //     }, 10000)
+    //   },
+    //   function () {
+    //     hide(statusLoader)
+    //     statusText.html('Echec')
+    //   }
+    // )
   })
 
   testBtn.click(function () {
@@ -372,3 +421,18 @@ $(document).ready(function () {
     }
   })
 })
+
+function ble_scan() {
+  document.addEventListener('deviceready', function () {
+    const debug = document.getElementById('debug')
+    ble.scan(
+      [],
+      5,
+      function (device) {
+        debug.innerHTML += JSON.stringify(device) + '<br/>';
+      },
+    )
+  }, false);
+
+
+}

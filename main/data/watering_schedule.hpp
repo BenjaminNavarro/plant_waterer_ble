@@ -44,10 +44,11 @@ struct PlantGroupSchedule {
     FlowSpeed flow_speed{};
 };
 
-using WateringSchedule = std::array<PlantGroupSchedule, 8>;
+constexpr std::size_t valve_count = 1;
+using WateringSchedule = std::array<PlantGroupSchedule, valve_count>;
 
 struct HardwareState {
-    std::array<bool, 8> output_state{};
+    std::array<bool, valve_count> output_state{};
     FlowSpeed flow_speed{};
 
     [[nodiscard]] constexpr bool operator==(const HardwareState& other) const {

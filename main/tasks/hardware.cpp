@@ -24,11 +24,12 @@ TaskHandle_t create_hardware_task(QueueHandle_t hardware_queue) {
 }
 
 void hardware_task(void* arg) {
-    std::array<Valve, 8> valves{
-        Valve{GPIO_NUM_23}, Valve{GPIO_NUM_4},  Valve{GPIO_NUM_18},
-        Valve{GPIO_NUM_19}, Valve{GPIO_NUM_13}, Valve{GPIO_NUM_12},
-        Valve{GPIO_NUM_14}, Valve{GPIO_NUM_27},
-    };
+    // std::array<Valve, 8> valves{
+    //     Valve{GPIO_NUM_23}, Valve{GPIO_NUM_4},  Valve{GPIO_NUM_18},
+    //     Valve{GPIO_NUM_19}, Valve{GPIO_NUM_13}, Valve{GPIO_NUM_12},
+    //     Valve{GPIO_NUM_14}, Valve{GPIO_NUM_27},
+    // };
+    std::array<Valve, valve_count> valves{Valve{GPIO_NUM_23}};
     WaterPump water_pump{GPIO_NUM_15};
 
     auto* hardware_queue = reinterpret_cast<QueueHandle_t>(arg);

@@ -11,20 +11,11 @@
 #include <tasks/watering.hpp>
 #include <tasks/hardware.hpp>
 
-#include <services/ntp.hpp>
-#include <services/mdns.hpp>
-#include <services/http.hpp>
-
 #include <data/watering_schedule.hpp>
 
 #include <driver/gpio.h>
 #include <esp_event.h>
-#include <esp_netif.h>
-#include <esp_netif_sntp.h>
-#include <esp_sntp.h>
 #include <esp_log.h>
-#include <lwip/apps/netbiosns.h>
-#include <mdns.h>
 #include <nvs_flash.h>
 #include <protocol_examples_common.h>
 #include <sdkconfig.h>
@@ -36,9 +27,16 @@
 #include <ctime>
 #include <sys/time.h>
 
+extern void app_main_ble();
+
 esp_err_t start_rest_server();
 
 extern "C" void app_main(void) {
+    ESP_LOGI("app_main", "calling app_main_ble()");
+    app_main_ble();
+    ESP_LOGI("app_main", "app_main_ble() executed");
+    return;
+
     ESP_ERROR_CHECK(nvs_flash_init());
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());

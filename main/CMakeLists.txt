@@ -13,7 +13,7 @@ idf_component_register(
         main_ble/main.cpp
         main_ble/src/gap.cpp
         main_ble/src/gatt_svc.cpp
-        main_ble/src/led.cpp
+        # main_ble/src/led.cpp
     INCLUDE_DIRS
         .
         pid-utils/hashed-string

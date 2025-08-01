@@ -3,9 +3,11 @@
   "displayName": "HelloCordova",
   "version": "1.0.0",
   "description": "A sample Apache Cordova application that responds to the deviceready event.",
-  "main": "index.js",
+  "source": "www/lib.ts",
+  "main": "www/lib.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "watch": "parcel watch",
+    "build": "parcel build"
   },
   "keywords": [
     "ecosystem:cordova"
@@ -15,7 +17,9 @@
   "devDependencies": {
     "cordova-android": "^13.0.0",
     "cordova-browser": "^7.0.0",
-    "cordova-plugin-ble-central": "^2.0.0"
+    "cordova-plugin-ble-central": "^2.0.0",
+    "parcel": "^2.15.4",
+    "typescript": "^5.8.3"
   },
   "cordova": {
     "platforms": [

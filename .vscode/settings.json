@@ -1,6 +1,6 @@
 {
   "C_Cpp.intelliSenseEngine": "default",
-  "idf.flashType": "UART",
+  "idf.flashType": "JTAG",
   "idf.port": "/dev/ttyUSB0",
   "files.associations": {
     "*.sdf": "xml",
@@ -75,8 +75,9 @@
     "iomanip": "cpp"
   },
   "clangd.arguments": [
-    "-header-insertion=never",
-    "--query-driver=/home/benjamin/.espressif/tools/xtensa-esp32-elf/**/xtensa-esp32-elf*"
+    "--background-index",
+    "--query-driver=F:\\ESP32\\Espressif\\tools\\riscv32-esp-elf\\esp-14.2.0_20241119\\riscv32-esp-elf\\bin\\riscv32-esp-elf-gcc.exe",
+    "--compile-commands-dir=f:\\ESP32\\plant_waterer_ble\\build"
   ],
   "idf.adapterTargetName": "esp32",
   "spellright.language": [
@@ -89,5 +90,17 @@
     "plaintext"
   ],
   "idf.portWin": "COM5",
-  "idf.pythonInstallPath": "c:\\Users\\black\\Documents\\ESP32\\Espressif\\tools\\idf-python\\3.11.2\\python.exe"
+  "idf.pythonInstallPath": "F:\\ESP32\\Espressif\\tools\\idf-python\\3.11.2\\python.exe",
+  "idf.espIdfPathWin": "f:\\ESP32\\v5.4.2\\esp-idf",
+  "idf.toolsPathWin": "F:\\ESP32\\Espressif",
+  "idf.openOcdConfigs": [
+    "board/esp32c3-builtin.cfg"
+  ],
+  "idf.customExtraVars": {
+    "OPENOCD_SCRIPTS": "F:\\Espressif\\tools\\openocd-esp32\\v0.12.0-esp32-20230921/openocd-esp32/share/openocd/scripts",
+    "IDF_CCACHE_ENABLE": "1",
+    "ESP_ROM_ELF_DIR": "F:\\Espressif\\tools\\esp-rom-elfs\\20230320/",
+    "IDF_TARGET": "esp32c3"
+  },
+  "clangd.path": "F:\\ESP32\\Espressif\\tools\\esp-clang\\esp-18.1.2_20240912\\esp-clang\\bin\\clangd.exe"
 }

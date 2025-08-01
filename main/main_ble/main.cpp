@@ -12,7 +12,6 @@
 #include "common.h"
 #include "gap.hpp"
 #include "gatt_svc.hpp"
-#include "led.hpp"
 
 /* Library function declarations */
 extern "C" void ble_store_config_init(void);
@@ -89,7 +88,7 @@ void app_main_ble() {
     esp_err_t ret;
 
     /* LED initialization */
-    led_init();
+    // led_init();
 
     /*
      * NVS flash initialization

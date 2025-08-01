@@ -37,57 +37,57 @@ extern "C" void app_main(void) {
     ESP_LOGI("app_main", "app_main_ble() executed");
     return;
 
-    ESP_ERROR_CHECK(nvs_flash_init());
-    ESP_ERROR_CHECK(esp_netif_init());
-    ESP_ERROR_CHECK(esp_event_loop_create_default());
+    // ESP_ERROR_CHECK(nvs_flash_init());
+    // ESP_ERROR_CHECK(esp_netif_init());
+    // ESP_ERROR_CHECK(esp_event_loop_create_default());
 
-    netbiosns_init();
-    netbiosns_set_name(CONFIG_EXAMPLE_MDNS_HOST_NAME);
+    // netbiosns_init();
+    // netbiosns_set_name(CONFIG_EXAMPLE_MDNS_HOST_NAME);
 
-    ESP_ERROR_CHECK(example_connect());
-    ESP_ERROR_CHECK(plant::start_mdns_service());
+    // ESP_ERROR_CHECK(example_connect());
+    // ESP_ERROR_CHECK(plant::start_mdns_service());
 
-    QueueHandle_t watering_schedule_queue =
-        xQueueCreate(1, sizeof(plant::WateringSchedule));
-    {
-        if (auto saved_schedule = plant::read_schedule_from_storage()) {
-            ESP_LOGI("main", "Schedule read from storage");
-            xQueueSendToBack(watering_schedule_queue, &saved_schedule.value(),
-                             0);
-        } else {
-            ESP_LOGI("main",
-                     "No schedule saved in storage, creating a default one");
-            plant::WateringSchedule default_schedule;
-            xQueueSendToBack(watering_schedule_queue, &default_schedule, 0);
-        }
-    }
+    // QueueHandle_t watering_schedule_queue =
+    //     xQueueCreate(1, sizeof(plant::WateringSchedule));
+    // {
+    //     if (auto saved_schedule = plant::read_schedule_from_storage()) {
+    //         ESP_LOGI("main", "Schedule read from storage");
+    //         xQueueSendToBack(watering_schedule_queue, &saved_schedule.value(),
+    //                          0);
+    //     } else {
+    //         ESP_LOGI("main",
+    //                  "No schedule saved in storage, creating a default one");
+    //         plant::WateringSchedule default_schedule;
+    //         xQueueSendToBack(watering_schedule_queue, &default_schedule, 0);
+    //     }
+    // }
 
-    QueueHandle_t mode_switch_queue = xQueueCreate(1, sizeof(plant::Mode));
+    // QueueHandle_t mode_switch_queue = xQueueCreate(1, sizeof(plant::Mode));
 
-    QueueHandle_t hardware_queue =
-        xQueueCreate(1, sizeof(plant::HardwareState));
+    // QueueHandle_t hardware_queue =
+    //     xQueueCreate(1, sizeof(plant::HardwareState));
 
-    QueueHandle_t test_configuration_queue =
-        xQueueCreate(1, sizeof(plant::HardwareState));
+    // QueueHandle_t test_configuration_queue =
+    //     xQueueCreate(1, sizeof(plant::HardwareState));
 
-    QueueHandle_t program_test_queue =
-        xQueueCreate(1, sizeof(plant::WateringTest));
+    // QueueHandle_t program_test_queue =
+    //     xQueueCreate(1, sizeof(plant::WateringTest));
 
-    plant::create_hardware_task(hardware_queue);
+    // plant::create_hardware_task(hardware_queue);
 
-    plant::create_watering_task(
-        {.mode_switch_queue = mode_switch_queue,
-         .hardware_queue = hardware_queue,
-         .watering_schedule_queue = watering_schedule_queue,
-         .test_configuration_queue = test_configuration_queue,
-         .program_test_queue = program_test_queue});
+    // plant::create_watering_task(
+    //     {.mode_switch_queue = mode_switch_queue,
+    //      .hardware_queue = hardware_queue,
+    //      .watering_schedule_queue = watering_schedule_queue,
+    //      .test_configuration_queue = test_configuration_queue,
+    //      .program_test_queue = program_test_queue});
 
-    ESP_ERROR_CHECK(plant::start_ntp_service(mode_switch_queue));
-    ESP_ERROR_CHECK(plant::start_http_service(
-        {.mode_switch_queue = mode_switch_queue,
-         .watering_schedule_queue = watering_schedule_queue,
-         .test_configuration_queue = test_configuration_queue,
-         .program_test_queue = program_test_queue}));
+    // ESP_ERROR_CHECK(plant::start_ntp_service(mode_switch_queue));
+    // ESP_ERROR_CHECK(plant::start_http_service(
+    //     {.mode_switch_queue = mode_switch_queue,
+    //      .watering_schedule_queue = watering_schedule_queue,
+    //      .test_configuration_queue = test_configuration_queue,
+    //      .program_test_queue = program_test_queue}));
 
-    plant::create_blink_task();
+    // plant::create_blink_task();
 }

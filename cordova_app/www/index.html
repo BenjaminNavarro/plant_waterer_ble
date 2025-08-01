@@ -2,18 +2,34 @@
 <html>
 
 <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-    <meta name="format-detection" content="telephone=no" />
-    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1" />
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1">
 
-    <title>Système d'arrosage</title>
+    <title>Syst&#xE8;me d&apos;arrosage</title>
+
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"
+        integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" type="text/css" href="js/jquery-1.5.0.mobile.min.css">
+
     <link rel="stylesheet" type="text/css" href="fomantic/semantic.min.css">
-    <script src='https://code.jquery.com/jquery-3.1.1.min.js'
-        integrity='sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=' crossorigin='anonymous'></script>
     <script src="fomantic/semantic.min.js"></script>
 
     <link rel="stylesheet" type="text/css" href="style.css">
+    <style>
+        /* For avoiding title truncation in wp8 */
+        .ui-header .ui-title {
+            overflow: visible !important;
+        }
+
+        /* For fixing the absolute position issue for the default cordova gen page*/
+        #cjp-accordion1 .app {
+            left: 5px !important;
+            margin: 5px !important;
+            position: relative !important;
+        }
+    </style>
 
     <template id="test_output_template">
         <div class="column">
@@ -43,7 +59,7 @@
                 <div class="left floated column">
                     <div class="row">
                         <h2>
-                            Système d'arrosage
+                            Syst&#xE8;me d&apos;arrosage
                         </h2>
                         <div class="ui action input">
                             <button id="search_btn" class="ui button">Rechercher</button>
@@ -100,7 +116,7 @@
                 </div>
                 <div class="row">
                     <div class="six wide column">
-                        <p class="vertical-center">Débit</p>
+                        <p class="vertical-center">D&#xE9;bit</p>
                     </div>
                     <div class="ten wide column">
                         <div class="ui right labeled input">
@@ -113,7 +129,7 @@
                 </div>
                 <div class="row">
                     <div class="six wide column">
-                        <p class="vertical-center">Date de début</p>
+                        <p class="vertical-center">Date de d&#xE9;but</p>
                     </div>
                     <div class="ten wide column">
                         <div class="ui calendar" id="standard_calendar">
@@ -126,7 +142,7 @@
                 </div>
                 <div class="row">
                     <div class="six wide column">
-                        <p class="vertical-center">Durée d'arrosage</p>
+                        <p class="vertical-center">Dur&#xE9;e d&apos;arrosage</p>
                     </div>
                     <div class="ten wide column">
                         <div class="ui right labeled input">
@@ -142,7 +158,7 @@
                 </div>
                 <div class="row">
                     <div class="six wide column">
-                        <p class="vertical-center">Répétition</p>
+                        <p class="vertical-center">R&#xE9;p&#xE9;tition</p>
                     </div>
                     <div class="ten wide column">
                         <div class="ui right labeled input">
@@ -170,7 +186,7 @@
         <div class="ui bottom attached tab segment" data-tab="manual">
             <div id="test_output_container" class="ui two column grid" style="margin: 1rem 0 1rem 0;">
                 <div class="column">
-                    <p class="vertical-center">Débit</p>
+                    <p class="vertical-center">D&#xE9;bit</p>
                 </div>
                 <div class="column">
                     <div class="ui right labeled input">
@@ -182,12 +198,13 @@
                 </div>
             </div>
             <button id="pump_on_btn" class="ui fullwidth button">Activer la pompe</button>
-            <button id="pump_off_btn" class="ui fullwidth button">Désactiver la pompe</button>
+            <button id="pump_off_btn" class="ui fullwidth button">D&#xE9;sactiver la pompe</button>
         </div>
     </div>
 
     <script type="text/javascript" src="cordova.js"></script>
-    <script type="text/javascript" src="main.js"></script>
+    <!-- <script type="text/javascript" src="main.js"></script> -->
+    <script type="text/javascript" src="lib.js"></script>
 </body>
 
 </html>

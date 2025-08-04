@@ -1,0 +1,19 @@
+{
+    "name": "plant-waterer-ble",
+    "version": "0.1.0",
+    "description": "",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "files": [
+        "/dist"
+    ],
+    "devDependencies": {
+        "@types/trusted-types": "^2.0.7",
+        "json5": "^2.2.3",
+        "typescript": "^5.9.2"
+    },
+    "dependencies": {
+        "@shoelace-style/animations": "^1.2.0",
+        "@shoelace-style/shoelace": "^2.20.1"
+    }
+}

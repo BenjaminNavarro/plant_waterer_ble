@@ -1,0 +1,1 @@
+export { testFromTS } from './lib';

@@ -19,7 +19,7 @@
     "cordova-browser": "^7.0.0",
     "cordova-plugin-ble-central": "^2.0.0",
     "parcel": "^2.15.4",
-    "typescript": "^5.8.3"
+    "typescript": "^5.9.2"
   },
   "cordova": {
     "platforms": [

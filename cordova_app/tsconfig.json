@@ -10,5 +10,13 @@
     },
     "files": [
         "www/lib.ts",
+    ],
+    "typeRoots": [
+        "www/jquery-ts",
+        "www/fomantic"
     ]
+    // "include": [
+    //     "www/jquery-ts/JQuery.d.ts",
+    //     "www/fomantic/types/index.d.ts"
+    // ]
 }

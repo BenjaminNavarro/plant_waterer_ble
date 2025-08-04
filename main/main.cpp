@@ -34,7 +34,7 @@ esp_err_t start_rest_server();
 extern "C" void app_main(void) {
     ESP_LOGI("app_main", "calling app_main_ble()");
     app_main_ble();
-    ESP_LOGI("app_main", "app_main_ble() executed");
+    ESP_LOGI("app_main", "app_main_ble() executed (they shall be remembered)");
     return;
 
     // ESP_ERROR_CHECK(nvs_flash_init());

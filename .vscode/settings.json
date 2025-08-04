@@ -1,6 +1,6 @@
 {
   "C_Cpp.intelliSenseEngine": "default",
-  "idf.flashType": "JTAG",
+  "idf.flashType": "UART",
   "idf.port": "/dev/ttyUSB0",
   "files.associations": {
     "*.sdf": "xml",
@@ -89,18 +89,18 @@
     "latex",
     "plaintext"
   ],
-  "idf.portWin": "COM5",
-  "idf.pythonInstallPath": "F:\\ESP32\\Espressif\\tools\\idf-python\\3.11.2\\python.exe",
-  "idf.espIdfPathWin": "f:\\ESP32\\v5.4.2\\esp-idf",
-  "idf.toolsPathWin": "F:\\ESP32\\Espressif",
+  "idf.portWin": "COM9",
+  "idf.pythonInstallPath": "C:\\Users\\black\\Documents\\ESP32\\Espressif\\tools\\idf-python\\3.11.2\\python.exe",
+  "idf.espIdfPathWin": "C:\\Users\\black\\Documents\\ESP32\\SDK\\v5.4.2\\esp-idf",
+  "idf.toolsPathWin": "C:\\Users\\black\\Documents\\ESP32\\Espressif",
   "idf.openOcdConfigs": [
     "board/esp32c3-builtin.cfg"
   ],
   "idf.customExtraVars": {
-    "OPENOCD_SCRIPTS": "F:\\Espressif\\tools\\openocd-esp32\\v0.12.0-esp32-20230921/openocd-esp32/share/openocd/scripts",
+    "OPENOCD_SCRIPTS": "C:\\Users\\black\\Documents\\Espressif\\tools\\openocd-esp32\\v0.12.0-esp32-20230921/openocd-esp32/share/openocd/scripts",
     "IDF_CCACHE_ENABLE": "1",
-    "ESP_ROM_ELF_DIR": "F:\\Espressif\\tools\\esp-rom-elfs\\20230320/",
+    "ESP_ROM_ELF_DIR": "C:\\Users\\black\\Documents\\Espressif\\tools\\esp-rom-elfs\\20230320/",
     "IDF_TARGET": "esp32c3"
   },
-  "clangd.path": "F:\\ESP32\\Espressif\\tools\\esp-clang\\esp-18.1.2_20240912\\esp-clang\\bin\\clangd.exe"
+  "clangd.path": "C:\\Users\\black\\Documents\\ESP32\\Espressif\\tools\\esp-clang\\esp-18.1.2_20240912\\esp-clang\\bin\\clangd.exe"
 }

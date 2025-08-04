@@ -1,0 +1,46 @@
+.is_hidden {
+    opacity: 0;
+}
+
+#search_button {
+    width: 100%;
+}
+
+/* Inside the tabs header, height is 53px */
+.progress {
+    position: fixed;
+    top: 3px;
+    right: 3px;
+}
+
+#progress_ring {
+    --size: 46px;
+}
+
+#progress_spinner {
+    font-size: 46px;
+    --track-width: 4px;
+}
+
+.card-header {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.card-header [slot='header'] {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.card-header h3 {
+    margin: 0;
+}
+
+.card-header sl-icon-button {
+    font-size: var(--sl-font-size-medium);
+}
+
+.device-entry-description {
+    float: right;
+}

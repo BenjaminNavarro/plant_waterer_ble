@@ -19,6 +19,62 @@ function interpolate(template: string, params: object) {
     return new Function(...keys, `return \`${template}\``)(...keyVals)
 }
 
+class TestConfig {
+    outputState: boolean[];
+    flowSpeed: number;
+
+    constructor(size: number) {
+        this.outputState.fill(false, 0, size)
+        this.flowSpeed = 0
+    }
+}
+
+class Schedule {
+    enabled: boolean;
+    flow_speed: number;
+    start_time: number;
+    watering_duration: number;
+    watering_period: number;
+}
+
+class Program {
+    schedule: Schedule[];
+
+    constructor(size: number) {
+        this.schedule.fill(new Schedule(), 0, size)
+    }
+}
+
+const outputs_count = 8
+const address = qs('#system_address_input').innerHTML
+const apiBaseUrl = 'http://' + address + '/api/v1/'
+
+async function readApi(endpoint: string, onSuccess: CallableFunction = null, onError: CallableFunction = null) {
+    try {
+        const response = await fetch(apiBaseUrl + endpoint, { method: 'GET', signal: AbortSignal.timeout(5000) })
+        if (!response.ok) {
+            onError()
+        }
+
+        const result = await response.json()
+        onSuccess(result)
+    } catch (error) {
+        onError()
+    }
+}
+
+async function writeApi(endpoint: string, data: object, onComplete: CallableFunction = null) {
+    const response = await fetch(apiBaseUrl + endpoint, {
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+        signal: AbortSignal.timeout(5000)
+    })
+    onComplete(response)
+}
+
 function init() {
     function hide(elem: HTMLElement) {
         elem.style.display = 'none'
@@ -38,38 +94,41 @@ function init() {
         testOutputContainer.innerHTML += interpolate(testOutputTemplate.innerHTML.toString().trim(), data)
     }
 
+    let mmm: FomanticUI.Calendar;
+
     const mainView = qs('#main_view')
     const statusBar = qs('#status_bar')
     const statusText = qs('#status_text')
     const statusLoader = qs('#status_loader')
-    const searchBtn = qs('#search_btn')
-    const testBtn = qs('#test_btn')
-    const stopBtn = qs('#stop_btn')
-    const applyBtn = qs('#apply_btn')
-    const testFlowSpeed = qs('#test_flow_speed')
-    const pumpOnBtn = qs('#pump_on_btn')
-    const pumpOffBtn = qs('#pump_off_btn')
+    const searchBtn = qs('#search_btn') as HTMLButtonElement
+    const testBtn = qs('#test_btn') as HTMLButtonElement
+    const stopBtn = qs('#stop_btn') as HTMLButtonElement
+    const applyBtn = qs('#apply_btn') as HTMLButtonElement
+    const testFlowSpeed = qs('#test_flow_speed') as HTMLInputElement
+    const pumpOnBtn = qs('#pump_on_btn') as HTMLButtonElement
+    const pumpOffBtn = qs('#pump_off_btn') as HTMLButtonElement
     const calendar = qs('#standard_calendar')
-    const programSelection = qs('#program_selection')
+    const programSelection = qs('#program_selection') as HTMLSelectElement
     const programEnabled = qs('#program_enabled')
-    const programFlowSpeed = qs('#program_flow_speed')
-    const programEnabledInput = qs('#program_enabled_input')
-    const programDuration = qs('#program_duration')
-    const programPeriod = qs('#program_period')
-    const programDurationTimeSelection = qs('#program_duration_time_type')
-    const programPeriodTimeSelection = qs('#program_period_time_type')
+    const programFlowSpeed = qs('#program_flow_speed') as HTMLInputElement
+    const programEnabledInput = qs('#program_enabled_input') as HTMLInputElement
+    const programDuration = qs('#program_duration') as HTMLInputElement
+    const programPeriod = qs('#program_period') as HTMLInputElement
+    const programDurationTimeSelection = qs('#program_duration_time_type') as HTMLSelectElement
+    const programPeriodTimeSelection = qs('#program_period_time_type') as HTMLSelectElement
 
-    let program = {}
+    let program = new Program(outputs_count)
     let programDurationTimeType = 's'
     let programPeriodTimeType = 'd'
-    let testConfig = {}
-    testConfig.outputState = [false, false, false, false, false, false, false, false]
-    testConfig.flowSpeed = 0
+    let testConfig = new TestConfig(8)
 
-    function sendTestConfig(flowSpeed) {
-        const request = {}
+    function sendTestConfig(flowSpeed: number) {
+        type requestType = {
+            flow_speed: number,
+            output_state: number[]
+        }
+        let request: requestType;
         request.flow_speed = flowSpeed / 100
-        request.output_state = []
         for (let index = 0; index < 8; index++) {
             request.output_state.push(testConfig.outputState[index] ? 1 : 0)
         }
@@ -77,11 +136,11 @@ function init() {
         writeApi(
             'manual/write',
             request,
-            function (resp) {
-                if (resp.responseText === 'ok') {
-                    statusText.html('Ok')
+            function (resp: Response) {
+                if (resp.statusText === 'ok') {
+                    statusText.innerHTML = 'Ok'
                 } else {
-                    statusText.html('Erreur')
+                    statusText.innerHTML = 'Erreur'
                 }
                 hide(statusLoader)
             })
@@ -89,31 +148,31 @@ function init() {
     }
 
     function sendProgram() {
-        statusText.html('Envoi')
+        statusText.innerHTML = 'Envoi'
         writeApi(
             'schedule/write',
             program,
-            function (resp) {
-                if (resp.responseText === 'ok') {
-                    statusText.html('Ok')
+            function (resp: Response) {
+                if (resp.statusText === 'ok') {
+                    statusText.innerHTML = 'Ok'
                 } else {
-                    statusText.html('Erreur')
+                    statusText.innerHTML = 'Erreur'
                 }
                 hide(statusLoader)
             })
         show(statusLoader)
     }
 
-    function sendProgramTest(config) {
-        statusText.html('Envoi')
+    function sendProgramTest(config: TestConfig) {
+        statusText.innerHTML = 'Envoi'
         writeApi(
             'program_test/write',
             config,
-            function (resp) {
-                if (resp.responseText === 'ok') {
-                    statusText.html('Ok')
+            function (resp: Response) {
+                if (resp.statusText === 'ok') {
+                    statusText.innerHTML = 'Ok'
                 } else {
-                    statusText.html('Erreur')
+                    statusText.innerHTML = 'Erreur'
                 }
                 hide(statusLoader)
             })
@@ -121,11 +180,11 @@ function init() {
     }
 
     function displayedSchedule() {
-        const index = parseInt(programSelection.val())
+        const index = parseInt(programSelection.options[programSelection.selectedIndex].value)
         return program.schedule[index]
     }
 
-    function toSeconds(value, unit) {
+    function toSeconds(value: number, unit: string) {
         if (unit === 'm') {
             return value * 60
         } else if (unit === 'h') {
@@ -139,8 +198,8 @@ function init() {
 
     function updateProgram() {
         const schedule = displayedSchedule()
-        programEnabledInput.prop('checked', schedule.enabled === 1)
-        programFlowSpeed.val(schedule.flow_speed * 100)
+        programEnabledInput.checked = schedule.enabled
+        programFlowSpeed.value = (schedule.flow_speed * 100).toString()
         calendar.calendar('set date', new Date(schedule.start_time * 1000), true, false)
 
         if (schedule.watering_duration > 3600) {
@@ -337,7 +396,7 @@ function init() {
         //   },
         //   function () {
         //     hide(statusLoader)
-        //     statusText.html('Echec')
+        //     statusText.innerHTML = 'Echec'
         //   }
         // )
 
@@ -346,7 +405,7 @@ function init() {
         //   function (data) {
         //     hide(statusLoader)
         //     show(mainView)
-        //     statusText.html('Connecté')
+        //     statusText.innerHTML = 'Connecté'
 
         //     program = data
         //     updateProgram()
@@ -359,14 +418,14 @@ function init() {
         //         },
         //         function () {
         //           hide(mainView)
-        //           statusText.html('Déconnecté')
+        //           statusText.innerHTML = 'Déconnecté'
         //           clearInterval(connectionCheckTimer)
         //         })
         //     }, 10000)
         //   },
         //   function () {
         //     hide(statusLoader)
-        //     statusText.html('Echec')
+        //     statusText.innerHTML = 'Echec'
         //   }
         // )
     })
@@ -387,7 +446,7 @@ function init() {
         show(testBtn)
         hide(stopBtn)
 
-        statusText.html('Connecté')
+        statusText.innerHTML = 'Connecté'
         hide(statusLoader)
     })
 

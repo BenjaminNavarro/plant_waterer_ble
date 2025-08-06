@@ -1,5 +1,5 @@
 {
-    "name": "plant-waterer-ble",
+    "name": "tinydrop",
     "version": "0.1.0",
     "description": "",
     "main": "dist/index.js",
@@ -13,7 +13,6 @@
         "typescript": "^5.9.2"
     },
     "dependencies": {
-        "@shoelace-style/animations": "^1.2.0",
-        "@shoelace-style/shoelace": "^2.20.1"
+        "cordova-plugin-ble-central": "^2.0.0"
     }
 }

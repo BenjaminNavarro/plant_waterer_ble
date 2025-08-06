@@ -1,1 +1,0 @@
-export { testFromTS } from './lib'

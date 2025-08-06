@@ -1,15 +1,16 @@
 {
     "compilerOptions": {
-        "module": "nodenext",
-        "target": "es2024",
+        "target": "esnext",
+        "module": "esnext",
+        "moduleResolution": "node",
         "declaration": true,
-        "moduleResolution": "nodenext",
         "outDir": "dist",
-        // "paths": {
-        //     "shoelace": [
-        //         "./deps/shoelace-2.20.1"
-        //     ]
-        // }
+        "skipLibCheck": true,
+        "paths": {
+            "shoelace/*": [
+                "./deps/shoelace-2.20.1/*"
+            ]
+        }
     },
     "include": [
         "src/**/*"

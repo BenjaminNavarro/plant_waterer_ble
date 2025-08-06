@@ -37,18 +37,10 @@
                 <sl-icon name="droplet-half"></sl-icon>
             </div>
 
-            <sl-button variant="primary" class="connect-button">Connexion</sl-button>
+            <sl-button variant="primary" class="connect-button" id="connect_button_${index}">Connexion</sl-button>
             <div class="device-entry-description" id="device_list_id_${index}">${id}</div>
 
         </sl-card>
-
-        <!-- <div class="device-entry-item">
-            <sl-icon name="droplet-half"></sl-icon>
-            <div class="device-entry-content">
-                <a class="device-entry-header" id="device_list_name_${index}" href="#">${name}</a>
-                <div class="device-entry-description" id="device_list_id_${index}">${id}</div>
-            </div>
-        </div> -->
     </template>
 
 </head>
@@ -61,44 +53,102 @@
     </div>
 
     <sl-tab-group id="tabs">
-        <sl-tab slot="nav" panel="connect">Connexion</sl-tab>
-        <sl-tab slot="nav" panel="program">Programmation</sl-tab>
-        <sl-tab slot="nav" panel="test">Test</sl-tab>
+        <sl-tab slot="nav" panel="connect" id="connect_tab">Connexion</sl-tab>
+        <sl-tab slot="nav" panel="config" id="config_tab">Configuration</sl-tab>
+        <sl-tab slot="nav" panel="test" id="test_tab">Test</sl-tab>
 
 
-        <sl-tab-panel name="connect">
+        <sl-tab-panel class="main-tabs" name="connect">
             <sl-button id="search_button" variant="primary" size="large">Rechercher</sl-button>
             <sl-divider></sl-divider>
             <div id="device_list" class="device-list">
             </div>
         </sl-tab-panel>
 
-        <sl-tab-panel name="program">
-            This is the program tab panel.
+        <sl-tab-panel class="main-tabs" name="config">
+            <sl-input label="Nom personnalisé" id="custom_name_input"></sl-input>
+            <sl-divider></sl-divider>
+            <div class="bulma-columns bulma-is-mobile bulma-is-vcentered">
+                <div class="bulma-column bulma-is-one-quarter">
+                    Activé
+                </div>
+                <div class="bulma-column bulma-is-narrow">
+                    <sl-switch id="program_enabled"></sl-switch>
+                </div>
+            </div>
+            <div class="bulma-columns bulma-is-mobile bulma-is-vcentered">
+                <div class="bulma-column bulma-is-one-quarter">
+                    Durée d'arrosage
+                </div>
+                <div class="bulma-column bulma-is-one-quarter">
+                    <sl-input id="program_duration" type="number" placeholder="0" min="0"></sl-input>
+                </div>
+                <div class="bulma-column bulma-is-two-quarters">
+                    <sl-select id="program_duration_time_type" value="s">
+                        <sl-option value="s">Secondes</sl-option>
+                        <sl-option value="m">Minutes</sl-option>
+                        <sl-option value="h">Heures</sl-option>
+                    </sl-select>
+                </div>
+            </div>
+            <div class="bulma-columns bulma-is-mobile bulma-is-vcentered">
+                <div class="bulma-column bulma-is-one-quarter">
+                    Fréquence d'arrosage
+                </div>
+                <div class="bulma-column bulma-is-one-quarter">
+                    <sl-input id="program_period" type="number" placeholder="0" min="0"></sl-input>
+                </div>
+                <div class="bulma-column bulma-is-two-quarters">
+                    <sl-select id="program_period_time_type" class="ui selection dropdown label time_length_input"
+                        value="d">
+                        <sl-option value="d" class="item">Jours</sl-option>
+                        <sl-option value="h">Heures</sl-option>
+                        <sl-option value="m">Minutes</sl-option>
+                        <sl-option value="s">Secondes</sl-option>
+                    </sl-select>
+                </div>
+            </div>
+            <div class="bulma-columns bulma-is-mobile bulma-is-vcentered">
+                <div class="bulma-column bulma-is-one-quarter">
+                    Débit d'arrosage
+                </div>
+                <div class="bulma-column bulma-is-three-quarters">
+                    <sl-input id="program_flow_speed" type="number" placeholder="100" min="0" max="100" step="10">
+                        <div slot="suffix">%</div>
+                    </sl-input>
+                </div>
+            </div>
+            <div class="bulma-columns bulma-is-mobile bulma-is-vcentered">
+                <div class="bulma-column bulma-is-one-quarter">
+                    Premier arrosage
+                </div>
+                <div class="bulma-column bulma-is-three-quarters">
+                    <sl-input id="program_start" type="datetime-local"></sl-input>
+                </div>
+
+            </div>
+
+            <sl-divider></sl-divider>
+
+            <sl-button-group class="program-buttons-group">
+                <sl-button id="program_test_button" variant="success" class="program-buttons">Tester</sl-button>
+                <sl-button id="program_apply_button" variant="primary" class="program-buttons">Appliquer</sl-button>
+            </sl-button-group>
+            <sl-divider></sl-divider>
+            <sl-button id="program_stop_button" variant="danger" size="large" class="program-buttons">Stop</sl-button>
+
+
+
         </sl-tab-panel>
 
-        <sl-tab-panel name="test">
+        <sl-tab-panel class="main-tabs" name="test">
             This is the test tab panel.
         </sl-tab-panel>
 
     </sl-tab-group>
 
-    <!-- <sl-checkbox>Check me</sl-checkbox>
-    <br />
-    <sl-input type="datetime-local"></sl-input>
-    <br />
-    <sl-input type="number"></sl-input>
-    <br />
-    <sl-relative-time date="2025-08-03T23:17:00-04:00"></sl-relative-time> -->
-
-
     <!-- <script type="text/javascript" src="cordova.js"></script> -->
-    <script>var exports = {};</script>
-    <script type="text/javascript" src="dist/lib.js"></script>
-    <script type="module">
-        testFromTS();
-    </script>
-
+    <script type="module" src="dist/main.js"></script>
 
     <script type="module">
         // Make sure all Shoelace custom elements are loaded before

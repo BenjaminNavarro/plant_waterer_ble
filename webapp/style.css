@@ -44,3 +44,18 @@
 .device-entry-description {
     float: right;
 }
+
+.main-tabs {
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+.program-buttons-group {
+    width: 100%;
+}
+
+.program-buttons {
+    width: 100%;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}

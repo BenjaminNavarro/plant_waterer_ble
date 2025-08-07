@@ -27,7 +27,7 @@ export class TinyDropFakeDevice {
     connected;
     connect(onSuccess, onFailure) {
         setTimeout(() => {
-            if (Math.random() < 0.9) {
+            if (Math.random() < 0.5) {
                 console.log("connected");
                 if (onSuccess !== undefined) {
                     onSuccess();

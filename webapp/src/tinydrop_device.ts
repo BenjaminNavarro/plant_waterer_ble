@@ -46,7 +46,7 @@ export class TinyDropFakeDevice implements TinyDropDevice {
 
     connect(onSuccess?: CallableFunction, onFailure?: CallableFunction): void {
         setTimeout(() => {
-            if (Math.random() < 0.9) {
+            if (Math.random() < 0.5) {
                 console.log("connected");
 
                 if (onSuccess !== undefined) {

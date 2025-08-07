@@ -2,6 +2,7 @@ import { qs, qsa, interpolate } from './utils.js'
 import { ProgressUI } from './progress_ui.js'
 import { TinyDropScanner } from './tinydrop_scanner.js'
 import { TinyDropDevice } from './tinydrop_device.js'
+import { Alert, AlertDuration, AlertType } from './alert.js'
 
 export class ConnectPanel {
     searchButton = qs('#search_button')
@@ -10,11 +11,15 @@ export class ConnectPanel {
     deviceList = qs('#device_list')
     deviceListEntryTemplate = qs('#device_list_entry_template')
 
-    constructor(progressUI: ProgressUI, scanner: TinyDropScanner, onConnect: CallableFunction, onDisconnect: CallableFunction) {
+    constructor(progressUI: ProgressUI, scanner: TinyDropScanner, alert: Alert, onConnect: CallableFunction, onDisconnect: CallableFunction) {
         this.searchButton.addEventListener('click', () => {
+            alert.show('Recherche en cours', AlertType.Info, this.searchDurationMs)
+
             this.deviceList.innerHTML = ''
 
             progressUI.startAutoUpdate(this.searchDurationMs)
+
+            let connecting = false
 
             let index = 0
             scanner.stop()
@@ -28,29 +33,50 @@ export class ConnectPanel {
                 const connectButtons = qsa<HTMLButtonElement>('.connect-button')
 
                 connectButtons.forEach(btn => {
+                    if (connecting) {
+                        btn.disabled = true
+                    }
                     btn.setAttribute('connected', 'false')
                     btn.addEventListener('click', () => {
                         if (btn.getAttribute('connected') == 'false') {
+                            alert.show('Connexion en cours', AlertType.Info, AlertDuration.Infinite)
+
                             progressUI.spin()
+                            connectButtons.forEach(other_btn => {
+                                other_btn.disabled = true
+                            })
                             device.connect(
                                 () => {
+                                    alert.show('Connecté', AlertType.Success, AlertDuration.Default)
+
                                     btn.setAttribute('connected', 'true')
                                     btn.innerHTML = 'Déconnexion'
+                                    btn.disabled = false
                                     progressUI.hide()
-                                    connectButtons.forEach(other_btn => {
-                                        if (other_btn != btn) {
-                                            other_btn.disabled = true
-                                        }
-                                    })
 
                                     onConnect(device)
+                                    connecting = false
+
+                                    console.log('Device connected');
                                 },
                                 () => {
+                                    alert.show('Connexion échouée', AlertType.Error, AlertDuration.Long)
+
                                     progressUI.hide()
+                                    connectButtons.forEach(other_btn => {
+                                        other_btn.disabled = false
+                                    })
+                                    connecting = false
+                                    console.log('failed to connect');
                                 })
+                            connecting = true
                         }
                         else {
+                            alert.show('Déconnexion en cours', AlertType.Info, AlertDuration.Infinite)
+
                             device.disconnect(() => {
+                                alert.show('Déconnecté', AlertType.Success, AlertDuration.Default)
+
                                 btn.setAttribute('connected', 'false')
                                 btn.innerHTML = 'Connexion'
                                 connectButtons.forEach(other_btn => {
@@ -60,12 +86,16 @@ export class ConnectPanel {
                                 })
 
                                 onDisconnect()
+                            }, () => {
+                                alert.show('Déconnexion échouée', AlertType.Error, AlertDuration.Long)
                             })
                         }
                     })
                 })
             },
                 (error: string) => {
+                    alert.show('Recherche echouée: ' + error, AlertType.Info, AlertDuration.Long)
+
                     progressUI.hide()
                     console.log(error)
 

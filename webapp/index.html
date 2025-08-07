@@ -47,105 +47,122 @@
 
 <body>
 
-    <div class="progress_container">
-        <sl-progress-ring id="progress_ring" class="progress" value="0"></sl-progress-ring>
-        <sl-spinner id="progress_spinner" class="progress"></sl-spinner>
+    <!-- <div class="app-header bulma-columns bulma-is-mobile">
+        <div class="bulma-column bulma-is-one-quarter">
+            TinyDrop
+        </div>
+        <div class="bulma-column">
+        </div>
+    </div> -->
+
+    <div class="app-content">
+        <div class="progress-container">
+            <sl-progress-ring id="progress_ring" class="progress" value="0"></sl-progress-ring>
+            <sl-spinner id="progress_spinner" class="progress"></sl-spinner>
+        </div>
+
+        <sl-tab-group id="tabs">
+            <sl-tab slot="nav" panel="connect" id="connect_tab">Connexion</sl-tab>
+            <sl-tab slot="nav" panel="config" id="config_tab">Configuration</sl-tab>
+            <sl-tab slot="nav" panel="test" id="test_tab">Test</sl-tab>
+            <sl-tab slot="nav" panel="msg" id="alert_box" disabled>
+                <sl-icon id="alert_icon" name="info-circle"></sl-icon>
+                <div id="alert_text">
+                    This is not a drill
+                </div>
+            </sl-tab>
+
+            <sl-tab-panel class="main-tabs" name="connect">
+                <sl-button id="search_button" variant="primary" size="large">Rechercher</sl-button>
+                <sl-divider></sl-divider>
+                <div id="device_list" class="device-list">
+                </div>
+            </sl-tab-panel>
+
+            <sl-tab-panel class="main-tabs" name="config">
+                <sl-input label="Nom personnalisé" id="custom_name_input"></sl-input>
+                <sl-divider></sl-divider>
+                <div class="bulma-columns bulma-is-mobile bulma-is-vcentered">
+                    <div class="bulma-column bulma-is-one-quarter">
+                        Activé
+                    </div>
+                    <div class="bulma-column bulma-is-narrow">
+                        <sl-switch id="program_enabled"></sl-switch>
+                    </div>
+                </div>
+                <div class="bulma-columns bulma-is-mobile bulma-is-vcentered">
+                    <div class="bulma-column bulma-is-one-quarter">
+                        Durée d'arrosage
+                    </div>
+                    <div class="bulma-column bulma-is-one-quarter">
+                        <sl-input id="program_duration" type="number" placeholder="0" min="0"></sl-input>
+                    </div>
+                    <div class="bulma-column bulma-is-two-quarters">
+                        <sl-select id="program_duration_time_type" value="s">
+                            <sl-option value="s">Secondes</sl-option>
+                            <sl-option value="m">Minutes</sl-option>
+                            <sl-option value="h">Heures</sl-option>
+                        </sl-select>
+                    </div>
+                </div>
+                <div class="bulma-columns bulma-is-mobile bulma-is-vcentered">
+                    <div class="bulma-column bulma-is-one-quarter">
+                        Fréquence d'arrosage
+                    </div>
+                    <div class="bulma-column bulma-is-one-quarter">
+                        <sl-input id="program_period" type="number" placeholder="0" min="0"></sl-input>
+                    </div>
+                    <div class="bulma-column bulma-is-two-quarters">
+                        <sl-select id="program_period_time_type" class="ui selection dropdown label time_length_input"
+                            value="d">
+                            <sl-option value="d" class="item">Jours</sl-option>
+                            <sl-option value="h">Heures</sl-option>
+                            <sl-option value="m">Minutes</sl-option>
+                            <sl-option value="s">Secondes</sl-option>
+                        </sl-select>
+                    </div>
+                </div>
+                <div class="bulma-columns bulma-is-mobile bulma-is-vcentered">
+                    <div class="bulma-column bulma-is-one-quarter">
+                        Débit d'arrosage
+                    </div>
+                    <div class="bulma-column bulma-is-three-quarters">
+                        <sl-input id="program_flow_speed" type="number" placeholder="100" min="0" max="100" step="10">
+                            <div slot="suffix">%</div>
+                        </sl-input>
+                    </div>
+                </div>
+                <div class="bulma-columns bulma-is-mobile bulma-is-vcentered">
+                    <div class="bulma-column bulma-is-one-quarter">
+                        Premier arrosage
+                    </div>
+                    <div class="bulma-column bulma-is-three-quarters">
+                        <sl-input id="program_start" type="datetime-local"></sl-input>
+                    </div>
+
+                </div>
+
+                <sl-divider></sl-divider>
+
+                <sl-button-group class="program-buttons-group">
+                    <sl-button id="program_test_button" variant="success" class="program-buttons">Tester</sl-button>
+                    <sl-button id="program_apply_button" variant="primary" class="program-buttons">Appliquer</sl-button>
+                </sl-button-group>
+                <sl-divider></sl-divider>
+                <sl-button id="program_stop_button" variant="danger" size="large"
+                    class="program-buttons">Stop</sl-button>
+
+
+
+            </sl-tab-panel>
+
+            <sl-tab-panel class="main-tabs" name="test">
+                This is the test tab panel.
+            </sl-tab-panel>
+
+        </sl-tab-group>
     </div>
 
-    <sl-tab-group id="tabs">
-        <sl-tab slot="nav" panel="connect" id="connect_tab">Connexion</sl-tab>
-        <sl-tab slot="nav" panel="config" id="config_tab">Configuration</sl-tab>
-        <sl-tab slot="nav" panel="test" id="test_tab">Test</sl-tab>
-
-
-        <sl-tab-panel class="main-tabs" name="connect">
-            <sl-button id="search_button" variant="primary" size="large">Rechercher</sl-button>
-            <sl-divider></sl-divider>
-            <div id="device_list" class="device-list">
-            </div>
-        </sl-tab-panel>
-
-        <sl-tab-panel class="main-tabs" name="config">
-            <sl-input label="Nom personnalisé" id="custom_name_input"></sl-input>
-            <sl-divider></sl-divider>
-            <div class="bulma-columns bulma-is-mobile bulma-is-vcentered">
-                <div class="bulma-column bulma-is-one-quarter">
-                    Activé
-                </div>
-                <div class="bulma-column bulma-is-narrow">
-                    <sl-switch id="program_enabled"></sl-switch>
-                </div>
-            </div>
-            <div class="bulma-columns bulma-is-mobile bulma-is-vcentered">
-                <div class="bulma-column bulma-is-one-quarter">
-                    Durée d'arrosage
-                </div>
-                <div class="bulma-column bulma-is-one-quarter">
-                    <sl-input id="program_duration" type="number" placeholder="0" min="0"></sl-input>
-                </div>
-                <div class="bulma-column bulma-is-two-quarters">
-                    <sl-select id="program_duration_time_type" value="s">
-                        <sl-option value="s">Secondes</sl-option>
-                        <sl-option value="m">Minutes</sl-option>
-                        <sl-option value="h">Heures</sl-option>
-                    </sl-select>
-                </div>
-            </div>
-            <div class="bulma-columns bulma-is-mobile bulma-is-vcentered">
-                <div class="bulma-column bulma-is-one-quarter">
-                    Fréquence d'arrosage
-                </div>
-                <div class="bulma-column bulma-is-one-quarter">
-                    <sl-input id="program_period" type="number" placeholder="0" min="0"></sl-input>
-                </div>
-                <div class="bulma-column bulma-is-two-quarters">
-                    <sl-select id="program_period_time_type" class="ui selection dropdown label time_length_input"
-                        value="d">
-                        <sl-option value="d" class="item">Jours</sl-option>
-                        <sl-option value="h">Heures</sl-option>
-                        <sl-option value="m">Minutes</sl-option>
-                        <sl-option value="s">Secondes</sl-option>
-                    </sl-select>
-                </div>
-            </div>
-            <div class="bulma-columns bulma-is-mobile bulma-is-vcentered">
-                <div class="bulma-column bulma-is-one-quarter">
-                    Débit d'arrosage
-                </div>
-                <div class="bulma-column bulma-is-three-quarters">
-                    <sl-input id="program_flow_speed" type="number" placeholder="100" min="0" max="100" step="10">
-                        <div slot="suffix">%</div>
-                    </sl-input>
-                </div>
-            </div>
-            <div class="bulma-columns bulma-is-mobile bulma-is-vcentered">
-                <div class="bulma-column bulma-is-one-quarter">
-                    Premier arrosage
-                </div>
-                <div class="bulma-column bulma-is-three-quarters">
-                    <sl-input id="program_start" type="datetime-local"></sl-input>
-                </div>
-
-            </div>
-
-            <sl-divider></sl-divider>
-
-            <sl-button-group class="program-buttons-group">
-                <sl-button id="program_test_button" variant="success" class="program-buttons">Tester</sl-button>
-                <sl-button id="program_apply_button" variant="primary" class="program-buttons">Appliquer</sl-button>
-            </sl-button-group>
-            <sl-divider></sl-divider>
-            <sl-button id="program_stop_button" variant="danger" size="large" class="program-buttons">Stop</sl-button>
-
-
-
-        </sl-tab-panel>
-
-        <sl-tab-panel class="main-tabs" name="test">
-            This is the test tab panel.
-        </sl-tab-panel>
-
-    </sl-tab-group>
 
     <!-- <script type="text/javascript" src="cordova.js"></script> -->
     <script type="module" src="dist/main.js"></script>

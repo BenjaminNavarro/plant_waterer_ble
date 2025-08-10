@@ -1,6 +1,5 @@
 {
     "html.customData": [
         "./deps/shoelace-2.20.1/vscode.html-custom-data.json"
-    ],
-    "idf.pythonInstallPath": "F:\\Espressif\\tools\\idf-python\\3.11.2\\python.exe"
+    ]
 }

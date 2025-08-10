@@ -2,6 +2,7 @@ import { qs } from './utils.js';
 import { ProgressUI } from './progress_ui.js';
 import { ConnectPanel } from './connect_panel.js';
 import { ConfigPanel } from './config_panel.js';
+import { TestPanel } from './test_panel.js';
 import { TinyDropFakeScanner } from './tinydrop_scanner.js';
 import { Alert } from './alert.js';
 function main() {
@@ -22,8 +23,9 @@ function main() {
         tabs.show('connect');
     });
     const configPanel = new ConfigPanel(progressUI);
+    const testPanel = new TestPanel(progressUI);
     configTab.disabled = true;
-    // tabs.show('config')
     testTab.disabled = true;
+    // tabs.show('test')
 }
 main();

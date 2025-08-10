@@ -14,55 +14,59 @@ export class ConfigPanel {
     programStopButton = qs<HTMLButtonElement>('#program_stop_button')
 
     constructor(progressUI: ProgressUI) {
+        let log = (value: any) => {
+            console.log(`[Program] ${value}`)
+        }
+
         this.programEnabled.addEventListener('sl-change', () => {
-            console.log(this.programEnabled.checked)
+            log(this.programEnabled.checked)
         })
 
         this.programDuration.addEventListener('sl-change', () => {
             let value = Number(this.programDuration.value)
             value = Math.max(value, 0)
             this.programDuration.value = value.toString()
-            console.log(this.programDuration.value)
+            log(this.programDuration.value)
         })
 
         this.programDurationTimeType.addEventListener('sl-change', () => {
-            console.log(this.programDurationTimeType.value)
+            log(this.programDurationTimeType.value)
         })
 
         this.programPeriod.addEventListener('sl-change', () => {
             let value = Number(this.programPeriod.value)
             value = Math.max(value, 0)
             this.programPeriod.value = value.toString()
-            console.log(this.programPeriod.value)
+            log(this.programPeriod.value)
         })
 
         this.programPeriodTimeType.addEventListener('sl-change', () => {
-            console.log(this.programPeriodTimeType.value)
+            log(this.programPeriodTimeType.value)
         })
 
         this.programWaterFlow.addEventListener('sl-change', () => {
             let value = Number(this.programWaterFlow.value)
             value = Math.min(Math.max(value, 0), 100)
             this.programWaterFlow.value = value.toString()
-            console.log(this.programWaterFlow.value)
+            log(this.programWaterFlow.value)
         })
 
         this.programStart.addEventListener('sl-change', () => {
-            console.log(this.programStart.value)
-            console.log(Date.parse(this.programStart.value))
+            log(this.programStart.value)
+            log(Date.parse(this.programStart.value))
 
         })
 
         this.programTestButton.addEventListener('click', () => {
-            console.log('Test clicked')
+            log('Test clicked')
         })
 
         this.programApplyButton.addEventListener('click', () => {
-            console.log('Apply clicked')
+            log('Apply clicked')
         })
 
         this.programStopButton.addEventListener('click', () => {
-            console.log('Stop clicked')
+            log('Stop clicked')
         })
     }
 }

@@ -157,7 +157,20 @@
             </sl-tab-panel>
 
             <sl-tab-panel class="main-tabs" name="test">
-                This is the test tab panel.
+                <div class="bulma-columns bulma-is-mobile bulma-is-vcentered">
+                    <div class="bulma-column bulma-is-one-quarter">
+                        Débit d'arrosage
+                    </div>
+                    <div class="bulma-column bulma-is-three-quarters">
+                        <sl-input id="test_flow_speed" type="number" placeholder="100" min="0" max="100" step="10">
+                            <div slot="suffix">%</div>
+                        </sl-input>
+                    </div>
+                </div>
+                <sl-divider></sl-divider>
+                <sl-button id="test_test_button" variant="success" class="program-buttons">Tester</sl-button>
+                <sl-divider></sl-divider>
+                <sl-button id="test_stop_button" variant="danger" size="large" class="program-buttons">Stop</sl-button>
             </sl-tab-panel>
 
         </sl-tab-group>

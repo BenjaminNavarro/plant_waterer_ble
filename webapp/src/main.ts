@@ -4,6 +4,7 @@ import { SlTabGroup, SlTab, SlAlert } from 'shoelace/shoelace'
 import { ProgressUI } from './progress_ui.js'
 import { ConnectPanel } from './connect_panel.js'
 import { ConfigPanel } from './config_panel.js'
+import { TestPanel } from './test_panel.js'
 
 import { TinyDropDevice, TinyDropBLEDevice, TinyDropFakeDevice } from './tinydrop_device.js'
 import { TinyDropScanner, TinyDropFakeScanner } from './tinydrop_scanner.js'
@@ -31,10 +32,11 @@ function main() {
     })
 
     const configPanel = new ConfigPanel(progressUI)
+    const testPanel = new TestPanel(progressUI)
 
     configTab.disabled = true
-    // tabs.show('config')
     testTab.disabled = true
+    // tabs.show('test')
 
 }
 

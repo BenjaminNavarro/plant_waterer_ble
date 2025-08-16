@@ -18,3 +18,25 @@ export function interpolate(template: string, params: Object): string {
     /* eslint no-new-func: "off" */
     return new Function(...keys, `return \`${template}\``)(...keyVals)
 }
+
+/**
+ * Converts a duration from a given unit into seconds
+ *
+ * @param durationInUnit  - A duration in the given unit
+ * @param unit  - One of the possible unit types ('s' => seconds, 'm' => minutes, 'h' => hours, 'd' => days)
+ * @return The duration converted into seconds
+ */
+export function convertDuration(durationInUnit: number, unit: string): number {
+    switch (unit) {
+        case 's':
+            return durationInUnit
+        case 'm':
+            return durationInUnit * 60
+        case 'h':
+            return durationInUnit * 60 * 60
+        case 'd':
+            return durationInUnit * 60 * 60 * 24
+        default:
+            return -1
+    }
+}

@@ -1,24 +1,34 @@
+import { SlIcon } from "shoelace/shoelace.js"
 import { qs } from "./utils.js"
 
 export class ProgressUI {
-    hide() {
+    stop(result: ResultType) {
         this.progressRing.hide()
         this.progressSpinner.hide()
+        this.progressResult.show(result)
     }
+
 
     startAutoUpdate(durationMs: number) {
         this.progressSpinner.hide()
         this.progressRing.show()
         this.progressRing.startAutoUpdate(durationMs)
+        this.hideResult()
     }
 
     spin() {
         this.progressRing.hide()
         this.progressSpinner.show()
+        this.hideResult()
+    }
+
+    private hideResult() {
+        this.progressResult.hide()
     }
 
     private progressRing = new ProgressRing('#progress_ring')
     private progressSpinner = new ProgressSpinner('#progress_spinner')
+    private progressResult = new ProgressResult('#progress_result')
 }
 
 
@@ -102,4 +112,73 @@ class ProgressSpinner {
 
     private progressSpinner: HTMLInputElement
 
+}
+
+export enum ResultType {
+    None,
+    Success,
+    Warning,
+    Error
+}
+
+export enum ResultDuration {
+    Default = 2000,
+    Medium = 5000,
+    Long = 10000,
+    Infinite = Infinity
+}
+
+class ProgressResult {
+    constructor(id: string) {
+        this.progressResult = qs<SlIcon>(id)
+        this.progressResultElem = qs(id)
+        this.hide()
+    }
+
+    hide() {
+        if (!this.progressResultElem.classList.contains("is_hidden")) {
+            this.progressResultElem.classList.add("is_hidden")
+        }
+    }
+
+    show(type: ResultType) {
+        if (this.progressResultElem.classList.contains("is_hidden")) {
+            this.progressResultElem.classList.remove("is_hidden")
+            let durationMs = ResultDuration.Infinite
+            switch (type) {
+                case ResultType.None:
+                    this.progressResult.name = ''
+                    this.progressResultElem.style.color = 'var(--sl-color-primary-600)'
+                    break
+                case ResultType.Success:
+                    this.progressResult.name = 'check2-circle'
+                    this.progressResultElem.style.color = 'var(--sl-color-success-600)'
+                    durationMs = ResultDuration.Default
+                    break
+                case ResultType.Warning:
+                    this.progressResult.name = 'exclamation-triangle'
+                    this.progressResultElem.style.color = 'var(--sl-color-warning-600)'
+                    durationMs = ResultDuration.Medium
+                    break
+                case ResultType.Error:
+                    this.progressResult.name = 'exclamation-octagon'
+                    this.progressResultElem.style.color = 'var(--sl-color-danger-600)'
+                    durationMs = ResultDuration.Long
+                    break
+            }
+
+            if (durationMs != ResultDuration.Infinite) {
+                if (this.currentTimeoutId != -1) {
+                    clearTimeout(this.currentTimeoutId)
+                }
+                this.currentTimeoutId = setTimeout(() => {
+                    this.hide()
+                }, durationMs)
+            }
+        }
+    }
+
+    private progressResult = qs<SlIcon>('#progress_result')
+    private progressResultElem = qs('#progress_result')
+    private currentTimeoutId = -1
 }

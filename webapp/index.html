@@ -59,18 +59,13 @@
         <div class="progress-container">
             <sl-progress-ring id="progress_ring" class="progress" value="0"></sl-progress-ring>
             <sl-spinner id="progress_spinner" class="progress"></sl-spinner>
+            <sl-icon id="progress_result" name="info-circle"></sl-icon>
         </div>
 
         <sl-tab-group id="tabs">
             <sl-tab slot="nav" panel="connect" id="connect_tab">Connexion</sl-tab>
             <sl-tab slot="nav" panel="config" id="config_tab">Configuration</sl-tab>
             <sl-tab slot="nav" panel="test" id="test_tab">Test</sl-tab>
-            <sl-tab slot="nav" panel="msg" id="alert_box" disabled>
-                <sl-icon id="alert_icon" name="info-circle"></sl-icon>
-                <div id="alert_text">
-                    This is not a drill
-                </div>
-            </sl-tab>
 
             <sl-tab-panel class="main-tabs" name="connect">
                 <sl-button id="search_button" variant="primary" size="large">Rechercher</sl-button>

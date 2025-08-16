@@ -1,13 +1,12 @@
 import { qs, qsa, interpolate } from './utils.js';
-import { AlertDuration, AlertType } from './alert.js';
+import { ResultType } from './progress_ui.js';
 export class ConnectPanel {
     searchButton = qs('#search_button');
     searchDurationMs = 5000;
     deviceList = qs('#device_list');
     deviceListEntryTemplate = qs('#device_list_entry_template');
-    constructor(progressUI, scanner, alert, onConnect, onDisconnect) {
+    constructor(progressUI, scanner, onConnect, onDisconnect) {
         this.searchButton.addEventListener('click', () => {
-            alert.show('Recherche en cours', AlertType.Info, this.searchDurationMs);
             this.deviceList.innerHTML = '';
             progressUI.startAutoUpdate(this.searchDurationMs);
             let connecting = false;
@@ -27,23 +26,20 @@ export class ConnectPanel {
                     btn.setAttribute('connected', 'false');
                     btn.addEventListener('click', () => {
                         if (btn.getAttribute('connected') == 'false') {
-                            alert.show('Connexion en cours', AlertType.Info, AlertDuration.Infinite);
                             progressUI.spin();
                             connectButtons.forEach(other_btn => {
                                 other_btn.disabled = true;
                             });
                             device.connect(() => {
-                                alert.show('Connecté', AlertType.Success, AlertDuration.Default);
                                 btn.setAttribute('connected', 'true');
                                 btn.innerHTML = 'Déconnexion';
                                 btn.disabled = false;
-                                progressUI.hide();
+                                progressUI.stop(ResultType.Success);
                                 onConnect(device);
                                 connecting = false;
                                 console.log('Device connected');
                             }, () => {
-                                alert.show('Connexion échouée', AlertType.Error, AlertDuration.Long);
-                                progressUI.hide();
+                                progressUI.stop(ResultType.Error);
                                 connectButtons.forEach(other_btn => {
                                     other_btn.disabled = false;
                                 });
@@ -53,9 +49,9 @@ export class ConnectPanel {
                             connecting = true;
                         }
                         else {
-                            alert.show('Déconnexion en cours', AlertType.Info, AlertDuration.Infinite);
+                            progressUI.spin();
                             device.disconnect(() => {
-                                alert.show('Déconnecté', AlertType.Success, AlertDuration.Default);
+                                progressUI.stop(ResultType.Success);
                                 btn.setAttribute('connected', 'false');
                                 btn.innerHTML = 'Connexion';
                                 connectButtons.forEach(other_btn => {
@@ -65,14 +61,13 @@ export class ConnectPanel {
                                 });
                                 onDisconnect();
                             }, () => {
-                                alert.show('Déconnexion échouée', AlertType.Error, AlertDuration.Long);
+                                progressUI.stop(ResultType.Error);
                             });
                         }
                     });
                 });
             }, (error) => {
-                alert.show('Recherche echouée: ' + error, AlertType.Info, AlertDuration.Long);
-                progressUI.hide();
+                progressUI.stop(ResultType.Error);
                 console.log(error);
             }, this.searchDurationMs);
         });

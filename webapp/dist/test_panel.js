@@ -1,4 +1,5 @@
 import { qs } from './utils.js';
+import { ResultType } from './progress_ui.js';
 export class ManualPanel {
     manualWaterFlow = qs('#manual_flow_speed');
     manualStartButton = qs('#manual_start_button');
@@ -26,9 +27,11 @@ export class ManualPanel {
         });
         this.manualStartButton.addEventListener('click', () => {
             log('Start clicked');
+            progressUI.startAutoUpdate(Number(this.manualDuration.value) * 1000);
         });
         this.manualStopButton.addEventListener('click', () => {
             log('Stop clicked');
+            progressUI.stop(ResultType.None);
         });
     }
 }

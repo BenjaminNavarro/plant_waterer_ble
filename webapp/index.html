@@ -64,8 +64,8 @@
 
         <sl-tab-group id="tabs">
             <sl-tab slot="nav" panel="connect" id="connect_tab">Connexion</sl-tab>
-            <sl-tab slot="nav" panel="config" id="config_tab">Configuration</sl-tab>
-            <sl-tab slot="nav" panel="test" id="test_tab">Test</sl-tab>
+            <sl-tab slot="nav" panel="config" id="config_tab">Automatique</sl-tab>
+            <sl-tab slot="nav" panel="manual" id="manual_tab">Manuel</sl-tab>
 
             <sl-tab-panel class="main-tabs" name="connect">
                 <sl-button id="search_button" variant="primary" size="large">Rechercher</sl-button>
@@ -151,21 +151,37 @@
 
             </sl-tab-panel>
 
-            <sl-tab-panel class="main-tabs" name="test">
+            <sl-tab-panel class="main-tabs" name="manual">
+                <div class="bulma-columns bulma-is-mobile bulma-is-vcentered">
+                    <div class="bulma-column bulma-is-one-quarter">
+                        Durée d'arrosage
+                    </div>
+                    <div class="bulma-column bulma-is-one-quarter">
+                        <sl-input id="manual_duration" type="number" placeholder="0" min="0"></sl-input>
+                    </div>
+                    <div class="bulma-column bulma-is-two-quarters">
+                        <sl-select id="manual_duration_time_type" value="s">
+                            <sl-option value="s">Secondes</sl-option>
+                            <sl-option value="m">Minutes</sl-option>
+                            <sl-option value="h">Heures</sl-option>
+                        </sl-select>
+                    </div>
+                </div>
                 <div class="bulma-columns bulma-is-mobile bulma-is-vcentered">
                     <div class="bulma-column bulma-is-one-quarter">
                         Débit d'arrosage
                     </div>
                     <div class="bulma-column bulma-is-three-quarters">
-                        <sl-input id="test_flow_speed" type="number" placeholder="100" min="0" max="100" step="10">
+                        <sl-input id="manual_flow_speed" type="number" placeholder="100" min="0" max="100" step="10">
                             <div slot="suffix">%</div>
                         </sl-input>
                     </div>
                 </div>
                 <sl-divider></sl-divider>
-                <sl-button id="test_test_button" variant="success" class="program-buttons">Tester</sl-button>
+                <sl-button id="manual_start_button" variant="success" class="program-buttons">Démarrer</sl-button>
                 <sl-divider></sl-divider>
-                <sl-button id="test_stop_button" variant="danger" size="large" class="program-buttons">Stop</sl-button>
+                <sl-button id="manual_stop_button" variant="danger" size="large"
+                    class="program-buttons">Stop</sl-button>
             </sl-tab-panel>
 
         </sl-tab-group>

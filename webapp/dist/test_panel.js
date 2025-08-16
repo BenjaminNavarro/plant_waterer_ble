@@ -1,22 +1,33 @@
 import { qs } from './utils.js';
-export class TestPanel {
-    testWaterFlow = qs('#test_flow_speed');
-    testTestButton = qs('#test_test_button');
-    testStopButton = qs('#test_stop_button');
+export class ManualPanel {
+    manualWaterFlow = qs('#manual_flow_speed');
+    manualStartButton = qs('#manual_start_button');
+    manualStopButton = qs('#manual_stop_button');
+    manualDuration = qs('#manual_duration');
+    manualDurationTimeType = qs('#manual_duration_time_type');
     constructor(progressUI) {
         let log = (value) => {
-            console.log(`[Test] ${value}`);
+            console.log(`[Manual] ${value}`);
         };
-        this.testWaterFlow.addEventListener('sl-change', () => {
-            let value = Number(this.testWaterFlow.value);
+        this.manualDuration.addEventListener('sl-change', () => {
+            let value = Number(this.manualDuration.value);
+            value = Math.max(value, 0);
+            this.manualDuration.value = value.toString();
+            log(this.manualDuration.value);
+        });
+        this.manualDurationTimeType.addEventListener('sl-change', () => {
+            log(this.manualDurationTimeType.value);
+        });
+        this.manualWaterFlow.addEventListener('sl-change', () => {
+            let value = Number(this.manualWaterFlow.value);
             value = Math.min(Math.max(value, 0), 100);
-            this.testWaterFlow.value = value.toString();
-            log(this.testWaterFlow.value);
+            this.manualWaterFlow.value = value.toString();
+            log(this.manualWaterFlow.value);
         });
-        this.testTestButton.addEventListener('click', () => {
-            log('Test clicked');
+        this.manualStartButton.addEventListener('click', () => {
+            log('Start clicked');
         });
-        this.testStopButton.addEventListener('click', () => {
+        this.manualStopButton.addEventListener('click', () => {
             log('Stop clicked');
         });
     }

@@ -1,5 +1,5 @@
-import { qs } from './utils.js'
-import { ProgressUI } from './progress_ui.js'
+import { convertDuration, qs } from './utils.js'
+import { ProgressUI, ResultType } from './progress_ui.js'
 
 export class ConfigPanel {
     programEnabled = qs<HTMLInputElement>('#program_enabled')
@@ -59,6 +59,8 @@ export class ConfigPanel {
 
         this.programTestButton.addEventListener('click', () => {
             log('Test clicked')
+            progressUI.startAutoUpdate(convertDuration(Number(this.programDuration.value), this.programDurationTimeType.value) * 1000)
+
         })
 
         this.programApplyButton.addEventListener('click', () => {
@@ -67,6 +69,7 @@ export class ConfigPanel {
 
         this.programStopButton.addEventListener('click', () => {
             log('Stop clicked')
+            progressUI.stop(ResultType.None)
         })
     }
 }

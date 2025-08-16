@@ -1,4 +1,5 @@
-import { qs } from './utils.js';
+import { convertDuration, qs } from './utils.js';
+import { ResultType } from './progress_ui.js';
 export class ConfigPanel {
     programEnabled = qs('#program_enabled');
     programDuration = qs('#program_duration');
@@ -47,12 +48,14 @@ export class ConfigPanel {
         });
         this.programTestButton.addEventListener('click', () => {
             log('Test clicked');
+            progressUI.startAutoUpdate(convertDuration(Number(this.programDuration.value), this.programDurationTimeType.value) * 1000);
         });
         this.programApplyButton.addEventListener('click', () => {
             log('Apply clicked');
         });
         this.programStopButton.addEventListener('click', () => {
             log('Stop clicked');
+            progressUI.stop(ResultType.None);
         });
     }
 }

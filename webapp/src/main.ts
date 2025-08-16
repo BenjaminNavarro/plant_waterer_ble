@@ -8,6 +8,7 @@ import { ManualPanel } from './test_panel.js'
 
 import { TinyDropDevice, TinyDropBLEDevice, TinyDropFakeDevice } from './tinydrop_device.js'
 import { TinyDropScanner, TinyDropFakeScanner } from './tinydrop_scanner.js'
+import { StatusBar } from './status_bar.js'
 
 function main() {
     const tabs = qs<SlTabGroup>('#tabs')
@@ -19,11 +20,12 @@ function main() {
     })
 
     const progressUI = new ProgressUI()
+    const statusBar = new StatusBar()
 
     // const device = new TinyDropBLEDevice()
     const fake_scanner = new TinyDropFakeScanner()
 
-    const connectPanel = new ConnectPanel(progressUI, fake_scanner, () => {
+    const connectPanel = new ConnectPanel(progressUI, statusBar, fake_scanner, () => {
         configTab.disabled = false
         manualTab.disabled = false
         tabs.show('config')

@@ -1,3 +1,7 @@
+:root {
+    --header-font-size: 24px;
+}
+
 .is_hidden {
     opacity: 0;
 }
@@ -89,4 +93,45 @@
 
 #alert_icon {
     margin-right: 0.5rem;
+}
+
+.app-header {
+    margin-top: 0rem;
+    margin-right: 0rem;
+    margin-left: 0rem;
+    margin-bottom: 0 !important;
+    padding-top: 0rem;
+    padding-right: 0rem;
+    padding-left: 0rem;
+    padding-bottom: 0;
+    font-size: var(--header-font-size);
+}
+
+.status-bar {
+    position: absolute;
+    right: 0;
+}
+
+.status-icon {
+    margin-left: 10px;
+}
+
+.bluetooth-disconnected {
+    color: gray;
+    opacity: 0.5;
+}
+
+.bluetooth-connected {
+    color: #017ff5;
+    opacity: 1;
+}
+
+.watering-off {
+    color: gray;
+    opacity: 0.5;
+}
+
+.watering-on {
+    color: #017ff5;
+    opacity: 1;
 }

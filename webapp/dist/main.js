@@ -4,6 +4,7 @@ import { ConnectPanel } from './connect_panel.js';
 import { ConfigPanel } from './config_panel.js';
 import { ManualPanel } from './test_panel.js';
 import { TinyDropFakeScanner } from './tinydrop_scanner.js';
+import { StatusBar } from './status_bar.js';
 function main() {
     const tabs = qs('#tabs');
     const configTab = qs('#config_tab');
@@ -12,9 +13,10 @@ function main() {
         console.log(`Tab ${ev.detail.name} is shown`);
     });
     const progressUI = new ProgressUI();
+    const statusBar = new StatusBar();
     // const device = new TinyDropBLEDevice()
     const fake_scanner = new TinyDropFakeScanner();
-    const connectPanel = new ConnectPanel(progressUI, fake_scanner, () => {
+    const connectPanel = new ConnectPanel(progressUI, statusBar, fake_scanner, () => {
         configTab.disabled = false;
         manualTab.disabled = false;
         tabs.show('config');

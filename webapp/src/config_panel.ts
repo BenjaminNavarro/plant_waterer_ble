@@ -1,12 +1,12 @@
-import { convertDuration, qs } from './utils.js'
-import { ProgressUI, ResultType } from './progress_ui.js'
+import { convertDuration, convertDurationToBestUnit, qs } from './utils.js'
+import { ProgressUI } from './progress_ui.js'
 import { TinyDropDevice, WateringProgram } from './tinydrop_device.js'
 import { SlChangeEvent, SlSwitch } from 'shoelace/shoelace.js'
 
 export class ConfigPanel {
-    device: TinyDropDevice
 
-    private programEnabled = qs<HTMLInputElement>('#program_enabled')
+    private programEnabled = qs<SlSwitch>('#program_enabled')
+    private programEnabledElem = qs<HTMLInputElement>('#program_enabled')
     private programDuration = qs<HTMLInputElement>('#program_duration')
     private programDurationTimeType = qs<HTMLInputElement>('#program_duration_time_type')
     private programPeriod = qs<HTMLInputElement>('#program_period')
@@ -17,6 +17,7 @@ export class ConfigPanel {
     private programApplyButton = qs<HTMLButtonElement>('#program_apply_button')
     private programStopButton = qs<HTMLButtonElement>('#program_stop_button')
 
+    private device: TinyDropDevice
     private progressUI: ProgressUI
     private program = new WateringProgram()
 
@@ -27,8 +28,8 @@ export class ConfigPanel {
             console.log(`[Program] ${value}`)
         }
 
-        this.programEnabled.addEventListener('sl-change', (ev: SlChangeEvent) => {
-            this.program.enabled = qs<SlSwitch>('#program_enabled').checked
+        this.programEnabledElem.addEventListener('sl-change', (ev: SlChangeEvent) => {
+            this.program.enabled = this.programEnabled.checked
         })
 
         this.programDuration.addEventListener('sl-change', () => {
@@ -60,9 +61,7 @@ export class ConfigPanel {
         })
 
         this.programStart.addEventListener('sl-change', () => {
-            log(this.programStart.value)
-            this.program.startDate = Date.parse(this.programStart.value)
-            log(this.program.startDate)
+            this.program.startDate = Date.parse(this.programStart.value) / 1000
 
         })
 
@@ -77,6 +76,40 @@ export class ConfigPanel {
         this.programStopButton.addEventListener('click', () => {
             this.stopWatering()
         })
+    }
+
+    setDevice(device: TinyDropDevice) {
+        this.device = device
+
+        if (this.device != null) {
+            this.program = this.device.readProgram()
+
+            this.program.enabled = this.program.enabled
+            this.programEnabled.checked = this.program.enabled
+
+            const durationConv = convertDurationToBestUnit(this.program.duration)
+            this.programDuration.value = durationConv.duration.toString()
+            this.programDurationTimeType.value = durationConv.unit
+
+            const periodConv = convertDurationToBestUnit(this.program.period)
+            this.programPeriod.value = periodConv.duration.toString()
+            this.programPeriodTimeType.value = periodConv.unit
+
+            this.programWaterFlow.value = this.program.waterFlow.toString()
+
+            const date = new Date(this.program.startDate * 1000)
+
+            const year = date.getFullYear()
+            const month = date.getMonth() + 1
+            const monthPrefix = month < 10 ? '0' : ''
+            const day = date.getDate()
+            const hours = date.getHours()
+            const minutes = date.getMinutes()
+            const formattedDate = `${year}-${monthPrefix}${month}-${day}T${hours}:${minutes}`
+
+            this.programStart.value = formattedDate
+        }
+
     }
 
     private startWatering() {

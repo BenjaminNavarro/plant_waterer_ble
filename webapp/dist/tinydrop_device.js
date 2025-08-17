@@ -160,12 +160,16 @@ export class TinyDropBLEDevice extends TinyDropDevice {
     }
     sendProgram(program) {
     }
+    readProgram() {
+        let program = new WateringProgram();
+        return program;
+    }
     log(value) {
         console.log(`[BLEDevice] ${value}`);
     }
 }
 export class TinyDropFakeDevice extends TinyDropDevice {
-    successRate = 0.5;
+    successRate = 0.95;
     deviceDelayMs = 500;
     notificationsStarted = false;
     stopTimeoutHandle = -1;
@@ -174,6 +178,10 @@ export class TinyDropFakeDevice extends TinyDropDevice {
     internalWateringState = new WateringStateData();
     constructor(statusBar, name, id) {
         super(statusBar, name, id);
+        let program = this.readProgram();
+        if (program != null && program.enabled) {
+            this.sendProgram(program);
+        }
         this.internalWateringState.startDate = Date.now() / 1000;
     }
     doConnect(onSuccess, onFailure) {
@@ -230,6 +238,7 @@ export class TinyDropFakeDevice extends TinyDropDevice {
     sendProgram(program) {
         clearInterval(this.wateringIntervalHandle);
         clearTimeout(this.wateringTimeoutHandle);
+        localStorage.setItem('program', JSON.stringify(program));
         if (program.enabled) {
             const startDate = this.computeWateringStart(program);
             this.wateringTimeoutHandle = setTimeout(() => {
@@ -238,6 +247,22 @@ export class TinyDropFakeDevice extends TinyDropDevice {
                     this.startWatering(program.duration, program.waterFlow);
                 }, program.period * 1000);
             }, (startDate * 1000 - Date.now()));
+        }
+    }
+    readProgram() {
+        const savedProgram = localStorage.getItem('program');
+        if (savedProgram != null) {
+            const savedProgramJS = JSON.parse(savedProgram);
+            let program = new WateringProgram();
+            program.enabled = savedProgramJS['enabled'];
+            program.duration = savedProgramJS['duration'];
+            program.period = savedProgramJS['period'];
+            program.waterFlow = savedProgramJS['waterFlow'];
+            program.startDate = savedProgramJS['startDate'];
+            return program;
+        }
+        else {
+            return null;
         }
     }
     computeWateringStart(program) {

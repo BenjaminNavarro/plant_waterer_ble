@@ -1,8 +1,8 @@
-import { convertDuration, qs } from './utils.js';
+import { convertDuration, convertDurationToBestUnit, qs } from './utils.js';
 import { WateringProgram } from './tinydrop_device.js';
 export class ConfigPanel {
-    device;
     programEnabled = qs('#program_enabled');
+    programEnabledElem = qs('#program_enabled');
     programDuration = qs('#program_duration');
     programDurationTimeType = qs('#program_duration_time_type');
     programPeriod = qs('#program_period');
@@ -12,6 +12,7 @@ export class ConfigPanel {
     programTestButton = qs('#program_test_button');
     programApplyButton = qs('#program_apply_button');
     programStopButton = qs('#program_stop_button');
+    device;
     progressUI;
     program = new WateringProgram();
     constructor(progressUI) {
@@ -19,8 +20,8 @@ export class ConfigPanel {
         let log = (value) => {
             console.log(`[Program] ${value}`);
         };
-        this.programEnabled.addEventListener('sl-change', (ev) => {
-            this.program.enabled = qs('#program_enabled').checked;
+        this.programEnabledElem.addEventListener('sl-change', (ev) => {
+            this.program.enabled = this.programEnabled.checked;
         });
         this.programDuration.addEventListener('sl-change', () => {
             let value = Number(this.programDuration.value);
@@ -46,9 +47,7 @@ export class ConfigPanel {
             this.programWaterFlow.value = this.program.waterFlow.toString();
         });
         this.programStart.addEventListener('sl-change', () => {
-            log(this.programStart.value);
-            this.program.startDate = Date.parse(this.programStart.value);
-            log(this.program.startDate);
+            this.program.startDate = Date.parse(this.programStart.value) / 1000;
         });
         this.programTestButton.addEventListener('click', () => {
             this.startWatering();
@@ -59,6 +58,30 @@ export class ConfigPanel {
         this.programStopButton.addEventListener('click', () => {
             this.stopWatering();
         });
+    }
+    setDevice(device) {
+        this.device = device;
+        if (this.device != null) {
+            this.program = this.device.readProgram();
+            this.program.enabled = this.program.enabled;
+            this.programEnabled.checked = this.program.enabled;
+            const durationConv = convertDurationToBestUnit(this.program.duration);
+            this.programDuration.value = durationConv.duration.toString();
+            this.programDurationTimeType.value = durationConv.unit;
+            const periodConv = convertDurationToBestUnit(this.program.period);
+            this.programPeriod.value = periodConv.duration.toString();
+            this.programPeriodTimeType.value = periodConv.unit;
+            this.programWaterFlow.value = this.program.waterFlow.toString();
+            const date = new Date(this.program.startDate * 1000);
+            const year = date.getFullYear();
+            const month = date.getMonth() + 1;
+            const monthPrefix = month < 10 ? '0' : '';
+            const day = date.getDate();
+            const hours = date.getHours();
+            const minutes = date.getMinutes();
+            const formattedDate = `${year}-${monthPrefix}${month}-${day}T${hours}:${minutes}`;
+            this.programStart.value = formattedDate;
+        }
     }
     startWatering() {
         if (this.device != null && !this.device.wateringState().watering) {

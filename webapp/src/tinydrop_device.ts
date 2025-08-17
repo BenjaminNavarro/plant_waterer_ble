@@ -115,6 +115,7 @@ export abstract class TinyDropDevice {
     abstract startWatering(durationSec: number, flowSpeed: number): void
     abstract stopWatering(): void
     abstract sendProgram(program: WateringProgram): void
+    abstract readProgram(): WateringProgram
 
     protected onNotification(type: detail.NotificationType, data: ArrayBuffer) {
         switch (type) {
@@ -213,13 +214,18 @@ export class TinyDropBLEDevice extends TinyDropDevice {
 
     }
 
+    override readProgram(): WateringProgram {
+        let program = new WateringProgram()
+        return program
+    }
+
     protected log(value: any): void {
         console.log(`[BLEDevice] ${value}`)
     }
 }
 
 export class TinyDropFakeDevice extends TinyDropDevice {
-    private successRate = 0.5
+    private successRate = 0.95
     private deviceDelayMs = 500
     private notificationsStarted = false
     private stopTimeoutHandle = -1
@@ -229,6 +235,12 @@ export class TinyDropFakeDevice extends TinyDropDevice {
 
     constructor(statusBar: StatusBar, name: string, id: string) {
         super(statusBar, name, id)
+
+        let program = this.readProgram()
+        if (program != null && program.enabled) {
+            this.sendProgram(program)
+        }
+
         this.internalWateringState.startDate = Date.now() / 1000
     }
 
@@ -302,6 +314,8 @@ export class TinyDropFakeDevice extends TinyDropDevice {
 
         clearTimeout(this.wateringTimeoutHandle)
 
+        localStorage.setItem('program', JSON.stringify(program))
+
         if (program.enabled) {
             const startDate = this.computeWateringStart(program)
             this.wateringTimeoutHandle = setTimeout(() => {
@@ -310,6 +324,24 @@ export class TinyDropFakeDevice extends TinyDropDevice {
                     this.startWatering(program.duration, program.waterFlow)
                 }, program.period * 1000)
             }, (startDate * 1000 - Date.now()))
+        }
+    }
+
+    override readProgram(): WateringProgram {
+        const savedProgram = localStorage.getItem('program')
+        if (savedProgram != null) {
+            const savedProgramJS = JSON.parse(savedProgram)
+            let program = new WateringProgram()
+            program.enabled = savedProgramJS['enabled']
+            program.duration = savedProgramJS['duration']
+            program.period = savedProgramJS['period']
+            program.waterFlow = savedProgramJS['waterFlow']
+            program.startDate = savedProgramJS['startDate']
+
+            return program
+        }
+        else {
+            return null
         }
     }
 

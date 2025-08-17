@@ -31,20 +31,19 @@ function main() {
     const connectPanel = new ConnectPanel(progressUI, statusBar, fake_scanner, (device: TinyDropBLEDevice) => {
         configTab.disabled = false
         manualTab.disabled = false
-        configPanel.device = device
-        testPanel.device = device
+        configPanel.setDevice(device)
+        testPanel.setDevice(device)
         tabs.show('config')
     }, () => {
         configTab.disabled = true
         manualTab.disabled = true
-        configPanel.device = null
-        testPanel.device = null
+        configPanel.setDevice(null)
+        testPanel.setDevice(null)
         tabs.show('connect')
     })
 
     configTab.disabled = true
     manualTab.disabled = true
-    // tabs.show('test')
 
 }
 

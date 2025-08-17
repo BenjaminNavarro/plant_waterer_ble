@@ -36,3 +36,33 @@ export function convertDuration(durationInUnit, unit) {
             return -1;
     }
 }
+export function findBestDurationUnit(durationSec) {
+    if (durationSec > 60 * 60 * 24) {
+        return 'd';
+    }
+    else if (durationSec > 60 * 60) {
+        return 'h';
+    }
+    else if (durationSec > 60) {
+        return 'm';
+    }
+    else {
+        return 's';
+    }
+}
+export function convertDurationToBestUnit(durationSec) {
+    const unit = findBestDurationUnit(durationSec);
+    let duration = durationSec;
+    switch (unit) {
+        case 'm':
+            duration /= 60;
+            break;
+        case 'h':
+            duration /= (60 * 60);
+            break;
+        case 'd':
+            duration /= (60 * 60 * 24);
+            break;
+    }
+    return { duration: duration, unit: unit };
+}

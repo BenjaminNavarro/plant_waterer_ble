@@ -36,6 +36,7 @@ export declare abstract class TinyDropDevice {
     abstract startWatering(durationSec: number, flowSpeed: number): void;
     abstract stopWatering(): void;
     abstract sendProgram(program: WateringProgram): void;
+    abstract readProgram(): WateringProgram;
     protected onNotification(type: detail.NotificationType, data: ArrayBuffer): void;
     protected abstract doConnect(onSuccess?: CallableFunction, onFailure?: CallableFunction): void;
     protected abstract doDisconnect(onSuccess?: CallableFunction, onFailure?: CallableFunction): void;
@@ -52,6 +53,7 @@ export declare class TinyDropBLEDevice extends TinyDropDevice {
     startWatering(durationSec: number, flowSpeed: number): void;
     stopWatering(): void;
     sendProgram(program: WateringProgram): void;
+    readProgram(): WateringProgram;
     protected log(value: any): void;
 }
 export declare class TinyDropFakeDevice extends TinyDropDevice {
@@ -70,6 +72,7 @@ export declare class TinyDropFakeDevice extends TinyDropDevice {
     startWatering(durationSec: number, flowSpeed: number): void;
     stopWatering(): void;
     sendProgram(program: WateringProgram): void;
+    readProgram(): WateringProgram;
     private computeWateringStart;
     private sendWateringNotification;
     protected log(value: any): void;

@@ -3,7 +3,6 @@ import { ProgressUI, ResultType } from './progress_ui.js'
 import { TinyDropDevice } from './tinydrop_device.js'
 
 export class ManualPanel {
-    device: TinyDropDevice
 
     private manualWaterFlow = qs<HTMLInputElement>('#manual_flow_speed')
     private manualStartButton = qs<HTMLButtonElement>('#manual_start_button')
@@ -11,6 +10,7 @@ export class ManualPanel {
     private manualDuration = qs<HTMLInputElement>('#manual_duration')
     private manualDurationTimeType = qs<HTMLInputElement>('#manual_duration_time_type')
 
+    private device: TinyDropDevice
     private progressUI: ProgressUI
     private duration = 0
     private waterFlow = 0
@@ -46,6 +46,10 @@ export class ManualPanel {
         this.manualStopButton.addEventListener('click', () => {
             this.stopWatering()
         })
+    }
+
+    setDevice(device: TinyDropDevice) {
+        this.device = device
     }
 
     private startWatering() {

@@ -9,3 +9,8 @@ export declare function interpolate(template: string, params: Object): string;
  * @return The duration converted into seconds
  */
 export declare function convertDuration(durationInUnit: number, unit: string): number;
+export declare function findBestDurationUnit(durationSec: number): string;
+export declare function convertDurationToBestUnit(durationSec: any): {
+    duration: number;
+    unit: string;
+};

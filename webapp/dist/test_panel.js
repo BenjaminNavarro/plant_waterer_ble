@@ -1,11 +1,11 @@
 import { convertDuration, qs } from './utils.js';
 export class ManualPanel {
-    device;
     manualWaterFlow = qs('#manual_flow_speed');
     manualStartButton = qs('#manual_start_button');
     manualStopButton = qs('#manual_stop_button');
     manualDuration = qs('#manual_duration');
     manualDurationTimeType = qs('#manual_duration_time_type');
+    device;
     progressUI;
     duration = 0;
     waterFlow = 0;
@@ -34,6 +34,9 @@ export class ManualPanel {
         this.manualStopButton.addEventListener('click', () => {
             this.stopWatering();
         });
+    }
+    setDevice(device) {
+        this.device = device;
     }
     startWatering() {
         if (this.device != null && !this.device.wateringState().watering) {

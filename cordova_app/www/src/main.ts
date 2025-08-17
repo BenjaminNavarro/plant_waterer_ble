@@ -7,7 +7,7 @@ import { ConfigPanel } from './config_panel.js'
 import { ManualPanel } from './test_panel.js'
 
 import { TinyDropDevice, TinyDropBLEDevice, TinyDropFakeDevice } from './tinydrop_device.js'
-import { TinyDropScanner, TinyDropFakeScanner } from './tinydrop_scanner.js'
+import { TinyDropScanner, TinyDropFakeScanner, TinyDropBLEScanner } from './tinydrop_scanner.js'
 import { StatusBar } from './status_bar.js'
 
 function main() {
@@ -22,13 +22,12 @@ function main() {
     const progressUI = new ProgressUI()
     const statusBar = new StatusBar()
 
-    // const device = new TinyDropBLEDevice()
-    const fake_scanner = new TinyDropFakeScanner(statusBar)
+    const scanner = isMobile() ? new TinyDropBLEScanner(statusBar) : new TinyDropFakeScanner(statusBar)
 
     const configPanel = new ConfigPanel(progressUI)
     const testPanel = new ManualPanel(progressUI)
 
-    const connectPanel = new ConnectPanel(progressUI, statusBar, fake_scanner, (device: TinyDropBLEDevice) => {
+    const connectPanel = new ConnectPanel(progressUI, statusBar, scanner, (device: TinyDropBLEDevice) => {
         configTab.disabled = false
         manualTab.disabled = false
         configPanel.setDevice(device)
@@ -45,6 +44,15 @@ function main() {
     configTab.disabled = true
     manualTab.disabled = true
 
+}
+
+function isMobile() {
+    var userAgent = navigator.userAgent
+
+    const isAndroid = /android/i.test(userAgent)
+    const isIOS = /iPad|iPhone|iPod/.test(userAgent)
+
+    return isAndroid || isIOS
 }
 
 main()

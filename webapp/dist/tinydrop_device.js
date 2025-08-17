@@ -231,12 +231,13 @@ export class TinyDropFakeDevice extends TinyDropDevice {
         clearInterval(this.wateringIntervalHandle);
         clearTimeout(this.wateringTimeoutHandle);
         if (program.enabled) {
+            const startDate = this.computeWateringStart(program);
             this.wateringTimeoutHandle = setTimeout(() => {
                 this.startWatering(program.duration, program.waterFlow);
                 this.wateringIntervalHandle = setInterval(() => {
                     this.startWatering(program.duration, program.waterFlow);
                 }, program.period * 1000);
-            }, this.computeWateringStart(program) * 1000);
+            }, (startDate * 1000 - Date.now()));
         }
     }
     computeWateringStart(program) {

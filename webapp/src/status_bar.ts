@@ -1,3 +1,4 @@
+import { SlProgressBar } from "shoelace/shoelace.js"
 import { qs } from "./utils.js"
 
 export class StatusBar {
@@ -24,6 +25,43 @@ export class StatusBar {
         }
     }
 
+    setWateringProgress(progress: number) {
+        progress = Math.max(Math.min(progress, 100), 0)
+        this.wateringProgress.value = progress
+    }
+
+    startWateringProgressAutoUpdate(durationSec: number, startValue?: number) {
+        if (startValue !== undefined) {
+            startValue = Math.max(Math.min(startValue, 100), 0)
+        }
+        else {
+            startValue = 0
+        }
+        durationSec = Math.max(durationSec, 0)
+
+        let progress = startValue
+        this.stopWateringProgressAutoUpdate()
+        this.setWateringProgress(progress)
+
+        this.autoUpdateInterval = setInterval(() => {
+            this.setWateringProgress(progress)
+
+            progress += 100 / (durationSec * 1000 / this.updateRateMs);
+            if (progress >= 100) {
+                progress = 100
+                this.stopWateringProgressAutoUpdate()
+                this.setWateringProgress(progress)
+            }
+        }, this.updateRateMs)
+    }
+
+    stopWateringProgressAutoUpdate() {
+        clearInterval(this.autoUpdateInterval)
+    }
+
     private bluetoothStatus = qs('#bluetooth_status')
     private wateringStatus = qs('#watering_status')
+    private wateringProgress = qs<SlProgressBar>('#watering_progress')
+    private autoUpdateInterval = -1
+    readonly updateRateMs = 100
 }

@@ -80,15 +80,13 @@ export class ConfigPanel {
     }
 
     private startWatering() {
-        if (this.device != null && !this.device.wateringState()) {
-            this.progressUI.startAutoUpdate(this.program.duration * 1000)
+        if (this.device != null && !this.device.wateringState().watering) {
             this.device.startWatering(this.program.duration, this.program.waterFlow)
         }
     }
 
     private stopWatering() {
-        if (this.device != null && this.device.wateringState()) {
-            this.progressUI.stop(ResultType.None)
+        if (this.device != null && this.device.wateringState().watering) {
             this.device.stopWatering()
         }
     }

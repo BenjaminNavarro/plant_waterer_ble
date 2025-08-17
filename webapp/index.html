@@ -52,8 +52,11 @@
             TinyDrop
         </div>
         <div class="status-bar bulma-column bulma-is-tree-quarters">
-            <sl-icon id="bluetooth_status" class="status-icon bluetooth-disconnected" name="bluetooth"></sl-icon>
-            <sl-icon id="watering_status" class="status-icon watering-off" name="droplet-half"></sl-icon>
+            <div style="display: flex; flex-direction: row;">
+                <sl-icon id="bluetooth_status" class="status-icon bluetooth-disconnected" name="bluetooth"></sl-icon>
+                <sl-icon id="watering_status" class="status-icon watering-off" name="droplet-half"></sl-icon>
+                <sl-progress-bar value="0" id="watering_progress" class="status-icon"></sl-progress-bar>
+            </div>
         </div>
     </div>
 

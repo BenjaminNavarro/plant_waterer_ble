@@ -13,17 +13,26 @@ export declare class WateringProgram {
     waterFlow: number;
     startDate: number;
 }
+export declare class WateringStateData {
+    watering: boolean;
+    duration: number;
+    startDate: number;
+    static readonly expectedBufferSize: number;
+    static fromBuffer(buffer: ArrayBuffer): WateringStateData;
+    toBuffer(): ArrayBuffer;
+}
 export declare abstract class TinyDropDevice {
+    connected: boolean;
     private deviceName;
     private deviceId;
-    private watering;
+    private wateringStateData;
     private statusBar;
     constructor(statusBar: StatusBar, name: string, id: string);
     name(): string;
     id(): string;
     connect(onSuccess?: CallableFunction, onFailure?: CallableFunction): void;
     disconnect(onSuccess?: CallableFunction, onFailure?: CallableFunction): void;
-    wateringState(): boolean;
+    wateringState(): WateringStateData;
     abstract startWatering(durationSec: number, flowSpeed: number): void;
     abstract stopWatering(): void;
     abstract sendProgram(program: WateringProgram): void;
@@ -33,6 +42,7 @@ export declare abstract class TinyDropDevice {
     protected abstract startNotifications(): void;
     protected abstract stopNotifications(): void;
     protected log(value: any): void;
+    private updateStatusBar;
 }
 export declare class TinyDropBLEDevice extends TinyDropDevice {
     doConnect(onSuccess?: CallableFunction, onFailure?: CallableFunction): void;
@@ -52,6 +62,7 @@ export declare class TinyDropFakeDevice extends TinyDropDevice {
     private wateringTimeoutHandle;
     private wateringIntervalHandle;
     private internalWateringState;
+    constructor(statusBar: StatusBar, name: string, id: string);
     doConnect(onSuccess?: CallableFunction, onFailure?: CallableFunction): void;
     doDisconnect(onSuccess?: CallableFunction, onFailure?: CallableFunction): void;
     startNotifications(): void;
@@ -60,6 +71,7 @@ export declare class TinyDropFakeDevice extends TinyDropDevice {
     stopWatering(): void;
     sendProgram(program: WateringProgram): void;
     private computeWateringStart;
+    private sendWateringNotification;
     protected log(value: any): void;
 }
 export {};

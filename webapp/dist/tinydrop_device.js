@@ -15,10 +15,33 @@ export class WateringProgram {
     waterFlow = 0;
     startDate = 0;
 }
+export class WateringStateData {
+    watering = false;
+    duration = 0;
+    startDate = 0;
+    static expectedBufferSize = 1 + 4 + 4;
+    static fromBuffer(buffer) {
+        let data = new WateringStateData();
+        let view = new DataView(buffer);
+        data.watering = view.getUint8(0) == 1;
+        data.duration = view.getUint32(0 + 1);
+        data.startDate = view.getUint32(0 + 1 + 4);
+        return data;
+    }
+    toBuffer() {
+        let buffer = new ArrayBuffer(WateringStateData.expectedBufferSize);
+        let view = new DataView(buffer);
+        view.setUint8(0, this.watering ? 1 : 0);
+        view.setUint32(0 + 1, this.duration);
+        view.setUint32(0 + 1 + 4, this.startDate);
+        return buffer;
+    }
+}
 export class TinyDropDevice {
+    connected = false;
     deviceName = '';
     deviceId = '';
-    watering = false;
+    wateringStateData = new WateringStateData();
     statusBar;
     constructor(statusBar, name, id) {
         this.statusBar = statusBar;
@@ -37,14 +60,14 @@ export class TinyDropDevice {
             if (onSuccess !== undefined) {
                 onSuccess();
             }
-            this.statusBar.setBluetoothState(true);
-            this.statusBar.setWateringState(this.wateringState());
+            this.connected = true;
+            this.updateStatusBar();
         }, () => {
             if (onFailure !== undefined) {
                 onFailure();
             }
-            this.statusBar.setBluetoothState(false);
-            this.statusBar.setWateringState(false);
+            this.connected = false;
+            this.updateStatusBar();
         });
     }
     disconnect(onSuccess, onFailure) {
@@ -53,32 +76,46 @@ export class TinyDropDevice {
             if (onSuccess !== undefined) {
                 onSuccess();
             }
-            this.statusBar.setBluetoothState(false);
-            this.statusBar.setWateringState(false);
+            this.connected = false;
+            this.updateStatusBar();
         }, () => {
             if (onFailure !== undefined) {
                 onFailure();
             }
+            this.connected = false;
+            this.updateStatusBar();
         });
     }
     wateringState() {
-        return this.watering;
+        return this.wateringStateData;
     }
     onNotification(type, data) {
         switch (type) {
             case detail.NotificationType.WateringState:
-                if (data.byteLength != 1) {
-                    this.log("incorrect watering state data length");
+                if (data.byteLength != WateringStateData.expectedBufferSize) {
+                    this.log(`incorrect watering state data length: got ${data.byteLength}, expected ${WateringStateData.expectedBufferSize}`);
                     return;
                 }
-                const wateringData = new Uint8Array(data);
-                this.watering = wateringData[0] == 1;
-                this.statusBar.setWateringState(this.watering);
+                this.wateringStateData = WateringStateData.fromBuffer(data);
+                this.updateStatusBar();
                 break;
         }
     }
     log(value) {
         console.log(`[Device] ${value}`);
+    }
+    updateStatusBar() {
+        this.statusBar.setBluetoothState(this.connected);
+        this.statusBar.setWateringState(this.wateringState().watering);
+        const nowSec = Date.now() / 1000;
+        if (this.wateringStateData.duration > 0) {
+            this.statusBar.startWateringProgressAutoUpdate(this.wateringStateData.duration, ((nowSec - this.wateringStateData.startDate) /
+                this.wateringStateData.duration) * 100);
+        }
+        else {
+            this.statusBar.stopWateringProgressAutoUpdate();
+            this.statusBar.setWateringProgress(0);
+        }
     }
 }
 export class TinyDropBLEDevice extends TinyDropDevice {
@@ -134,7 +171,11 @@ export class TinyDropFakeDevice extends TinyDropDevice {
     stopTimeoutHandle = -1;
     wateringTimeoutHandle = -1;
     wateringIntervalHandle = -1;
-    internalWateringState = false;
+    internalWateringState = new WateringStateData();
+    constructor(statusBar, name, id) {
+        super(statusBar, name, id);
+        this.internalWateringState.startDate = Date.now() / 1000;
+    }
     doConnect(onSuccess, onFailure) {
         setTimeout(() => {
             if (Math.random() < this.successRate) {
@@ -142,9 +183,7 @@ export class TinyDropFakeDevice extends TinyDropDevice {
                 if (onSuccess !== undefined) {
                     onSuccess();
                 }
-                let data = new Uint8Array(1);
-                data[0] = this.internalWateringState ? 1 : 0;
-                this.onNotification(detail.NotificationType.WateringState, data.buffer);
+                this.onNotification(detail.NotificationType.WateringState, this.internalWateringState.toBuffer());
             }
             else {
                 this.log("disconnected");
@@ -166,39 +205,26 @@ export class TinyDropFakeDevice extends TinyDropDevice {
         this.notificationsStarted = false;
     }
     startWatering(durationSec, flowSpeed) {
-        if (this.wateringState()) {
+        if (this.wateringState().watering) {
             return;
         }
+        this.sendWateringNotification(false);
         setTimeout(() => {
-            if (this.notificationsStarted) {
-                let data = new Uint8Array(1);
-                data[0] = 1;
-                this.onNotification(detail.NotificationType.WateringState, data.buffer);
-            }
-            this.internalWateringState = true;
+            this.internalWateringState.startDate = Date.now() / 1000;
+            this.sendWateringNotification(true, durationSec);
         }, this.deviceDelayMs);
         clearTimeout(this.stopTimeoutHandle);
         this.stopTimeoutHandle = setTimeout(() => {
-            if (this.notificationsStarted) {
-                let data = new Uint8Array(1);
-                data[0] = 0;
-                this.onNotification(detail.NotificationType.WateringState, data.buffer);
-            }
-            this.internalWateringState = false;
+            this.sendWateringNotification(false);
         }, durationSec * 1000 + this.deviceDelayMs);
     }
     stopWatering() {
-        if (!this.wateringState()) {
+        if (!this.wateringState().watering) {
             return;
         }
         clearTimeout(this.stopTimeoutHandle);
         setTimeout(() => {
-            if (this.notificationsStarted) {
-                let data = new Uint8Array(1);
-                data[0] = 0;
-                this.onNotification(detail.NotificationType.WateringState, data.buffer);
-            }
-            this.internalWateringState = false;
+            this.sendWateringNotification(false);
         }, this.deviceDelayMs);
     }
     sendProgram(program) {
@@ -227,6 +253,11 @@ export class TinyDropFakeDevice extends TinyDropDevice {
             const cycles = (now - program.startDate) / program.period;
             return program.startDate + cycles * program.period;
         }
+    }
+    sendWateringNotification(state, duration = 0) {
+        this.internalWateringState.watering = state;
+        this.internalWateringState.duration = state ? duration : 0;
+        this.onNotification(detail.NotificationType.WateringState, this.internalWateringState.toBuffer());
     }
     log(value) {
         console.log(`[FakeDevice] ${value}`);

@@ -116,6 +116,12 @@
     margin-left: 10px;
 }
 
+
+#watering_progress {
+    transform: rotate(-90deg);
+    width: var(--header-font-size);
+}
+
 .bluetooth-disconnected {
     color: gray;
     opacity: 0.5;

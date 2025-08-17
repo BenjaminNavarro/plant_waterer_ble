@@ -1,5 +1,4 @@
 import { convertDuration, qs } from './utils.js';
-import { ResultType } from './progress_ui.js';
 import { WateringProgram } from './tinydrop_device.js';
 export class ConfigPanel {
     device;
@@ -62,14 +61,12 @@ export class ConfigPanel {
         });
     }
     startWatering() {
-        if (this.device != null && !this.device.wateringState()) {
-            this.progressUI.startAutoUpdate(this.program.duration * 1000);
+        if (this.device != null && !this.device.wateringState().watering) {
             this.device.startWatering(this.program.duration, this.program.waterFlow);
         }
     }
     stopWatering() {
-        if (this.device != null && this.device.wateringState()) {
-            this.progressUI.stop(ResultType.None);
+        if (this.device != null && this.device.wateringState().watering) {
             this.device.stopWatering();
         }
     }

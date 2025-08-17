@@ -1,5 +1,4 @@
 import { convertDuration, qs } from './utils.js';
-import { ResultType } from './progress_ui.js';
 export class ManualPanel {
     device;
     manualWaterFlow = qs('#manual_flow_speed');
@@ -37,14 +36,12 @@ export class ManualPanel {
         });
     }
     startWatering() {
-        if (this.device != null && !this.device.wateringState()) {
-            this.progressUI.startAutoUpdate(this.duration * 1000);
+        if (this.device != null && !this.device.wateringState().watering) {
             this.device.startWatering(this.duration, this.waterFlow);
         }
     }
     stopWatering() {
-        if (this.device != null && this.device.wateringState()) {
-            this.progressUI.stop(ResultType.None);
+        if (this.device != null && this.device.wateringState().watering) {
             this.device.stopWatering();
         }
     }

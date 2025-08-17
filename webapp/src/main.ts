@@ -23,20 +23,24 @@ function main() {
     const statusBar = new StatusBar()
 
     // const device = new TinyDropBLEDevice()
-    const fake_scanner = new TinyDropFakeScanner()
+    const fake_scanner = new TinyDropFakeScanner(statusBar)
 
-    const connectPanel = new ConnectPanel(progressUI, statusBar, fake_scanner, () => {
+    const configPanel = new ConfigPanel(progressUI)
+    const testPanel = new ManualPanel(progressUI)
+
+    const connectPanel = new ConnectPanel(progressUI, statusBar, fake_scanner, (device: TinyDropBLEDevice) => {
         configTab.disabled = false
         manualTab.disabled = false
+        configPanel.device = device
+        testPanel.device = device
         tabs.show('config')
     }, () => {
         configTab.disabled = true
         manualTab.disabled = true
+        configPanel.device = null
+        testPanel.device = null
         tabs.show('connect')
     })
-
-    const configPanel = new ConfigPanel(progressUI)
-    const testPanel = new ManualPanel(progressUI)
 
     configTab.disabled = true
     manualTab.disabled = true

@@ -13,8 +13,8 @@ export class ConnectPanel {
             let index = 0;
             scanner.stop();
             scanner.scan((device) => {
-                let name = device.name;
-                let id = device.id;
+                let name = device.name();
+                let id = device.id();
                 const data = { index, name, id };
                 const entryHTML = interpolate(this.deviceListEntryTemplate.innerHTML.toString().trim(), data);
                 this.deviceList.innerHTML += entryHTML;
@@ -30,9 +30,9 @@ export class ConnectPanel {
                             connectButtons.forEach(other_btn => {
                                 other_btn.disabled = true;
                             });
+                            scanner.stop();
                             device.connect(() => {
                                 progressUI.stop(ResultType.Success);
-                                statusBar.setBluetoothState(true);
                                 btn.setAttribute('connected', 'true');
                                 btn.innerHTML = 'Déconnexion';
                                 btn.disabled = false;
@@ -41,7 +41,6 @@ export class ConnectPanel {
                                 console.log('Device connected');
                             }, () => {
                                 progressUI.stop(ResultType.Error);
-                                statusBar.setBluetoothState(false);
                                 connectButtons.forEach(other_btn => {
                                     other_btn.disabled = false;
                                 });
@@ -54,7 +53,6 @@ export class ConnectPanel {
                             progressUI.spin();
                             device.disconnect(() => {
                                 progressUI.stop(ResultType.Success);
-                                statusBar.setBluetoothState(false);
                                 btn.setAttribute('connected', 'false');
                                 btn.innerHTML = 'Connexion';
                                 connectButtons.forEach(other_btn => {
@@ -65,14 +63,12 @@ export class ConnectPanel {
                                 onDisconnect();
                             }, () => {
                                 progressUI.stop(ResultType.Error);
-                                statusBar.setBluetoothState(true);
                             });
                         }
                     });
                 });
             }, (error) => {
                 progressUI.stop(ResultType.Error);
-                statusBar.setBluetoothState(false);
                 console.log(error);
             }, this.searchDurationMs);
         });

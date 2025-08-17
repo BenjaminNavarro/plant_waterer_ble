@@ -1,16 +1,23 @@
 /// <reference types="cordova-plugin-ble-central" />
-import { TinyDropFakeDevice } from "./tinydrop_device.js";
-export class TinyDropBLEScanner {
-    scanning = false;
+import { TinyDropBLEDevice, TinyDropFakeDevice } from "./tinydrop_device.js";
+export class TinyDropScanner {
+    scanning;
+    statusBar;
+    constructor(statusBar) {
+        this.statusBar = statusBar;
+    }
+    scanningState() {
+        return this.scanning;
+    }
+}
+export class TinyDropBLEScanner extends TinyDropScanner {
     scan(onDeviceFound, onError, timeoutMs) {
         if (this.scanning) {
             console.log('BLE scan already in progress');
             return;
         }
         ble.startScan([], (device) => {
-            let dev = new TinyDropFakeDevice();
-            dev.name = device.name;
-            dev.id = device.id;
+            let dev = new TinyDropBLEDevice(this.statusBar, device.name, device.id);
             onDeviceFound(dev);
         }, (error) => {
             onError(error);
@@ -28,8 +35,7 @@ export class TinyDropBLEScanner {
         }
     }
 }
-export class TinyDropFakeScanner {
-    scanning = false;
+export class TinyDropFakeScanner extends TinyDropScanner {
     scan(onDeviceFound, onError, timeoutMs) {
         if (this.scanning) {
             console.log('Fake scan already in progress');
@@ -38,9 +44,9 @@ export class TinyDropFakeScanner {
         this.timers = new Array(3);
         for (let index = 0; index < 3; index++) {
             this.timers[index] = setTimeout(() => {
-                let dev = new TinyDropFakeDevice();
-                dev.name = "Device #" + (index + 1).toString();
-                dev.id = index.toString();
+                const name = 'Device #' + (index + 1).toString();
+                const id = index.toString();
+                let dev = new TinyDropFakeDevice(this.statusBar, name, id);
                 onDeviceFound(dev);
             }, (index + 1) * 500);
         }

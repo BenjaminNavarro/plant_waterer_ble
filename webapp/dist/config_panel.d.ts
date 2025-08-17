@@ -1,14 +1,21 @@
 import { ProgressUI } from './progress_ui.js';
+import { TinyDropDevice } from './tinydrop_device.js';
 export declare class ConfigPanel {
-    programEnabled: HTMLInputElement;
-    programDuration: HTMLInputElement;
-    programDurationTimeType: HTMLInputElement;
-    programPeriod: HTMLInputElement;
-    programPeriodTimeType: HTMLInputElement;
-    programWaterFlow: HTMLInputElement;
-    programStart: HTMLInputElement;
-    programTestButton: HTMLButtonElement;
-    programApplyButton: HTMLButtonElement;
-    programStopButton: HTMLButtonElement;
+    device: TinyDropDevice;
+    private programEnabled;
+    private programDuration;
+    private programDurationTimeType;
+    private programPeriod;
+    private programPeriodTimeType;
+    private programWaterFlow;
+    private programStart;
+    private programTestButton;
+    private programApplyButton;
+    private programStopButton;
+    private progressUI;
+    private program;
     constructor(progressUI: ProgressUI);
+    private startWatering;
+    private stopWatering;
+    private sendProgram;
 }

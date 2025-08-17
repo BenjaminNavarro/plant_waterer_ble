@@ -1,52 +1,143 @@
-.vertical-center {
-    margin: 0;
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
+:root {
+    --header-font-size: 24px;
 }
 
-.prog.grid>.row {
-    padding-top: 0;
-    padding-bottom: 0;
+.is_hidden {
+    opacity: 0;
 }
 
-.ui.menu.inverted {
-    padding: 1em;
-}
-
-.ui.menu.inverted h2 {
-    color: white;
-}
-
-.ui.menu.inverted h3 {
-    color: white;
-}
-
-.ui.input>input[type=number] {
-    max-width: 5rem;
-}
-
-.ui.fullwidth.button {
+#search_button {
     width: 100%;
 }
 
-.time_length_input {
-    color: rgba(0, 0, 0, .6) !important;
-    outline-color: rgba(0, 0, 0, .6) !important;
-    background-color: #e8e8e8 !important;
-    border-color: rgb(0, 0, 0, 0) !important;
-    min-width: 9rem !important;
+/* Inside the tabs header, height is 53px */
+.progress-container {
+    position: fixed;
+    right: 0;
 }
 
-#status_text {
-    text-align: center;
-    vertical-align: baseline;
+.progress {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    font-size: 46px;
 }
 
-#system_address_input {
-    max-width: 40%;
+#progress_result {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    font-size: 40px;
 }
 
-#output_select {
-    padding-top: 1rem;
+#progress_ring {
+    --size: 46px;
+}
+
+#progress_spinner {
+    font-size: 46px;
+    --track-width: 4px;
+}
+
+.card-header {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.card-header [slot='header'] {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.card-header h3 {
+    margin: 0;
+}
+
+.card-header sl-icon-button {
+    font-size: var(--sl-font-size-medium);
+}
+
+.device-entry-description {
+    float: right;
+}
+
+.main-tabs {
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+.program-buttons-group {
+    width: 100%;
+}
+
+.program-buttons {
+    width: 100%;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+#alert_box {
+    /* display: none; */
+    /* margin-left: 5rem;
+    margin-right: 50px; */
+    margin: 1rem 1rem 0 1rem;
+    border-style: solid;
+    border-width: 3px 0 0 0;
+    margin-bottom: -3px;
+}
+
+#alert_box::part(base) {
+    color: white;
+}
+
+#alert_icon {
+    margin-right: 0.5rem;
+}
+
+.app-header {
+    margin-top: 0rem;
+    margin-right: 0rem;
+    margin-left: 0rem;
+    margin-bottom: 0 !important;
+    padding-top: 0rem;
+    padding-right: 0rem;
+    padding-left: 0rem;
+    padding-bottom: 0;
+    font-size: var(--header-font-size);
+}
+
+.status-bar {
+    position: absolute;
+    right: 0;
+}
+
+.status-icon {
+    margin-left: 10px;
+}
+
+
+#watering_progress {
+    transform: rotate(-90deg);
+    width: var(--header-font-size);
+}
+
+.bluetooth-disconnected {
+    color: gray;
+    opacity: 0.5;
+}
+
+.bluetooth-connected {
+    color: #017ff5;
+    opacity: 1;
+}
+
+.watering-off {
+    color: gray;
+    opacity: 0.5;
+}
+
+.watering-on {
+    color: #017ff5;
+    opacity: 1;
 }

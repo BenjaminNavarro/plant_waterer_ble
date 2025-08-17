@@ -5,206 +5,210 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="format-detection" content="telephone=no">
-    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1">
+    <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1">
+
 
     <title>Syst&#xE8;me d&apos;arrosage</title>
 
-    <script src="https://code.jquery.com/jquery-3.1.1.min.js"
-        integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
-    <link rel="stylesheet" type="text/css" href="js/jquery-1.5.0.mobile.min.css">
+    <link rel="stylesheet" media="(prefers-color-scheme:light)" href="deps/shoelace-2.20.1/themes/light.css" />
+    <link rel="stylesheet" media="(prefers-color-scheme:dark)" href="deps/shoelace-2.20.1/themes/dark.css"
+        onload="document.documentElement.classList.add('sl-theme-dark');" />
+    <script type="module" src="deps/shoelace-2.20.1/shoelace.js"></script>
 
-    <link rel="stylesheet" type="text/css" href="fomantic/semantic.min.css">
-    <script src="fomantic/semantic.min.js"></script>
+    <link rel="stylesheet" href="deps/bulma-1.0.4/css/versions/bulma-prefixed.min.css">
+    <link rel="stylesheet" href="style.css">
 
-    <link rel="stylesheet" type="text/css" href="style.css">
     <style>
-        /* For avoiding title truncation in wp8 */
-        .ui-header .ui-title {
-            overflow: visible !important;
+        body {
+            opacity: 0;
         }
 
-        /* For fixing the absolute position issue for the default cordova gen page*/
-        #cjp-accordion1 .app {
-            left: 5px !important;
-            margin: 5px !important;
-            position: relative !important;
+        body.ready {
+            opacity: 1;
+            transition: 0.25s opacity;
         }
     </style>
 
-    <template id="test_output_template">
-        <div class="column">
-            <div class="ui test toggle checkbox">
-                <input type="checkbox" name="test_output_${index}" id="test_output_${index}" data-value="${index}">
-                <label>Sortie ${index}</label>
-            </div>
-        </div>
-    </template>
-
     <template id="device_list_entry_template">
-        <div class="item">
-            <i class="large tint middle aligned icon"></i>
-            <div class="content">
-                <a class="header" id="device_list_name_${index}" href="#">${name}</a>
-                <div class="description" id="device_list_id_${index}">${id}</div>
+        <sl-card class="card-header">
+            <div slot="header">
+                <h3 class="device-entry-header" id="device_list_name_${index}">${name}</h3>
+                <sl-icon name="droplet-half"></sl-icon>
             </div>
-        </div>
+
+            <sl-button variant="primary" class="connect-button" id="connect_button_${index}">Connexion</sl-button>
+            <div class="device-entry-description" id="device_list_id_${index}">${id}</div>
+
+        </sl-card>
     </template>
 
 </head>
 
 <body>
-    <div class="ui menu inverted">
-        <div class="ui two column grid">
-            <div class="four column row">
-                <div class="left floated column">
-                    <div class="row">
-                        <h2>
-                            Syst&#xE8;me d&apos;arrosage
-                        </h2>
-                        <div class="ui action input">
-                            <button id="search_btn" class="ui button">Rechercher</button>
-                        </div>
-                    </div>
-                </div>
-                <div id="status_bar" class="right floated column">
-                    <h3 id="status_text">
-                    </h3>
-                    <div class="ui inverted segment">
-                        <div id="status_loader" class="ui active inverted centered inline loader">
-                            <div class="ui large loader"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
+    <div class="app-header bulma-columns bulma-is-mobile">
+        <div class="app-name bulma-column bulma-is-one-quarter">
+            TinyDrop
         </div>
-    </div>
-    <div id="device_list" class="ui relaxed divided list">
-    </div>
-    <div id="debug">
-    </div>
-    <div id="main_view" class="ui container">
-        <div class="ui top attached tabular menu">
-            <a class="item active" data-tab="automatic">Programmation</a>
-            <a class="item" data-tab="manual">Test</a>
-        </div>
-        <div class="ui bottom attached tab segment active" data-tab="automatic">
-            <div class="ui prog two column vertically divided grid">
-                <div class="row">
-                    <div id="output_select" class="column">
-                        <select id="program_selection" class="ui search selection dropdown">
-                            <option value="0">Sortie 1</option>
-                            <option value="1">Sortie 2</option>
-                            <option value="2">Sortie 3</option>
-                            <option value="3">Sortie 4</option>
-                            <option value="4">Sortie 5</option>
-                            <option value="5">Sortie 6</option>
-                            <option value="6">Sortie 7</option>
-                            <option value="7">Sortie 8</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="six wide column">
-                        <p class="vertical-center">Programme actif</p>
-                    </div>
-                    <div class="ten wide column">
-                        <div id="program_enabled" class="ui toggle checkbox">
-                            <input id="program_enabled_input" type="checkbox" name="public">
-                            <label></label>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="six wide column">
-                        <p class="vertical-center">D&#xE9;bit</p>
-                    </div>
-                    <div class="ten wide column">
-                        <div class="ui right labeled input">
-                            <input id="program_flow_speed" type="number" placeholder="100" min="0" max="100">
-                            <div class="ui basic label">
-                                %
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="six wide column">
-                        <p class="vertical-center">Date de d&#xE9;but</p>
-                    </div>
-                    <div class="ten wide column">
-                        <div class="ui calendar" id="standard_calendar">
-                            <div class="ui fluid input left icon">
-                                <i class="calendar icon"></i>
-                                <input type="text" placeholder="Date/Heure">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="six wide column">
-                        <p class="vertical-center">Dur&#xE9;e d&apos;arrosage</p>
-                    </div>
-                    <div class="ten wide column">
-                        <div class="ui right labeled input">
-                            <input id="program_duration" type="number" placeholder="0">
-                            <select id="program_duration_time_type"
-                                class="ui selection dropdown label time_length_input">
-                                <option value="s">Secondes</option>
-                                <option value="m">Minutes</option>
-                                <option value="h">Heures</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="six wide column">
-                        <p class="vertical-center">R&#xE9;p&#xE9;tition</p>
-                    </div>
-                    <div class="ten wide column">
-                        <div class="ui right labeled input">
-                            <input id="program_period" type="number" placeholder="0">
-                            <select id="program_period_time_type" class="ui selection dropdown label time_length_input">
-                                <option value="d" class="item">Jours</option>
-                                <option value="h" class="item">Heures</option>
-                                <option value="m" class="item">Minutes</option>
-                                <option value="s" class="item">Secondes</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
+        <div class="status-bar bulma-column bulma-is-tree-quarters">
+            <div style="display: flex; flex-direction: row;">
+                <sl-icon id="bluetooth_status" class="status-icon bluetooth-disconnected" name="bluetooth"></sl-icon>
+                <sl-icon id="watering_status" class="status-icon watering-off" name="droplet-half"></sl-icon>
+                <sl-progress-bar value="0" id="watering_progress" class="status-icon"></sl-progress-bar>
             </div>
-            <div class="ui equal width grid">
-                <div class="column">
-                    <button id="test_btn" class="ui fullwidth button">Tester</button>
-                    <button id="stop_btn" class="ui fullwidth button">Stop</button>
-                </div>
-                <div class="column">
-                    <button id="apply_btn" class="ui fullwidth button">Appliquer</button>
-                </div>
-            </div>
-        </div>
-        <div class="ui bottom attached tab segment" data-tab="manual">
-            <div id="test_output_container" class="ui two column grid" style="margin: 1rem 0 1rem 0;">
-                <div class="column">
-                    <p class="vertical-center">D&#xE9;bit</p>
-                </div>
-                <div class="column">
-                    <div class="ui right labeled input">
-                        <input id="test_flow_speed" type="number" placeholder="100" min="0" max="100">
-                        <div class="ui basic label">
-                            %
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <button id="pump_on_btn" class="ui fullwidth button">Activer la pompe</button>
-            <button id="pump_off_btn" class="ui fullwidth button">D&#xE9;sactiver la pompe</button>
         </div>
     </div>
 
-    <script type="text/javascript" src="cordova.js"></script>
-    <!-- <script type="text/javascript" src="main.js"></script> -->
-    <script type="text/javascript" src="lib.js"></script>
+    <div class="app-content">
+        <div class="progress-container">
+            <sl-progress-ring id="progress_ring" class="progress" value="0"></sl-progress-ring>
+            <sl-spinner id="progress_spinner" class="progress"></sl-spinner>
+            <sl-icon id="progress_result" name="info-circle"></sl-icon>
+        </div>
+
+        <sl-tab-group id="tabs">
+            <sl-tab slot="nav" panel="connect" id="connect_tab">Connexion</sl-tab>
+            <sl-tab slot="nav" panel="config" id="config_tab">Automatique</sl-tab>
+            <sl-tab slot="nav" panel="manual" id="manual_tab">Manuel</sl-tab>
+
+            <sl-tab-panel class="main-tabs" name="connect">
+                <sl-button id="search_button" variant="primary" size="large">Rechercher</sl-button>
+                <sl-divider></sl-divider>
+                <div id="device_list" class="device-list">
+                </div>
+            </sl-tab-panel>
+
+            <sl-tab-panel class="main-tabs" name="config">
+                <sl-input label="Nom personnalisé" id="custom_name_input"></sl-input>
+                <sl-divider></sl-divider>
+                <div class="bulma-columns bulma-is-mobile bulma-is-vcentered">
+                    <div class="bulma-column bulma-is-one-quarter">
+                        Activé
+                    </div>
+                    <div class="bulma-column bulma-is-narrow">
+                        <sl-switch id="program_enabled"></sl-switch>
+                    </div>
+                </div>
+                <div class="bulma-columns bulma-is-mobile bulma-is-vcentered">
+                    <div class="bulma-column bulma-is-one-quarter">
+                        Durée d'arrosage
+                    </div>
+                    <div class="bulma-column bulma-is-one-quarter">
+                        <sl-input id="program_duration" type="number" placeholder="0" min="0"></sl-input>
+                    </div>
+                    <div class="bulma-column bulma-is-two-quarters">
+                        <sl-select id="program_duration_time_type" value="s">
+                            <sl-option value="s">Secondes</sl-option>
+                            <sl-option value="m">Minutes</sl-option>
+                            <sl-option value="h">Heures</sl-option>
+                        </sl-select>
+                    </div>
+                </div>
+                <div class="bulma-columns bulma-is-mobile bulma-is-vcentered">
+                    <div class="bulma-column bulma-is-one-quarter">
+                        Fréquence d'arrosage
+                    </div>
+                    <div class="bulma-column bulma-is-one-quarter">
+                        <sl-input id="program_period" type="number" placeholder="0" min="0"></sl-input>
+                    </div>
+                    <div class="bulma-column bulma-is-two-quarters">
+                        <sl-select id="program_period_time_type" class="ui selection dropdown label time_length_input"
+                            value="d">
+                            <sl-option value="d" class="item">Jours</sl-option>
+                            <sl-option value="h">Heures</sl-option>
+                            <sl-option value="m">Minutes</sl-option>
+                            <sl-option value="s">Secondes</sl-option>
+                        </sl-select>
+                    </div>
+                </div>
+                <div class="bulma-columns bulma-is-mobile bulma-is-vcentered">
+                    <div class="bulma-column bulma-is-one-quarter">
+                        Débit d'arrosage
+                    </div>
+                    <div class="bulma-column bulma-is-three-quarters">
+                        <sl-input id="program_flow_speed" type="number" placeholder="100" min="0" max="100" step="10">
+                            <div slot="suffix">%</div>
+                        </sl-input>
+                    </div>
+                </div>
+                <div class="bulma-columns bulma-is-mobile bulma-is-vcentered">
+                    <div class="bulma-column bulma-is-one-quarter">
+                        Premier arrosage
+                    </div>
+                    <div class="bulma-column bulma-is-three-quarters">
+                        <sl-input id="program_start" type="datetime-local"></sl-input>
+                    </div>
+
+                </div>
+
+                <sl-divider></sl-divider>
+
+                <sl-button-group class="program-buttons-group">
+                    <sl-button id="program_test_button" variant="success" class="program-buttons">Tester</sl-button>
+                    <sl-button id="program_apply_button" variant="primary" class="program-buttons">Appliquer</sl-button>
+                </sl-button-group>
+                <sl-divider></sl-divider>
+                <sl-button id="program_stop_button" variant="danger" size="large"
+                    class="program-buttons">Stop</sl-button>
+
+
+
+            </sl-tab-panel>
+
+            <sl-tab-panel class="main-tabs" name="manual">
+                <div class="bulma-columns bulma-is-mobile bulma-is-vcentered">
+                    <div class="bulma-column bulma-is-one-quarter">
+                        Durée d'arrosage
+                    </div>
+                    <div class="bulma-column bulma-is-one-quarter">
+                        <sl-input id="manual_duration" type="number" placeholder="0" min="0"></sl-input>
+                    </div>
+                    <div class="bulma-column bulma-is-two-quarters">
+                        <sl-select id="manual_duration_time_type" value="s">
+                            <sl-option value="s">Secondes</sl-option>
+                            <sl-option value="m">Minutes</sl-option>
+                            <sl-option value="h">Heures</sl-option>
+                        </sl-select>
+                    </div>
+                </div>
+                <div class="bulma-columns bulma-is-mobile bulma-is-vcentered">
+                    <div class="bulma-column bulma-is-one-quarter">
+                        Débit d'arrosage
+                    </div>
+                    <div class="bulma-column bulma-is-three-quarters">
+                        <sl-input id="manual_flow_speed" type="number" placeholder="100" min="0" max="100" step="10">
+                            <div slot="suffix">%</div>
+                        </sl-input>
+                    </div>
+                </div>
+                <sl-divider></sl-divider>
+                <sl-button id="manual_start_button" variant="success" class="program-buttons">Démarrer</sl-button>
+                <sl-divider></sl-divider>
+                <sl-button id="manual_stop_button" variant="danger" size="large"
+                    class="program-buttons">Stop</sl-button>
+            </sl-tab-panel>
+
+        </sl-tab-group>
+    </div>
+
+
+    <!-- <script type="text/javascript" src="cordova.js"></script> -->
+    <script type="module" src="dist/main.js"></script>
+
+    <script type="module">
+        // Make sure all Shoelace custom elements are loaded before
+        // showing the page content to avoid flashes and shifts
+        await Promise.allSettled([
+            customElements.whenDefined('sl-button'),
+            customElements.whenDefined('sl-checkbox'),
+        ]);
+
+        // Button, card, and rating are registered now! Add
+        // the `ready` class so the UI fades in.
+        document.body.classList.add('ready');
+    </script>
+
 </body>
 
 </html>

@@ -17,7 +17,7 @@ function main() {
     const scanner = isMobile() ? new TinyDropBLEScanner(statusBar) : new TinyDropFakeScanner(statusBar);
     const configPanel = new ConfigPanel(progressUI);
     const testPanel = new ManualPanel(progressUI);
-    const connectPanel = new ConnectPanel(progressUI, statusBar, scanner, (device) => {
+    const connectPanel = new ConnectPanel(progressUI, scanner, (device) => {
         configTab.disabled = false;
         manualTab.disabled = false;
         configPanel.setDevice(device);

@@ -5,7 +5,7 @@ export class ConnectPanel {
     searchDurationMs = 5000;
     deviceList = qs('#device_list');
     deviceListEntryTemplate = qs('#device_list_entry_template');
-    constructor(progressUI, statusBar, scanner, onConnect, onDisconnect) {
+    constructor(progressUI, scanner, onConnect, onDisconnect) {
         this.searchButton.addEventListener('click', () => {
             this.deviceList.innerHTML = '';
             progressUI.startAutoUpdate(this.searchDurationMs);

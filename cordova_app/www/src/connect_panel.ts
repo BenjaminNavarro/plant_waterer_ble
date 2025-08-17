@@ -1,8 +1,7 @@
 import { qs, qsa, interpolate } from './utils.js'
-import { ProgressUI, ResultDuration, ResultType } from './progress_ui.js'
+import { ProgressUI, ResultType } from './progress_ui.js'
 import { TinyDropScanner } from './tinydrop_scanner.js'
 import { TinyDropDevice } from './tinydrop_device.js'
-import { StatusBar } from './status_bar.js'
 
 export class ConnectPanel {
     searchButton = qs('#search_button')
@@ -11,7 +10,7 @@ export class ConnectPanel {
     deviceList = qs('#device_list')
     deviceListEntryTemplate = qs('#device_list_entry_template')
 
-    constructor(progressUI: ProgressUI, statusBar: StatusBar, scanner: TinyDropScanner, onConnect: CallableFunction, onDisconnect: CallableFunction) {
+    constructor(progressUI: ProgressUI, scanner: TinyDropScanner, onConnect: CallableFunction, onDisconnect: CallableFunction) {
         this.searchButton.addEventListener('click', () => {
             this.deviceList.innerHTML = ''
 

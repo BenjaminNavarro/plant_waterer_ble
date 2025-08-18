@@ -1,9 +1,14 @@
-import type { CapacitorConfig } from '@capacitor/cli';
+import type { CapacitorConfig } from '@capacitor/cli'
 
 const config: CapacitorConfig = {
   appId: 'io.myhome.tinydrop',
   appName: 'TinyDrop',
-  webDir: 'www'
-};
+  webDir: 'www/dist',
+  plugins: {
+    EdgeToEdge: {
+      backgroundColor: "#14161a",
+    },
+  },
+}
 
-export default config;
+export default config

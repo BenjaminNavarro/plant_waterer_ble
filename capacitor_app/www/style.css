@@ -13,7 +13,7 @@
 /* Inside the tabs header, height is 53px */
 .progress-container {
     position: fixed;
-    right: 0;
+    right: 1rem;
 }
 
 .progress {
@@ -101,8 +101,8 @@
     margin-left: 0rem;
     margin-bottom: 0 !important;
     padding-top: 0rem;
-    padding-right: 0rem;
-    padding-left: 0rem;
+    padding-right: 1rem;
+    padding-left: 1rem;
     padding-bottom: 0;
     font-size: var(--header-font-size);
 }

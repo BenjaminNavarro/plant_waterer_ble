@@ -1,5 +1,9 @@
+import 'bulma/css/versions/bulma-prefixed.min.css'
+import '@shoelace-style/shoelace/dist/themes/dark.css'
+
 import { qs } from './utils.js'
-import { SlTabGroup, SlTab, SlAlert, SlTabShowEvent } from 'shoelace/shoelace'
+import { SlTabGroup, SlTab, SlIcon } from '@shoelace-style/shoelace'
+import type { SlTabShowEvent } from '@shoelace-style/shoelace'
 
 import { ProgressUI } from './progress_ui.js'
 import { ConnectPanel } from './connect_panel.js'

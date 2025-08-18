@@ -1,7 +1,8 @@
 import { convertDuration, convertDurationToBestUnit, qs } from './utils.js'
 import { ProgressUI } from './progress_ui.js'
 import { TinyDropDevice, WateringProgram } from './tinydrop_device.js'
-import { SlChangeEvent, SlSwitch } from 'shoelace/shoelace.js'
+import { SlSwitch } from '@shoelace-style/shoelace'
+import type { SlChangeEvent } from '@shoelace-style/shoelace'
 
 export class ConfigPanel {
 

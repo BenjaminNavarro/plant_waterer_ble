@@ -2,7 +2,7 @@
     "compilerOptions": {
         "target": "esnext",
         "module": "esnext",
-        "moduleResolution": "node",
+        // "moduleResolution": "node",
         "declaration": true,
         "outDir": "www/dist",
         "skipLibCheck": true,
@@ -10,7 +10,13 @@
             "shoelace/*": [
                 "./www/deps/shoelace-2.20.1/*"
             ]
-        }
+        },
+        /* Bundler mode */
+        "moduleResolution": "bundler",
+        "allowImportingTsExtensions": true,
+        "verbatimModuleSyntax": true,
+        "moduleDetection": "force",
+        "noEmit": true,
     },
     "include": [
         "www/src/**/*"

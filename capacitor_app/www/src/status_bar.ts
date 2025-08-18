@@ -1,5 +1,6 @@
-import { SlProgressBar } from "shoelace/shoelace.js"
-import { qs, timeoutId } from "./utils.js"
+import { SlProgressBar } from "@shoelace-style/shoelace"
+import { qs } from "./utils.js"
+import type { timeoutId } from "./utils.js"
 
 export class StatusBar {
     constructor() {

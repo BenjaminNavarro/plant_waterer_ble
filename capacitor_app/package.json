@@ -2,15 +2,22 @@
   "name": "io.myhome.tinydrop",
   "displayName": "TinyDrop",
   "version": "1.0.0",
+  "types": "module",
+  "private": "true",
   "description": "Contrôle du système d'arrosage TinyDrop",
-  "source": "www/src/main.ts",
-  "main": "www/dist/main.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
   "author": "Benjamin Navarro",
   "license": "UNLICENSED",
   "devDependencies": {
     "@types/trusted-types": "^2.0.7",
     "json5": "^2.2.3",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "vite": "^5.4.19",
+    "vite-plugin-static-copy": "^3.1.1"
   },
   "dependencies": {
     "@capacitor-community/bluetooth-le": "^7.1.1",
@@ -18,5 +25,8 @@
     "@capacitor/cli": "^7.4.2",
     "@capacitor/core": "^7.4.2",
     "@capacitor/status-bar": "^7.0.2",
+    "@capawesome/capacitor-android-edge-to-edge-support": "^7.2.2",
+    "@shoelace-style/shoelace": "^2.20.1",
+    "bulma": "^1.0.4"
   }
 }

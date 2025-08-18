@@ -8,27 +8,9 @@
     <meta name="viewport"
         content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1">
 
+    <title>TinyDrop</title>
 
-    <title>Syst&#xE8;me d&apos;arrosage</title>
-
-    <link rel="stylesheet" media="(prefers-color-scheme:light)" href="deps/shoelace-2.20.1/themes/light.css" />
-    <link rel="stylesheet" media="(prefers-color-scheme:dark)" href="deps/shoelace-2.20.1/themes/dark.css"
-        onload="document.documentElement.classList.add('sl-theme-dark');" />
-    <script type="module" src="deps/shoelace-2.20.1/shoelace.js"></script>
-
-    <link rel="stylesheet" href="deps/bulma-1.0.4/css/versions/bulma-prefixed.min.css">
     <link rel="stylesheet" href="style.css">
-
-    <style>
-        body {
-            opacity: 0;
-        }
-
-        body.ready {
-            opacity: 1;
-            transition: 0.25s opacity;
-        }
-    </style>
 
     <template id="device_list_entry_template">
         <sl-card class="card-header">
@@ -45,7 +27,7 @@
 
 </head>
 
-<body>
+<body class="sl-theme-dark">
 
     <div class="app-header bulma-columns bulma-is-mobile">
         <div class="app-name bulma-column bulma-is-one-quarter">
@@ -193,10 +175,10 @@
     </div>
 
 
-    <script type="text/javascript" src="cordova.js"></script>
-    <script type="module" src="dist/main.js"></script>
+    <!-- <script type="text/javascript" src="cordova.js"></script> -->
+    <script type="module" src="src/main.ts"></script>
 
-    <script type="module">
+    <!-- <script type="module">
         // Make sure all Shoelace custom elements are loaded before
         // showing the page content to avoid flashes and shifts
         await Promise.allSettled([
@@ -207,7 +189,7 @@
         // Button, card, and rating are registered now! Add
         // the `ready` class so the UI fades in.
         document.body.classList.add('ready');
-    </script>
+    </script> -->
 
 </body>
 

@@ -32,6 +32,9 @@ export class TinyDropBLEScanner extends TinyDropScanner {
         ble.startScan(
             [],
             (device: BLECentralPlugin.PeripheralData) => {
+                console.log('Device found:');
+                console.log(device)
+
                 let dev = new TinyDropBLEDevice(this.statusBar, device.name, device.id)
 
                 onDeviceFound(dev)

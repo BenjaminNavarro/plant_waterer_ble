@@ -1,0 +1,18 @@
+{
+    "compilerOptions": {
+        "target": "esnext",
+        "module": "esnext",
+        "moduleResolution": "node",
+        "declaration": true,
+        "outDir": "www/dist",
+        "skipLibCheck": true,
+        "paths": {
+            "shoelace/*": [
+                "./www/deps/shoelace-2.20.1/*"
+            ]
+        }
+    },
+    "include": [
+        "www/src/**/*"
+    ],
+}

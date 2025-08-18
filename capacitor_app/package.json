@@ -1,0 +1,21 @@
+{
+  "name": "io.myhome.tinydrop",
+  "displayName": "TinyDrop",
+  "version": "1.0.0",
+  "description": "Contrôle du système d'arrosage TinyDrop",
+  "source": "www/src/main.ts",
+  "main": "www/dist/main.js",
+  "author": "Benjamin Navarro",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@types/trusted-types": "^2.0.7",
+    "json5": "^2.2.3",
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.4.2",
+    "@capacitor/cli": "^7.4.2",
+    "@capacitor/core": "^7.4.2",
+    "cordova-plugin-ble-central": "^2.0.0"
+  }
+}

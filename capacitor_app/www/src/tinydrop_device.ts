@@ -1,7 +1,6 @@
-/// <reference types="cordova-plugin-ble-central" />
-
+import { BleClient as ble } from '@capacitor-community/bluetooth-le';
 import { StatusBar } from "./status_bar.js"
-import { timeoutId } from "./utils.js"
+import type { timeoutId } from "./utils.js"
 
 namespace detail {
     export enum NotificationType {
@@ -162,45 +161,45 @@ export abstract class TinyDropDevice {
 export class TinyDropBLEDevice extends TinyDropDevice {
 
     override doConnect(onSuccess?: CallableFunction, onFailure?: CallableFunction): void {
-        ble.connect(this.id(), function (services) {
-            this.log("connected");
-            this.log(services);
+        // ble.connect(this.id(), function (services) {
+        //     this.log("connected");
+        //     this.log(services);
 
-            if (onSuccess !== undefined) {
-                onSuccess()
-            }
+        //     if (onSuccess !== undefined) {
+        //         onSuccess()
+        //     }
 
-        }, function (error: BLECentralPlugin.BLEError) {
-            this.log("disconnected");
-            this.log(`${error.id} - ${error.name}: ${error.errorMessage}`)
+        // }, function (error: BLECentralPlugin.BLEError) {
+        //     this.log("disconnected");
+        //     this.log(`${error.id} - ${error.name}: ${error.errorMessage}`)
 
-            if (onFailure !== undefined) {
-                onFailure()
-            }
-        })
+        //     if (onFailure !== undefined) {
+        //         onFailure()
+        //     }
+        // })
     }
 
     override doDisconnect(onSuccess: CallableFunction, onFailure?: CallableFunction): void {
-        ble.disconnect(this.id(), () => {
-            onSuccess()
-        }, (error: BLECentralPlugin.BLEError) => {
-            this.log(error)
-            onFailure()
-        })
+        // ble.disconnect(this.id(), () => {
+        //     onSuccess()
+        // }, (error: BLECentralPlugin.BLEError) => {
+        //     this.log(error)
+        //     onFailure()
+        // })
     }
 
     override startNotifications(): void {
-        ble.startNotification(this.id(), detail.service_uuid, detail.watering_state_uuid, (data: ArrayBuffer) => {
-            this.onNotification(detail.NotificationType.WateringState, data)
-        }, (error: BLECentralPlugin.BLEError) => {
-            this.log("watering start notification error: " + error)
-        })
+        // ble.startNotification(this.id(), detail.service_uuid, detail.watering_state_uuid, (data: ArrayBuffer) => {
+        //     this.onNotification(detail.NotificationType.WateringState, data)
+        // }, (error: BLECentralPlugin.BLEError) => {
+        //     this.log("watering start notification error: " + error)
+        // })
     }
 
     override stopNotifications(): void {
-        ble.stopNotification(this.id(), detail.service_uuid, detail.watering_state_uuid, null, (error: BLECentralPlugin.BLEError) => {
-            this.log("watering stop notification error: " + error)
-        })
+        // ble.stopNotification(this.id(), detail.service_uuid, detail.watering_state_uuid, null, (error: BLECentralPlugin.BLEError) => {
+        //     this.log("watering stop notification error: " + error)
+        // })
     }
 
     override startWatering(durationSec: number, flowSpeed: number): void {

@@ -1,8 +1,8 @@
-/// <reference types="cordova-plugin-ble-central" />
-
+import { BleClient as ble } from '@capacitor-community/bluetooth-le';
+import type { ScanResult } from '@capacitor-community/bluetooth-le';
 import { StatusBar } from "./status_bar.js";
 import { TinyDropDevice, TinyDropBLEDevice, TinyDropFakeDevice } from "./tinydrop_device.js";
-import { timeoutId } from './utils.js'
+import type { timeoutId } from './utils.js'
 
 type onDeviceFoundCallback = (device: TinyDropDevice) => void
 type onScanErrorCallback = (error: string) => void
@@ -24,26 +24,47 @@ export abstract class TinyDropScanner {
 }
 
 export class TinyDropBLEScanner extends TinyDropScanner {
-    scan(onDeviceFound: onDeviceFoundCallback, onError: onScanErrorCallback, timeoutMs: number): void {
+    constructor(statusBar: StatusBar) {
+        super(statusBar)
+
+    }
+
+    async scan(onDeviceFound: onDeviceFoundCallback, onError: onScanErrorCallback, timeoutMs: number): Promise<void> {
         if (this.scanning) {
             console.log('BLE scan already in progress');
             return
         }
 
-        ble.startScan(
-            [],
-            (device: BLECentralPlugin.PeripheralData) => {
-                console.log('Device found:');
-                console.log(device)
+        // Ask for permissions if needed
+        await ble.initialize()
 
-                let dev = new TinyDropBLEDevice(this.statusBar, device.name, device.id)
-
-                onDeviceFound(dev)
+        ble.requestLEScan(
+            {
+                services: ['2f675585-e40a-c088-6941-b245883c4e3a']
             },
-            (error: string) => {
-                onError(error)
+            (result: ScanResult) => {
+                console.log('received new scan result', result)
+                console.log(result)
+
+                let dev = new TinyDropBLEDevice(this.statusBar, result.localName, result.device.deviceId)
+                onDeviceFound(dev)
             }
         )
+
+        // ble.startScan(
+        //     [],
+        //     (device: BLECentralPlugin.PeripheralData) => {
+        //         console.log('Device found:');
+        //         console.log(device)
+
+        //         let dev = new TinyDropBLEDevice(this.statusBar, device.name, device.id)
+
+        //         onDeviceFound(dev)
+        //     },
+        //     (error: string) => {
+        //         onError(error)
+        //     }
+        // )
 
         this.scanning = true
 
@@ -55,11 +76,8 @@ export class TinyDropBLEScanner extends TinyDropScanner {
 
     stop(): void {
         if (this.scanning) {
-            ble.stopScan(() => {
-                this.scanning = false
-            }, () => {
-                console.log('Failed to stop BLE scan');
-            })
+            ble.stopLEScan()
+            this.scanning = false
         }
     }
 }

@@ -2,11 +2,13 @@ idf_component_register(
     SRCS
         main.cpp
         data/watering_schedule.cpp
-        # services/http.cpp
+        data/user_defined_name.cpp
         services/ble_service.cpp
         services/ble_current_time_service.cpp
         services/ble_battery_service.cpp
         services/ble_watering_service.cpp
+        services/ble_name_service.cpp
+        services/ble_utils.cpp
         tasks/blink.cpp
         tasks/watering.cpp
         tasks/hardware.cpp

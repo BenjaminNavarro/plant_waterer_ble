@@ -8,6 +8,8 @@
 #include <services/ble_current_time_service.hpp>
 #include <services/ble_battery_service.hpp>
 #include <services/ble_watering_service.hpp>
+#include <services/ble_name_service.hpp>
+#include <data/user_defined_name.hpp>
 
 #include "common.h"
 #include "gap.hpp"
@@ -81,6 +83,7 @@ plant::BLEServiceRegistrator ble_services;
 plant::BLECurrentTimeService current_time_service;
 plant::BLEBatteryService battery_service;
 plant::BLEWateringService watering_service;
+plant::BLENameService name_service;
 
 void app_main_ble() {
     /* Local variables */
@@ -114,6 +117,12 @@ void app_main_ble() {
 
     /* GAP service initialization */
     ManufacturerData manufacturer_data;
+
+    if (auto saved_name = plant::read_user_defined_name_from_storage()) {
+        ESP_LOGI(TAG, "Name read from storage");
+        manufacturer_data.part2.user_defined_name = saved_name->as_array();
+    }
+
     rc = gap_init(manufacturer_data);
     if (rc != 0) {
         ESP_LOGE(TAG, "failed to initialize GAP service, error code: %d", rc);
@@ -123,6 +132,9 @@ void app_main_ble() {
     ble_services.add_service(current_time_service);
     ble_services.add_service(battery_service);
     ble_services.add_service(watering_service);
+    ble_services.add_service(name_service);
+
+    name_service.name().set(manufacturer_data.part2.user_defined_name);
 
     ble_services.register_all_services();
 

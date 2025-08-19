@@ -53,9 +53,10 @@ struct ManufacturerData {
     struct Part2 {
         // 16 bytes available in the scan response buffer for manufacturer data
         static constexpr std::size_t max_size = 16;
+        static constexpr std::size_t name_max_size = max_size - 2;
 
         static constexpr std::uint16_t id = mfg_id_from_string("TD");
-        std::array<char, max_size - sizeof(id)> user_defined_name =
+        std::array<char, name_max_size> user_defined_name =
             std::to_array("My Cute Plant");
 
         std::array<uint8_t, max_size> to_array() {
@@ -79,5 +80,8 @@ struct ManufacturerData {
 /* Public function declarations */
 void adv_init(void);
 int gap_init(const ManufacturerData& manufacturer_data);
+
+ManufacturerData getCurrentManufacturerData();
+void updateManufacturerData(const ManufacturerData& manufacturer_data);
 
 #endif // GAP_SVC_H

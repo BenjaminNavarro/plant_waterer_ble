@@ -313,3 +313,11 @@ int gap_init(const ManufacturerData& manufacturer_data) {
     }
     return rc;
 }
+
+ManufacturerData getCurrentManufacturerData() {
+    return saved_manufacturer_data;
+}
+
+void updateManufacturerData(const ManufacturerData& manufacturer_data) {
+    saved_manufacturer_data = manufacturer_data;
+}

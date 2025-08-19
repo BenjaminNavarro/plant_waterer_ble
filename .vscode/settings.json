@@ -72,7 +72,13 @@
     "typeinfo": "cpp",
     "optional": "cpp",
     "unordered_set": "cpp",
-    "iomanip": "cpp"
+    "iomanip": "cpp",
+    "charconv": "cpp",
+    "format": "cpp",
+    "ranges": "cpp",
+    "span": "cpp",
+    "text_encoding": "cpp",
+    "variant": "cpp"
   },
   "clangd.arguments": [
     "--background-index",

@@ -231,7 +231,23 @@ export class TinyDropBLEDevice extends TinyDropDevice {
     }
 
     override setName(new_name: string): void {
-
+        logger.log(`setName: ${new_name} (${new_name.length})`)
+        let asciiKeys = new Array<number>();
+        for (var i = 0; i < new_name.length; i++) {
+            asciiKeys.push(new_name[i].charCodeAt(0));
+        }
+        logger.log('ascii: ' + asciiKeys)
+        const encoder = new TextEncoder()
+        const array = encoder.encode(new_name)
+        logger.log(array)
+        const data = new DataView(array.buffer, array.length - new_name.length, new_name.length)
+        logger.log(data.buffer)
+        ble.write(this.id(), "4f736c21-2054-4786-93fe-a5c4b028dbef", "b8b4c3af-fa31-4de4-9fa1-a26ea5da7f0b", data).then(() => {
+            logger.log(`Name ${new_name} sent to device`)
+        }, (reason: any) => {
+            logger.log(`Can't send name to device`)
+            logger.log(reason)
+        })
     }
 
     override startWatering(durationSec: number, flowSpeed: number): void {

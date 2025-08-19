@@ -2,6 +2,7 @@ import { qs, qsa, interpolate } from './utils.ts'
 import { ProgressUI, ResultType } from './progress_ui.ts'
 import { TinyDropScanner } from './tinydrop_scanner.ts'
 import { TinyDropDevice } from './tinydrop_device.ts'
+import type { SlTabShowEvent } from '@shoelace-style/shoelace'
 
 export class ConnectPanel {
     searchButton = qs('#search_button')

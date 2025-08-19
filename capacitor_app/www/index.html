@@ -69,7 +69,8 @@
             </sl-tab-panel>
 
             <sl-tab-panel class="main-tabs" name="config">
-                <sl-input label="Nom personnalisé" id="custom_name_input" maxlength="14"></sl-input>
+                <input label="Nom personnalisé" id="custom_name_input" type="text" pattern="[\x00-\x7F]+"
+                    class="bulma-input"></input>
                 <sl-divider></sl-divider>
                 <div class="bulma-columns bulma-is-mobile bulma-is-vcentered">
                     <div class="bulma-column bulma-is-one-quarter">

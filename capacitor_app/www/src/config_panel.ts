@@ -30,9 +30,10 @@ export class ConfigPanel {
             console.log(`[Program] ${value}`)
         }
 
-        this.customNameInput.addEventListener('sl-change', () => {
+        this.customNameInput.addEventListener('change', () => {
             if (this.device != null) {
-                this.device.setName(this.customNameInput.value)
+                // Since HTMLInput's maxLength is not reliable on mobile, just truncate the input...
+                this.device.setName(this.customNameInput.value.substring(0, 14))
             }
         })
 

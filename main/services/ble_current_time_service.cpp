@@ -1,21 +1,21 @@
 #include <services/ble_current_time_service.hpp>
 
 #include "host/ble_hs.h"
+#include "ble_utils.hpp"
+
+#include <sys/time.h>
 
 namespace plant {
 
 namespace {
 
 /* Current time service */
-const ble_uuid16_t current_time_svc_uuid = BLE_UUID16_INIT(0x1805);
+const auto current_time_svc_uuid =
+    make_uuid128("87f4d02e-698f-4c46-91f2-5f714c877b0a");
 
-uint32_t current_time_chr_val = {0};
 uint16_t current_time_chr_val_handle;
-const ble_uuid16_t current_time_chr_uuid = BLE_UUID16_INIT(0x2A2B);
-
-uint16_t current_time_chr_conn_handle = 0;
-bool current_time_chr_conn_handle_inited = false;
-bool current_time_ind_status = false;
+const auto current_time_chr_uuid =
+    make_uuid128("21bc4af5-44f0-4a7b-aa36-a110a0ac0ad2");
 
 } // namespace
 
@@ -38,9 +38,7 @@ int BLECurrentTimeService::current_time_chr_access(uint16_t conn_handle,
 
     auto error_handler = [ctxt]() {
         ESP_LOGE("BLECurrentTimeService",
-                 "unexpected access operation to heart rate "
-                 "characteristic, opcode: %d",
-                 ctxt->op);
+                 "unexpected access operation, opcode: %d", ctxt->op);
         return BLE_ATT_ERR_UNLIKELY;
     };
 
@@ -63,17 +61,57 @@ int BLECurrentTimeService::current_time_chr_access(uint16_t conn_handle,
 
         /* Verify attribute handle */
         if (attr_handle == current_time_chr_val_handle) {
-            self.current_time().seconds =
-                (self.current_time().seconds +
-                 xTaskGetTickCount() / xPortGetTickRateHz()) %
-                60;
-            int res = os_mbuf_append(ctxt->om, &self.current_time(),
-                                     sizeof(self.current_time()));
+            struct timeval now_tv;
+            gettimeofday(&now_tv, nullptr);
+
+            int res =
+                os_mbuf_append(ctxt->om, &now_tv.tv_sec, sizeof(now_tv.tv_sec));
             return res == 0 ? 0 : BLE_ATT_ERR_INSUFFICIENT_RES;
         }
         return error_handler();
 
-    // TODO handle write
+    case BLE_GATT_ACCESS_OP_WRITE_CHR:
+        if (conn_handle != BLE_HS_CONN_HANDLE_NONE) {
+            ESP_LOGI("BLECurrentTimeService",
+                     "Characteristic write; conn_handle=%d attr_handle=%d",
+                     conn_handle, attr_handle);
+        } else {
+            ESP_LOGI("BLECurrentTimeService",
+                     "Characteristic write by NimBLE stack; attr_handle=%d",
+                     attr_handle);
+        }
+        if (attr_handle == current_time_chr_val_handle) {
+            constexpr auto packet_size = sizeof(std::int64_t);
+            const auto bytes_received = OS_MBUF_PKTLEN(ctxt->om);
+            if (bytes_received != packet_size) {
+                return error_handler();
+            }
+
+            uint16_t bytes_written{};
+            std::int64_t current_time{};
+            auto rc = gatt_svr_write(ctxt->om, packet_size, packet_size,
+                                     &current_time, &bytes_written);
+
+            if (rc != 0) {
+                ESP_LOGI("BLECurrentTimeService",
+                         "Cannot write time to memory\n");
+                return rc;
+            }
+
+            struct timeval tv;
+            tv.tv_sec = current_time;
+            tv.tv_usec = 0;
+            settimeofday(&tv, nullptr);
+
+            ble_gatts_chr_updated(attr_handle);
+
+            ESP_LOGI("BLECurrentTimeService", "New time: %lld\n", current_time);
+            ESP_LOGI("BLECurrentTimeService",
+                     "Notification/Indication scheduled for "
+                     "all subscribed peers.\n");
+            return rc;
+        }
+        return error_handler();
 
     /* Unknown event */
     default:

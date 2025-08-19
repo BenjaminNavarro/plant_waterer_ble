@@ -47,6 +47,8 @@ export class WateringStateData {
     }
 }
 
+export type programReadCallback = (program: WateringProgram) => void
+
 export abstract class TinyDropDevice {
 
     connected = false
@@ -123,7 +125,7 @@ export abstract class TinyDropDevice {
     abstract startWatering(durationSec: number, flowSpeed: number): void
     abstract stopWatering(): void
     abstract sendProgram(program: WateringProgram): void
-    abstract readProgram(): WateringProgram
+    abstract readProgram(onSuccess: programReadCallback): void
 
     protected onNotification(type: detail.NotificationType, data: ArrayBuffer) {
         switch (type) {
@@ -238,18 +240,16 @@ export class TinyDropBLEDevice extends TinyDropDevice {
         for (var i = 0; i < new_name.length; i++) {
             asciiKeys.push(new_name[i].charCodeAt(0));
         }
-        logger.log('ascii: ' + asciiKeys)
         const encoder = new TextEncoder()
         const array = encoder.encode(new_name)
-        logger.log(array)
         const data = new DataView(array.buffer, array.length - new_name.length, new_name.length)
-        logger.log(data.buffer)
-        ble.write(this.id(), "4f736c21-2054-4786-93fe-a5c4b028dbef", "b8b4c3af-fa31-4de4-9fa1-a26ea5da7f0b", data).then(() => {
-            logger.log(`Name ${new_name} sent to device`)
-        }, (reason: any) => {
-            logger.log(`Can't send name to device`)
-            logger.log(reason)
-        })
+        ble.write(this.id(), "4f736c21-2054-4786-93fe-a5c4b028dbef", "b8b4c3af-fa31-4de4-9fa1-a26ea5da7f0b", data).then(
+            () => {
+                logger.log(`Name ${new_name} sent to device`)
+            }, (reason: any) => {
+                logger.log(`Can't send name to device`)
+                logger.log(reason)
+            })
     }
 
     override startWatering(durationSec: number, flowSpeed: number): void {
@@ -264,9 +264,27 @@ export class TinyDropBLEDevice extends TinyDropDevice {
 
     }
 
-    override readProgram(): WateringProgram {
-        let program = new WateringProgram()
-        return program
+    override readProgram(onSuccess: programReadCallback): void {
+        logger.log('Reading program from device...')
+        ble.read(this.id(), '2f675585-e40a-c088-6941-b245883c4e3a', '3496dac7-7885-4c9c-8e54-0ffebd805485').then(
+            (data: DataView) => {
+                if (data.byteLength != 16) {
+                    logger.log(`Invalid data size for program. Got ${data.byteLength}, expected 16`)
+                    return
+                }
+
+                let program = new WateringProgram()
+                program.startDate = Number(data.getBigUint64(0, true))
+                program.period = data.getUint32(8, true)
+                program.duration = data.getUint16(8 + 4, true)
+                program.waterFlow = data.getUint8(8 + 4 + 2)
+                program.enabled = data.getUint8(8 + 4 + 2 + 1) != 0
+                logger.log('Program received: ' + JSON.stringify(program))
+                onSuccess(program)
+            }, (reason: any) => {
+                logger.log(`Can't read program from device`)
+                logger.log(reason)
+            })
     }
 
     private sendCurrentTime(): void {
@@ -275,12 +293,13 @@ export class TinyDropBLEDevice extends TinyDropDevice {
         const dataView = new DataView(buffer)
         const nowBitInt = BigInt(now)
         dataView.setBigInt64(0, nowBitInt, true)
-        ble.write(this.id(), "87f4d02e-698f-4c46-91f2-5f714c877b0a", "21bc4af5-44f0-4a7b-aa36-a110a0ac0ad2", dataView).then(() => {
-            logger.log(`Time ${now} sent to device`)
-        }, (reason: any) => {
-            logger.log(`Can't send time to device`)
-            logger.log(reason)
-        })
+        ble.write(this.id(), "87f4d02e-698f-4c46-91f2-5f714c877b0a", "21bc4af5-44f0-4a7b-aa36-a110a0ac0ad2", dataView).then(
+            () => {
+                logger.log(`Time ${now} sent to device`)
+            }, (reason: any) => {
+                logger.log(`Can't send time to device`)
+                logger.log(reason)
+            })
     }
 
     protected log(value: any): void {
@@ -300,10 +319,11 @@ export class TinyDropFakeDevice extends TinyDropDevice {
     constructor(statusBar: StatusBar, name: string, id: string, outputCount: number) {
         super(statusBar, name, id, outputCount)
 
-        let program = this.readProgram()
-        if (program != null && program.enabled) {
-            this.sendProgram(program)
-        }
+        this.readProgram((program: WateringProgram) => {
+            if (program.enabled) {
+                this.sendProgram(program)
+            }
+        })
 
         let savedName = localStorage.getItem('deviceName')
         if (savedName != null) {
@@ -401,7 +421,7 @@ export class TinyDropFakeDevice extends TinyDropDevice {
         }
     }
 
-    override readProgram(): WateringProgram {
+    override readProgram(onSuccess: programReadCallback): void {
         const savedProgram = localStorage.getItem('program')
         if (savedProgram != null) {
             const savedProgramJS = JSON.parse(savedProgram)
@@ -412,7 +432,7 @@ export class TinyDropFakeDevice extends TinyDropDevice {
             program.waterFlow = savedProgramJS['waterFlow']
             program.startDate = savedProgramJS['startDate']
 
-            return program
+            onSuccess(program)
         }
         else {
             return null

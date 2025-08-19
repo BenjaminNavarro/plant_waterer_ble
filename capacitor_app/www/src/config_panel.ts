@@ -3,6 +3,7 @@ import { ProgressUI } from './progress_ui.ts'
 import { TinyDropDevice, WateringProgram } from './tinydrop_device.ts'
 import { SlSwitch } from '@shoelace-style/shoelace'
 import type { SlChangeEvent } from '@shoelace-style/shoelace'
+import { logger } from './logger.ts'
 
 export class ConfigPanel {
 
@@ -92,9 +93,8 @@ export class ConfigPanel {
 
         if (this.device != null) {
             this.customNameInput.value = this.device.name()
-            let savedProgram = this.device.readProgram()
-            if (savedProgram != null) {
-                this.program = savedProgram
+            this.device.readProgram((program: WateringProgram) => {
+                this.program = program
 
                 this.program.enabled = this.program.enabled
                 this.programEnabled.checked = this.program.enabled
@@ -115,12 +115,15 @@ export class ConfigPanel {
                 const month = date.getMonth() + 1
                 const monthPrefix = month < 10 ? '0' : ''
                 const day = date.getDate()
+                const dayPrefix = day < 10 ? '0' : ''
                 const hours = date.getHours()
+                const hoursPrefix = hours < 10 ? '0' : ''
                 const minutes = date.getMinutes()
-                const formattedDate = `${year}-${monthPrefix}${month}-${day}T${hours}:${minutes}`
+                const minutesPrefix = minutes < 10 ? '0' : ''
+                const formattedDate = `${year}-${monthPrefix}${month}-${dayPrefix}${day}T${hoursPrefix}${hours}:${minutesPrefix}${minutes}`
 
                 this.programStart.value = formattedDate
-            }
+            })
         }
 
     }

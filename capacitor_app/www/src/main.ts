@@ -13,6 +13,7 @@ import { ManualPanel } from './test_panel.ts'
 import { TinyDropDevice, TinyDropBLEDevice, TinyDropFakeDevice } from './tinydrop_device.ts'
 import { TinyDropScanner, TinyDropFakeScanner, TinyDropBLEScanner } from './tinydrop_scanner.ts'
 import { StatusBar } from './status_bar.ts'
+import { logger } from './logger.ts'
 
 function main() {
     const tabs = qs<SlTabGroup>('#tabs')
@@ -31,7 +32,7 @@ function main() {
     const configPanel = new ConfigPanel(progressUI)
     const testPanel = new ManualPanel(progressUI)
 
-    const connectPanel = new ConnectPanel(progressUI, scanner, (device: TinyDropBLEDevice) => {
+    const connectPanel = new ConnectPanel(progressUI, scanner, (device: TinyDropDevice) => {
         configTab.disabled = false
         manualTab.disabled = false
         configPanel.setDevice(device)

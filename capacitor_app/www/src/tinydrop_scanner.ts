@@ -3,6 +3,7 @@ import type { ScanResult } from '@capacitor-community/bluetooth-le';
 import { StatusBar } from "./status_bar.ts";
 import { TinyDropDevice, TinyDropBLEDevice, TinyDropFakeDevice } from "./tinydrop_device.ts";
 import type { timeoutId } from './utils.ts'
+import { logger } from './logger.ts';
 
 type onDeviceFoundCallback = (device: TinyDropDevice) => void
 type onScanErrorCallback = (error: string) => void
@@ -29,53 +30,72 @@ export class TinyDropBLEScanner extends TinyDropScanner {
 
     }
 
-    async scan(onDeviceFound: onDeviceFoundCallback, onError: onScanErrorCallback, timeoutMs: number): Promise<void> {
+    scan(onDeviceFound: onDeviceFoundCallback, onError: onScanErrorCallback, timeoutMs: number): Promise<void> {
         if (this.scanning) {
-            console.log('BLE scan already in progress');
+            logger.log('BLE scan already in progress');
             return
         }
 
         // Ask for permissions if needed
-        await ble.initialize()
+        logger.log('Initializing BLE')
+        ble.initialize().then(() => {
 
-        ble.requestLEScan(
-            {
-                services: ['2f675585-e40a-c088-6941-b245883c4e3a']
-            },
-            (result: ScanResult) => {
-                console.log('received new scan result', result)
-                console.log(result)
+            logger.log('BLE ready')
 
-                let dev = new TinyDropBLEDevice(this.statusBar, result.localName, result.device.deviceId)
-                onDeviceFound(dev)
+            logger.log('Requesting BLE scan')
+
+            const mfgIDtoKey = (id: string): string => {
+                if (id.length != 2) {
+                    return ''
+                }
+
+                const charCode0 = id.charCodeAt(0)
+                const charCode1 = id.charCodeAt(1)
+                const charCode0Shift = (charCode0 & 0xFF) << 8
+                const key = charCode0Shift | charCode1 & 0xFF
+
+                return key.toString()
             }
-        )
 
-        // ble.startScan(
-        //     [],
-        //     (device: BLECentralPlugin.PeripheralData) => {
-        //         console.log('Device found:');
-        //         console.log(device)
+            const mfgKey1 = mfgIDtoKey('TD')
+            const mfgKey2 = mfgIDtoKey('HW')
 
-        //         let dev = new TinyDropBLEDevice(this.statusBar, device.name, device.id)
+            ble.requestLEScan(
+                {
+                    // services: ['2f675585-e40a-c088-6941-b245883c4e3a']
+                },
+                (result: ScanResult) => {
+                    if (mfgKey1 in result.manufacturerData && mfgKey2 in result.manufacturerData) {
+                        logger.log(`received new scan result: ${result.localName} ${result.device.deviceId}`)
+                        logger.log('Output count: ' + result.manufacturerData[mfgKey2].getUint8(0).toString())
 
-        //         onDeviceFound(dev)
-        //     },
-        //     (error: string) => {
-        //         onError(error)
-        //     }
-        // )
+                        const decoder = new TextDecoder()
+                        const userDefinedName = decoder.decode(result.manufacturerData[mfgKey1])
 
-        this.scanning = true
+                        let dev = new TinyDropBLEDevice(this.statusBar, userDefinedName, result.device.deviceId)
+                        onDeviceFound(dev)
+                    }
+                    else {
+                        console.log(result);
+                    }
+                }
+            )
 
-        setTimeout(
-            this.stop,
-            timeoutMs
-        )
+            this.scanning = true
+
+            setTimeout(
+                () => {
+                    this.stop()
+                },
+                timeoutMs
+            )
+
+        })
     }
 
     stop(): void {
         if (this.scanning) {
+            logger.log('Stopping BLE scan')
             ble.stopLEScan()
             this.scanning = false
         }
@@ -86,7 +106,7 @@ export class TinyDropFakeScanner extends TinyDropScanner {
 
     scan(onDeviceFound: onDeviceFoundCallback, onError: onScanErrorCallback, timeoutMs: number): void {
         if (this.scanning) {
-            console.log('Fake scan already in progress');
+            logger.log('Fake scan already in progress');
             return
         }
 

@@ -5,7 +5,7 @@ import { TinyDropDevice } from './tinydrop_device.ts'
 
 export class ConnectPanel {
     searchButton = qs('#search_button')
-    searchDurationMs = 5000
+    searchDurationMs = 30000
 
     deviceList = qs('#device_list')
     deviceListEntryTemplate = qs('#device_list_entry_template')

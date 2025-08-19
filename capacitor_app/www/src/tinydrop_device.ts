@@ -1,6 +1,7 @@
 import { BleClient as ble, type BleService } from '@capacitor-community/bluetooth-le';
 import { StatusBar } from "./status_bar.ts"
 import type { timeoutId } from "./utils.ts"
+import { logger } from './logger.ts';
 
 namespace detail {
     export enum NotificationType {
@@ -137,10 +138,10 @@ export abstract class TinyDropDevice {
     protected abstract stopNotifications(): void
 
     protected log(value: any): void {
-        console.log(`[Device] ${value}`)
+        logger.log(`[Device] ${value}`)
     }
 
-    private updateStatusBar() {
+    protected updateStatusBar() {
         this.statusBar.setBluetoothState(this.connected)
         this.statusBar.setWateringState(this.wateringState().watering)
 
@@ -161,31 +162,51 @@ export abstract class TinyDropDevice {
 export class TinyDropBLEDevice extends TinyDropDevice {
 
     override doConnect(onSuccess?: CallableFunction, onFailure?: CallableFunction): void {
-        // ble.connect(this.id(), function (services) {
-        //     this.log("connected");
-        //     this.log(services);
+        const onConnect = () => {
+            logger.log("connected")
+            ble.getServices(this.id()).then((services: BleService[]) => {
+                let uuids = []
+                services.forEach(service => {
+                    uuids.push(service.uuid)
+                })
 
-        //     if (onSuccess !== undefined) {
-        //         onSuccess()
-        //     }
+                // TODO check expected services
+                logger.log('services: ' + uuids.toString())
 
-        // }, function (error: BLECentralPlugin.BLEError) {
-        //     this.log("disconnected");
-        //     this.log(`${error.id} - ${error.name}: ${error.errorMessage}`)
+                if (onSuccess !== undefined) {
+                    onSuccess()
+                }
+            })
 
-        //     if (onFailure !== undefined) {
-        //         onFailure()
-        //     }
-        // })
+
+        }
+
+        const onDisconnect = () => {
+            this.log("disconnected")
+
+            this.connected = false
+            this.updateStatusBar()
+        }
+
+        const onError = (reason: any) => {
+            this.log("connection error")
+            this.log(reason)
+            if (onFailure !== undefined) {
+                onFailure()
+            }
+        }
+
+        this.log('connecting to ' + this.id())
+        ble.connect(this.id(), onDisconnect).then(onConnect, onError)
     }
 
     override doDisconnect(onSuccess: CallableFunction, onFailure?: CallableFunction): void {
-        // ble.disconnect(this.id(), () => {
-        //     onSuccess()
-        // }, (error: BLECentralPlugin.BLEError) => {
-        //     this.log(error)
-        //     onFailure()
-        // })
+        ble.disconnect(this.id()).then(() => {
+            onSuccess()
+        }).catch((reason: any) => {
+            this.log(reason)
+            onFailure()
+        })
     }
 
     override startNotifications(): void {
@@ -220,7 +241,7 @@ export class TinyDropBLEDevice extends TinyDropDevice {
     }
 
     protected log(value: any): void {
-        console.log(`[BLEDevice] ${value}`)
+        logger.log(`[BLEDevice] ${value}`)
     }
 }
 
@@ -367,6 +388,6 @@ export class TinyDropFakeDevice extends TinyDropDevice {
     }
 
     protected log(value: any): void {
-        console.log(`[FakeDevice] ${value}`)
+        logger.log(`[FakeDevice] ${value}`)
     }
 }

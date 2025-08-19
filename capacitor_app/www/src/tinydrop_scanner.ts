@@ -61,22 +61,16 @@ export class TinyDropBLEScanner extends TinyDropScanner {
             const mfgKey2 = mfgIDtoKey('HW')
 
             ble.requestLEScan(
-                {
-                    // services: ['2f675585-e40a-c088-6941-b245883c4e3a']
-                },
+                {},
                 (result: ScanResult) => {
                     if (mfgKey1 in result.manufacturerData && mfgKey2 in result.manufacturerData) {
-                        logger.log(`received new scan result: ${result.localName} ${result.device.deviceId}`)
-                        logger.log('Output count: ' + result.manufacturerData[mfgKey2].getUint8(0).toString())
-
                         const decoder = new TextDecoder()
                         const userDefinedName = decoder.decode(result.manufacturerData[mfgKey1])
 
-                        let dev = new TinyDropBLEDevice(this.statusBar, userDefinedName, result.device.deviceId)
+                        const outputCount = result.manufacturerData[mfgKey2].getUint8(0);
+
+                        let dev = new TinyDropBLEDevice(this.statusBar, userDefinedName, result.device.deviceId, outputCount)
                         onDeviceFound(dev)
-                    }
-                    else {
-                        console.log(result);
                     }
                 }
             )
@@ -116,7 +110,7 @@ export class TinyDropFakeScanner extends TinyDropScanner {
             this.timers[index] = setTimeout(() => {
                 const name = 'Device #' + (index + 1).toString()
                 const id = index.toString()
-                let dev = new TinyDropFakeDevice(this.statusBar, name, id)
+                let dev = new TinyDropFakeDevice(this.statusBar, name, id, 1)
 
                 onDeviceFound(dev)
             }, (index + 1) * 500)

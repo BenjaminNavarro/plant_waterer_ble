@@ -55,11 +55,13 @@ export abstract class TinyDropDevice {
     private deviceId: string = ''
     private wateringStateData = new WateringStateData()
     private statusBar: StatusBar
+    private outputCount = 0
 
-    constructor(statusBar: StatusBar, name: string, id: string) {
+    constructor(statusBar: StatusBar, name: string, id: string, outputCount: number) {
         this.statusBar = statusBar
         this.deviceName = name
         this.deviceId = id
+        this.outputCount = outputCount
     }
 
     name(): string {
@@ -68,6 +70,10 @@ export abstract class TinyDropDevice {
 
     id(): string {
         return this.deviceId
+    }
+
+    outputs(): number {
+        return this.outputCount
     }
 
     connect(onSuccess?: CallableFunction, onFailure?: CallableFunction): void {
@@ -259,8 +265,8 @@ export class TinyDropFakeDevice extends TinyDropDevice {
     private wateringIntervalHandle: timeoutId = null
     private internalWateringState = new WateringStateData()
 
-    constructor(statusBar: StatusBar, name: string, id: string) {
-        super(statusBar, name, id)
+    constructor(statusBar: StatusBar, name: string, id: string, outputCount: number) {
+        super(statusBar, name, id, outputCount)
 
         let program = this.readProgram()
         if (program != null && program.enabled) {

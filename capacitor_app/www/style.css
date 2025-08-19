@@ -141,3 +141,10 @@
     color: #017ff5;
     opacity: 1;
 }
+
+#logs_button {
+    position: fixed;
+    z-index: 1;
+    bottom: 1rem;
+    right: 1rem;
+}

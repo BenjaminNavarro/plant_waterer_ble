@@ -3,6 +3,11 @@ import { interpolate, qs } from "./utils.ts";
 export class Logger {
     constructor() {
         this.logs.innerHTML = ''
+
+        this.logsTable.classList.add('is_hidden')
+        qs('#logs_button').addEventListener('click', () => {
+            this.logsTable.classList.toggle('is_hidden')
+        })
     }
 
     log(data: any) {
@@ -16,6 +21,7 @@ export class Logger {
         console.log(data)
     }
 
+    private logsTable = qs('#logs_table')
     private logs = qs('#logs')
     private logEntryTemplate = qs('#log_entry')
 }

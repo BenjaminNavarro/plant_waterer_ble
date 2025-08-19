@@ -180,6 +180,8 @@ export class TinyDropBLEDevice extends TinyDropDevice {
                 // TODO check expected services
                 logger.log('services: ' + uuids.toString())
 
+                this.sendCurrentTime()
+
                 if (onSuccess !== undefined) {
                     onSuccess()
                 }
@@ -265,6 +267,20 @@ export class TinyDropBLEDevice extends TinyDropDevice {
     override readProgram(): WateringProgram {
         let program = new WateringProgram()
         return program
+    }
+
+    private sendCurrentTime(): void {
+        const now = Math.round(Date.now() / 1000)
+        const buffer = new ArrayBuffer(8)
+        const dataView = new DataView(buffer)
+        const nowBitInt = BigInt(now)
+        dataView.setBigInt64(0, nowBitInt, true)
+        ble.write(this.id(), "87f4d02e-698f-4c46-91f2-5f714c877b0a", "21bc4af5-44f0-4a7b-aa36-a110a0ac0ad2", dataView).then(() => {
+            logger.log(`Time ${now} sent to device`)
+        }, (reason: any) => {
+            logger.log(`Can't send time to device`)
+            logger.log(reason)
+        })
     }
 
     protected log(value: any): void {

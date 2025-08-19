@@ -44,13 +44,13 @@ export function convertDuration(durationInUnit: number, unit: string): number {
 }
 
 export function findBestDurationUnit(durationSec: number): string {
-    if (durationSec > 60 * 60 * 24) {
+    if (durationSec >= 60 * 60 * 24) {
         return 'd'
     }
-    else if (durationSec > 60 * 60) {
+    else if (durationSec >= 60 * 60) {
         return 'h'
     }
-    else if (durationSec > 60) {
+    else if (durationSec >= 60) {
         return 'm'
     }
     else {

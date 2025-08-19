@@ -113,7 +113,8 @@ void app_main_ble() {
     }
 
     /* GAP service initialization */
-    rc = gap_init();
+    ManufacturerData manufacturer_data;
+    rc = gap_init(manufacturer_data);
     if (rc != 0) {
         ESP_LOGE(TAG, "failed to initialize GAP service, error code: %d", rc);
         return;

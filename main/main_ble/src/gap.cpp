@@ -8,6 +8,8 @@
 #include "common.h"
 #include "gatt_svc.hpp"
 
+#include <array>
+
 /* Private function declarations */
 inline static void format_addr(char* addr_str, uint8_t addr[]);
 static void print_conn_desc(struct ble_gap_conn_desc* desc);
@@ -17,22 +19,7 @@ static int gap_event_handler(struct ble_gap_event* event, void* arg);
 /* Private variables */
 static uint8_t own_addr_type;
 static uint8_t addr_val[6] = {0};
-static uint8_t esp_uri[] = {BLE_GAP_URI_PREFIX_HTTPS,
-                            '/',
-                            '/',
-                            'e',
-                            's',
-                            'p',
-                            'r',
-                            'e',
-                            's',
-                            's',
-                            'i',
-                            'f',
-                            '.',
-                            'c',
-                            'o',
-                            'm'};
+static ManufacturerData saved_manufacturer_data;
 
 /* Private functions */
 inline static void format_addr(char* addr_str, uint8_t addr[]) {
@@ -89,13 +76,18 @@ static void start_advertising(void) {
 
     /* Set device appearance */
     adv_fields.appearance = BLE_GAP_APPEARANCE_GENERIC_TAG;
-    adv_fields.appearance_is_present = 1;
+    adv_fields.appearance_is_present = 0;
 
     /* Set device LE role */
     adv_fields.le_role = BLE_GAP_LE_ROLE_PERIPHERAL;
     adv_fields.le_role_is_present = 1;
 
-    /* Set advertiement fields */
+    // 10 bytes available in the advertizing buffer for manufacturer data
+    const auto mfg_data_1 = saved_manufacturer_data.part1.to_array();
+    adv_fields.mfg_data = mfg_data_1.data();
+    adv_fields.mfg_data_len = mfg_data_1.size();
+
+    /* Set advertisement fields */
     rc = ble_gap_adv_set_fields(&adv_fields);
     if (rc != 0) {
         ESP_LOGE(TAG, "failed to set advertising data, error code: %d", rc);
@@ -107,12 +99,13 @@ static void start_advertising(void) {
     rsp_fields.device_addr_type = own_addr_type;
     rsp_fields.device_addr_is_present = 1;
 
-    /* Set URI */
-    rsp_fields.uri = esp_uri;
-    rsp_fields.uri_len = sizeof(esp_uri);
+    // 16 bytes available in the scan response buffer for manufacturer data
+    const auto mfg_data_2 = saved_manufacturer_data.part2.to_array();
+    rsp_fields.mfg_data = mfg_data_2.data();
+    rsp_fields.mfg_data_len = mfg_data_2.size();
 
     /* Set advertising interval */
-    rsp_fields.adv_itvl = BLE_GAP_ADV_ITVL_MS(500);
+    rsp_fields.adv_itvl = BLE_GAP_ADV_ITVL_MS(100);
     rsp_fields.adv_itvl_is_present = 1;
 
     /* Set scan response fields */
@@ -127,8 +120,8 @@ static void start_advertising(void) {
     adv_params.disc_mode = BLE_GAP_DISC_MODE_GEN;
 
     /* Set advertising interval */
-    adv_params.itvl_min = BLE_GAP_ADV_ITVL_MS(500);
-    adv_params.itvl_max = BLE_GAP_ADV_ITVL_MS(510);
+    adv_params.itvl_min = BLE_GAP_ADV_ITVL_MS(100);
+    adv_params.itvl_max = BLE_GAP_ADV_ITVL_MS(110);
 
     /* Start advertising */
     rc = ble_gap_adv_start(own_addr_type, NULL, BLE_HS_FOREVER, &adv_params,
@@ -302,9 +295,11 @@ void adv_init(void) {
     start_advertising();
 }
 
-int gap_init(void) {
+int gap_init(const ManufacturerData& manufacturer_data) {
     /* Local variables */
     int rc = 0;
+
+    saved_manufacturer_data = manufacturer_data;
 
     /* Call NimBLE GAP initialization API */
     ble_svc_gap_init();

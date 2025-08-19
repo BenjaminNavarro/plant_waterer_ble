@@ -31,7 +31,7 @@
 #include "nimble/nimble_port_freertos.h"
 
 /* Defines */
-#define TAG "NimBLE_GATT_Server"
-#define DEVICE_NAME "NimBLE_GATT"
+#define TAG "TinyDrop"
+#define DEVICE_NAME "TinyDrop"
 
 #endif // COMMON_H

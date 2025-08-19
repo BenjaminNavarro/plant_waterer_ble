@@ -1,6 +1,6 @@
 import { SlIcon } from "@shoelace-style/shoelace"
-import { qs } from "./utils.js"
-import type { timeoutId } from "./utils.js"
+import { qs } from "./utils.ts"
+import type { timeoutId } from "./utils.ts"
 
 export class ProgressUI {
     stop(result: ResultType) {

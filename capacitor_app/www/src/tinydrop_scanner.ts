@@ -1,8 +1,8 @@
 import { BleClient as ble } from '@capacitor-community/bluetooth-le';
 import type { ScanResult } from '@capacitor-community/bluetooth-le';
-import { StatusBar } from "./status_bar.js";
-import { TinyDropDevice, TinyDropBLEDevice, TinyDropFakeDevice } from "./tinydrop_device.js";
-import type { timeoutId } from './utils.js'
+import { StatusBar } from "./status_bar.ts";
+import { TinyDropDevice, TinyDropBLEDevice, TinyDropFakeDevice } from "./tinydrop_device.ts";
+import type { timeoutId } from './utils.ts'
 
 type onDeviceFoundCallback = (device: TinyDropDevice) => void
 type onScanErrorCallback = (error: string) => void

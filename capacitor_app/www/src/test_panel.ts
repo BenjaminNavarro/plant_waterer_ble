@@ -1,6 +1,6 @@
-import { convertDuration, qs } from './utils.js'
-import { ProgressUI, ResultType } from './progress_ui.js'
-import { TinyDropDevice } from './tinydrop_device.js'
+import { convertDuration, qs } from './utils.ts'
+import { ProgressUI, ResultType } from './progress_ui.ts'
+import { TinyDropDevice } from './tinydrop_device.ts'
 
 export class ManualPanel {
 

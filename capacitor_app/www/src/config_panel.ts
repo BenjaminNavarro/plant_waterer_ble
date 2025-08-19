@@ -1,6 +1,6 @@
-import { convertDuration, convertDurationToBestUnit, qs } from './utils.js'
-import { ProgressUI } from './progress_ui.js'
-import { TinyDropDevice, WateringProgram } from './tinydrop_device.js'
+import { convertDuration, convertDurationToBestUnit, qs } from './utils.ts'
+import { ProgressUI } from './progress_ui.ts'
+import { TinyDropDevice, WateringProgram } from './tinydrop_device.ts'
 import { SlSwitch } from '@shoelace-style/shoelace'
 import type { SlChangeEvent } from '@shoelace-style/shoelace'
 

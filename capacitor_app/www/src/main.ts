@@ -1,18 +1,18 @@
 import 'bulma/css/versions/bulma-prefixed.min.css'
 import '@shoelace-style/shoelace/dist/themes/dark.css'
 
-import { qs } from './utils.js'
+import { qs } from './utils.ts'
 import { SlTabGroup, SlTab, SlIcon } from '@shoelace-style/shoelace'
 import type { SlTabShowEvent } from '@shoelace-style/shoelace'
 
-import { ProgressUI } from './progress_ui.js'
-import { ConnectPanel } from './connect_panel.js'
-import { ConfigPanel } from './config_panel.js'
-import { ManualPanel } from './test_panel.js'
+import { ProgressUI } from './progress_ui.ts'
+import { ConnectPanel } from './connect_panel.ts'
+import { ConfigPanel } from './config_panel.ts'
+import { ManualPanel } from './test_panel.ts'
 
-import { TinyDropDevice, TinyDropBLEDevice, TinyDropFakeDevice } from './tinydrop_device.js'
-import { TinyDropScanner, TinyDropFakeScanner, TinyDropBLEScanner } from './tinydrop_scanner.js'
-import { StatusBar } from './status_bar.js'
+import { TinyDropDevice, TinyDropBLEDevice, TinyDropFakeDevice } from './tinydrop_device.ts'
+import { TinyDropScanner, TinyDropFakeScanner, TinyDropBLEScanner } from './tinydrop_scanner.ts'
+import { StatusBar } from './status_bar.ts'
 
 function main() {
     const tabs = qs<SlTabGroup>('#tabs')

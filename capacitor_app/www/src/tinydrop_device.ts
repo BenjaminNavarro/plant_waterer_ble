@@ -1,6 +1,6 @@
-import { BleClient as ble } from '@capacitor-community/bluetooth-le';
-import { StatusBar } from "./status_bar.js"
-import type { timeoutId } from "./utils.js"
+import { BleClient as ble, type BleService } from '@capacitor-community/bluetooth-le';
+import { StatusBar } from "./status_bar.ts"
+import type { timeoutId } from "./utils.ts"
 
 namespace detail {
     export enum NotificationType {

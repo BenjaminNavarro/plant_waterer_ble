@@ -2,24 +2,23 @@
 
 #include "host/ble_hs.h"
 
+#include "ble_utils.hpp"
+
 namespace plant {
 
 namespace {
 
-// 2f675585-e40a-c088-6941-b245883c4e3a
-const ble_uuid128_t watering_svc_uuid =
-    BLE_UUID128_INIT(0x3a, 0x4e, 0x3c, 0x88, 0x45, 0xb2, 0x41, 0x69, 0x88, 0xc0,
-                     0x0a, 0xe4, 0x85, 0x55, 0x67, 0x2f);
+//
+constexpr auto watering_svc_uuid =
+    make_uuid128("2f675585-e40a-c088-6941-b245883c4e3a");
 
 uint16_t watering_test_chr_val_handle;
-const ble_uuid128_t watering_test_chr_uuid =
-    BLE_UUID128_INIT(0xce, 0xe6, 0x55, 0x0c, 0x9b, 0xf3, 0x46, 0xd4, 0xb9, 0xda,
-                     0x43, 0x4d, 0xc8, 0x52, 0xe7, 0xd2);
+constexpr auto watering_test_chr_uuid =
+    make_uuid128("198a6292-be81-4989-bd7d-a408d1b8b08a");
 
 uint16_t watering_schedule_chr_val_handle;
-const ble_uuid128_t watering_schedule_chr_uuid =
-    BLE_UUID128_INIT(0x28, 0xeb, 0x73, 0x8b, 0x31, 0x26, 0x4c, 0x9a, 0x80, 0xc8,
-                     0x1f, 0x3f, 0x58, 0x11, 0xca, 0xbc);
+constexpr auto watering_schedule_chr_uuid =
+    make_uuid128("3496dac7-7885-4c9c-8e54-0ffebd805485");
 
 } // namespace
 
@@ -75,11 +74,11 @@ int BLEWateringService::watering_chr_access(uint16_t conn_handle,
         /* Verify attribute handle */
         if (attr_handle == watering_test_chr_val_handle) {
             int res = os_mbuf_append(ctxt->om, &self.watering_test(),
-                                     sizeof(WateringTest));
+                                     WateringTest::size);
             return res == 0 ? 0 : BLE_ATT_ERR_INSUFFICIENT_RES;
         } else if (attr_handle == watering_schedule_chr_val_handle) {
             int res = os_mbuf_append(ctxt->om, &self.watering_schedule(),
-                                     sizeof(WateringSchedule));
+                                     WateringSchedule::size);
             return res == 0 ? 0 : BLE_ATT_ERR_INSUFFICIENT_RES;
         } else {
             return error_handler();

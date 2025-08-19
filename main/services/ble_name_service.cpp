@@ -41,9 +41,7 @@ int BLENameService::name_chr_access(uint16_t conn_handle, uint16_t attr_handle,
     auto& self = *static_cast<BLENameService*>(arg);
 
     auto error_handler = [ctxt]() {
-        ESP_LOGE("BLENameService",
-                 "unexpected access operation to heart rate "
-                 "characteristic, opcode: %d",
+        ESP_LOGE("BLENameService", "unexpected access operation, opcode: %d",
                  ctxt->op);
         return BLE_ATT_ERR_UNLIKELY;
     };

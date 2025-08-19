@@ -13,17 +13,25 @@
 
 namespace plant {
 
+// Make sure the data is packed
 struct WateringSchedule {
     std::uint64_t start_time{1751472531}; // UNIX time
     std::uint32_t watering_period{86400}; // in seconds
     std::uint16_t watering_duration{30};  // in seconds
     std::uint8_t flow_speed{50};          // 0-100
     bool enabled{false};
+
+    static const auto size = sizeof(start_time) + sizeof(watering_period) +
+                             sizeof(watering_duration) + sizeof(flow_speed) +
+                             sizeof(enabled);
 };
 
+// Make sure the data is packed
 struct WateringTest {
     std::uint16_t duration{10};  // in seconds
     std::uint8_t flow_speed{30}; // 0-100
+
+    static const auto size = sizeof(duration) + sizeof(flow_speed);
 };
 
 class BLEWateringService : public BLEService<2> {

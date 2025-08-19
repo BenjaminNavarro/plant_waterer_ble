@@ -6,6 +6,7 @@ import type { SlChangeEvent } from '@shoelace-style/shoelace'
 
 export class ConfigPanel {
 
+    private customNameInput = qs<HTMLInputElement>('#custom_name_input')
     private programEnabled = qs<SlSwitch>('#program_enabled')
     private programEnabledElem = qs<HTMLInputElement>('#program_enabled')
     private programDuration = qs<HTMLInputElement>('#program_duration')
@@ -28,6 +29,12 @@ export class ConfigPanel {
         let log = (value: any) => {
             console.log(`[Program] ${value}`)
         }
+
+        this.customNameInput.addEventListener('sl-change', () => {
+            if (this.device != null) {
+                this.device.setName(this.customNameInput.value)
+            }
+        })
 
         this.programEnabledElem.addEventListener('sl-change', (ev: SlChangeEvent) => {
             this.program.enabled = this.programEnabled.checked
@@ -83,6 +90,7 @@ export class ConfigPanel {
         this.device = device
 
         if (this.device != null) {
+            this.customNameInput.value = this.device.name()
             let savedProgram = this.device.readProgram()
             if (savedProgram != null) {
                 this.program = savedProgram

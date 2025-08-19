@@ -51,7 +51,7 @@ export abstract class TinyDropDevice {
 
     connected = false
 
-    private deviceName: string = ''
+    protected deviceName: string = ''
     private deviceId: string = ''
     private wateringStateData = new WateringStateData()
     private statusBar: StatusBar
@@ -113,6 +113,7 @@ export abstract class TinyDropDevice {
         return this.wateringStateData
     }
 
+    abstract setName(new_name: string): void
     abstract startWatering(durationSec: number, flowSpeed: number): void
     abstract stopWatering(): void
     abstract sendProgram(program: WateringProgram): void
@@ -223,6 +224,10 @@ export class TinyDropBLEDevice extends TinyDropDevice {
         // })
     }
 
+    override setName(new_name: string): void {
+
+    }
+
     override startWatering(durationSec: number, flowSpeed: number): void {
 
     }
@@ -262,6 +267,11 @@ export class TinyDropFakeDevice extends TinyDropDevice {
             this.sendProgram(program)
         }
 
+        let savedName = localStorage.getItem('deviceName')
+        if (savedName != null) {
+            this.deviceName = savedName
+        }
+
         this.internalWateringState.startDate = Date.now() / 1000
     }
 
@@ -298,6 +308,11 @@ export class TinyDropFakeDevice extends TinyDropDevice {
 
     override stopNotifications(): void {
         this.notificationsStarted = false
+    }
+
+    override setName(new_name: string): void {
+        this.deviceName = new_name
+        localStorage.setItem('deviceName', new_name)
     }
 
     override startWatering(durationSec: number, flowSpeed: number): void {

@@ -9,6 +9,7 @@ type onDeviceFoundCallback = (device: TinyDropDevice) => void
 type onScanErrorCallback = (error: string) => void
 
 export abstract class TinyDropScanner {
+    scannedDevices = new Array<TinyDropBLEDevice>()
     protected scanning: boolean
     protected statusBar: StatusBar
 
@@ -60,6 +61,13 @@ export class TinyDropBLEScanner extends TinyDropScanner {
             const mfgKey1 = mfgIDtoKey('TD')
             const mfgKey2 = mfgIDtoKey('HW')
 
+            this.scannedDevices.forEach(device => {
+                if (device.connected) {
+                    device.disconnect()
+                }
+            })
+            this.scannedDevices = new Array<TinyDropBLEDevice>()
+
             ble.requestLEScan(
                 {},
                 (result: ScanResult) => {
@@ -70,6 +78,7 @@ export class TinyDropBLEScanner extends TinyDropScanner {
                         const outputCount = result.manufacturerData[mfgKey2].getUint8(0);
 
                         let dev = new TinyDropBLEDevice(this.statusBar, userDefinedName, result.device.deviceId, outputCount)
+                        this.scannedDevices.push(dev)
                         onDeviceFound(dev)
                     }
                 }

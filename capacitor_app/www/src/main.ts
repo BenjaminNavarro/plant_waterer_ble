@@ -50,6 +50,7 @@ function main() {
     configTab.disabled = true
     manualTab.disabled = true
 
+    document.body.classList.remove('is_hidden')
 }
 
 function isMobile() {

@@ -84,7 +84,7 @@ export abstract class TinyDropDevice {
         return this.outputCount
     }
 
-    connect(onSuccess?: CallableFunction, onFailure?: CallableFunction): void {
+    connect(onSuccess?: CallableFunction, onFailure?: CallableFunction, onDisconnect?: CallableFunction): void {
         this.doConnect(() => {
             this.startNotifications()
 
@@ -100,6 +100,15 @@ export abstract class TinyDropDevice {
             }
 
             this.connected = false
+            this.updateStatusBar()
+        }, () => {
+            if (onDisconnect !== undefined) {
+                onDisconnect()
+            }
+
+            this.connected = false
+            this.wateringStateData.watering = false
+            this.wateringStateData.duration = 0
             this.updateStatusBar()
         })
     }
@@ -155,7 +164,7 @@ export abstract class TinyDropDevice {
         }
     }
 
-    protected abstract doConnect(onSuccess?: CallableFunction, onFailure?: CallableFunction): void
+    protected abstract doConnect(onSuccess?: CallableFunction, onFailure?: CallableFunction, onDisconnect?: CallableFunction): void
     protected abstract doDisconnect(onSuccess?: CallableFunction, onFailure?: CallableFunction): void
     protected abstract startNotifications(): void
     protected abstract stopNotifications(): void
@@ -184,7 +193,7 @@ export abstract class TinyDropDevice {
 
 export class TinyDropBLEDevice extends TinyDropDevice {
 
-    override doConnect(onSuccess?: CallableFunction, onFailure?: CallableFunction): void {
+    override doConnect(onSuccess?: CallableFunction, onFailure?: CallableFunction, onDisconnect?: CallableFunction): void {
         const onConnect = () => {
             logger.log("connected")
             ble.getServices(this.id()).then((services: BleService[]) => {
@@ -206,11 +215,14 @@ export class TinyDropBLEDevice extends TinyDropDevice {
 
         }
 
-        const onDisconnect = () => {
+        const onDeviceDisconnect = () => {
             this.log("disconnected")
 
             this.connected = false
             this.updateStatusBar()
+            if (onDisconnect !== undefined) {
+                onDisconnect()
+            }
         }
 
         const onError = (reason: any) => {
@@ -222,7 +234,7 @@ export class TinyDropBLEDevice extends TinyDropDevice {
         }
 
         this.log('connecting to ' + this.id())
-        ble.connect(this.id(), onDisconnect).then(onConnect, onError)
+        ble.connect(this.id(), onDeviceDisconnect).then(onConnect, onError)
     }
 
     override doDisconnect(onSuccess: CallableFunction, onFailure?: CallableFunction): void {
@@ -380,7 +392,7 @@ export class TinyDropFakeDevice extends TinyDropDevice {
         this.internalWateringState.startDate = Date.now() / 1000
     }
 
-    override doConnect(onSuccess?: CallableFunction, onFailure?: CallableFunction): void {
+    override doConnect(onSuccess?: CallableFunction, onFailure?: CallableFunction, onDisconnect?: CallableFunction): void {
         setTimeout(() => {
             if (Math.random() < this.successRate) {
                 this.log("connected");

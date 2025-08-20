@@ -63,6 +63,16 @@ export class ConnectPanel {
                                     })
                                     connecting = false
                                     console.log('failed to connect');
+                                },
+                                () => {
+                                    connectButtons.forEach(other_btn => {
+                                        other_btn.disabled = false
+                                    })
+
+                                    btn.setAttribute('connected', 'false')
+                                    btn.innerHTML = 'Connexion'
+                                    connecting = false
+                                    onDisconnect()
                                 })
                             connecting = true
                         }

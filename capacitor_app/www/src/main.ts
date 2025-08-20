@@ -32,19 +32,20 @@ function main() {
     const configPanel = new ConfigPanel(progressUI)
     const testPanel = new ManualPanel(progressUI)
 
-    const connectPanel = new ConnectPanel(progressUI, scanner, (device: TinyDropDevice) => {
-        configTab.disabled = false
-        manualTab.disabled = false
-        configPanel.setDevice(device)
-        testPanel.setDevice(device)
-        tabs.show('config')
-    }, () => {
-        configTab.disabled = true
-        manualTab.disabled = true
-        configPanel.setDevice(null)
-        testPanel.setDevice(null)
-        tabs.show('connect')
-    })
+    const connectPanel = new ConnectPanel(progressUI, scanner,
+        (device: TinyDropDevice) => {
+            configTab.disabled = false
+            manualTab.disabled = false
+            configPanel.setDevice(device)
+            testPanel.setDevice(device)
+            tabs.show('config')
+        }, () => {
+            configTab.disabled = true
+            manualTab.disabled = true
+            configPanel.setDevice(null)
+            testPanel.setDevice(null)
+            tabs.show('connect')
+        })
 
     configTab.disabled = true
     manualTab.disabled = true

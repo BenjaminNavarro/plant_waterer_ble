@@ -8,8 +8,10 @@ namespace detail {
         WateringState
     }
 
-    export const service_uuid = '0x00112233445566'
-    export const watering_state_uuid = '0x00112233445566'
+    export const watering_service_uuid = '2f675585-e40a-c088-6941-b245883c4e3a'
+    export const watering_program_uuid = '3496dac7-7885-4c9c-8e54-0ffebd805485'
+    export const watering_test_uuid = '198a6292-be81-4989-bd7d-a408d1b8b08a'
+    export const watering_state_uuid = 'ed4cb13c-71cc-460b-a781-5530878f7aa5'
 }
 
 export class WateringProgram {
@@ -26,23 +28,27 @@ export class WateringStateData {
     duration = 0
     startDate = 0
 
-    static readonly expectedBufferSize = 1 + 4 + 4
+    static readonly expectedBufferSize = 1 + 2 + 8
 
     static fromBuffer(buffer: ArrayBuffer): WateringStateData {
-        let data = new WateringStateData()
         let view = new DataView(buffer)
-        data.watering = view.getUint8(0) == 1
-        data.duration = view.getUint32(0 + 1)
-        data.startDate = view.getUint32(0 + 1 + 4)
+        return this.fromView(view)
+    }
+
+    static fromView(view: DataView): WateringStateData {
+        let data = new WateringStateData()
+        data.startDate = Number(view.getBigUint64(0, true))
+        data.duration = view.getUint16(0 + 8, true)
+        data.watering = view.getUint8(0 + 8 + 2) == 1
         return data
     }
 
     toBuffer(): ArrayBuffer {
         let buffer = new ArrayBuffer(WateringStateData.expectedBufferSize)
         let view = new DataView(buffer)
-        view.setUint8(0, this.watering ? 1 : 0)
-        view.setUint32(0 + 1, this.duration)
-        view.setUint32(0 + 1 + 4, this.startDate)
+        view.setBigUint64(0, BigInt(this.startDate), true)
+        view.setUint16(0 + 8, this.duration, true)
+        view.setUint8(0 + 8 + 2, this.watering ? 1 : 0)
         return buffer
     }
 }
@@ -127,14 +133,22 @@ export abstract class TinyDropDevice {
     abstract sendProgram(program: WateringProgram): void
     abstract readProgram(onSuccess: programReadCallback): void
 
-    protected onNotification(type: detail.NotificationType, data: ArrayBuffer) {
+    protected onNotification(type: detail.NotificationType, data: ArrayBuffer | DataView) {
         switch (type) {
             case detail.NotificationType.WateringState:
                 if (data.byteLength != WateringStateData.expectedBufferSize) {
                     this.log(`incorrect watering state data length: got ${data.byteLength}, expected ${WateringStateData.expectedBufferSize}`)
                     return
                 }
-                this.wateringStateData = WateringStateData.fromBuffer(data)
+                if (data instanceof DataView) {
+                    this.wateringStateData = WateringStateData.fromView(data)
+                }
+                else {
+                    this.wateringStateData = WateringStateData.fromBuffer(data)
+                }
+
+                this.log('watering state:')
+                this.log(JSON.stringify(this.wateringStateData))
 
                 this.updateStatusBar()
                 break
@@ -221,17 +235,27 @@ export class TinyDropBLEDevice extends TinyDropDevice {
     }
 
     override startNotifications(): void {
-        // ble.startNotification(this.id(), detail.service_uuid, detail.watering_state_uuid, (data: ArrayBuffer) => {
-        //     this.onNotification(detail.NotificationType.WateringState, data)
-        // }, (error: BLECentralPlugin.BLEError) => {
-        //     this.log("watering start notification error: " + error)
-        // })
+        ble.startNotifications(this.id(), detail.watering_service_uuid, detail.watering_state_uuid, (data: DataView) => {
+            this.log('Watering state notification received')
+            this.onNotification(detail.NotificationType.WateringState, data)
+        }).then(
+            () => {
+                this.log("watering state notification started")
+            },
+            (reason: any) => {
+                this.log("failed to start watering state notifications: ")
+                this.log(reason)
+            })
     }
 
     override stopNotifications(): void {
-        // ble.stopNotification(this.id(), detail.service_uuid, detail.watering_state_uuid, null, (error: BLECentralPlugin.BLEError) => {
-        //     this.log("watering stop notification error: " + error)
-        // })
+        ble.stopNotifications(this.id(), detail.watering_service_uuid, detail.watering_state_uuid).then(
+            () => {
+                this.log("watering state notification stopped")
+            }, (reason: any) => {
+                this.log("failed to stop watering state notifications: ")
+                this.log(reason)
+            })
     }
 
     override setName(new_name: string): void {

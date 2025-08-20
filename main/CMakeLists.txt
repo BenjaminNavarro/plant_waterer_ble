@@ -4,11 +4,14 @@ idf_component_register(
         data/watering_schedule.cpp
         data/user_defined_name.cpp
         services/ble_service.cpp
+        services/ble_characteristic.cpp
         services/ble_current_time_service.cpp
         services/ble_battery_service.cpp
-        services/ble_watering_service.cpp
         services/ble_name_service.cpp
-        services/ble_utils.cpp
+        services/ble_watering_service/ble_watering_schedule.cpp
+        services/ble_watering_service/ble_watering_test.cpp
+        services/ble_watering_service/ble_watering_state.cpp
+        services/ble_watering_service/ble_watering_service.cpp
         tasks/blink.cpp
         tasks/watering.cpp
         tasks/hardware.cpp

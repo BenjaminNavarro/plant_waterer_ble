@@ -1,11 +1,9 @@
-#include <services/ble_watering_service.hpp>
+#include <services/ble_watering_service/ble_watering_schedule.hpp>
+#include <services/ble_utils.hpp>
 
 #include <host/ble_hs.h>
+#include <host/ble_gatt.h>
 #include <nvs.h>
-
-#include "ble_utils.hpp"
-#include "host/ble_gatt.h"
-#include "ble_watering_service.hpp"
 
 #include <sys/time.h>
 #include <cstring>
@@ -14,17 +12,8 @@ namespace plant {
 
 namespace {
 
-constexpr auto watering_svc_uuid =
-    make_uuid128("2f675585-e40a-c088-6941-b245883c4e3a");
-
 constexpr auto watering_schedule_chr_uuid =
     make_uuid128("3496dac7-7885-4c9c-8e54-0ffebd805485");
-
-constexpr auto watering_test_chr_uuid =
-    make_uuid128("198a6292-be81-4989-bd7d-a408d1b8b08a");
-
-constexpr auto watering_state_chr_uuid =
-    make_uuid128("ed4cb13c-71cc-460b-a781-5530878f7aa5");
 
 } // namespace
 
@@ -48,44 +37,6 @@ void BLEWateringScheduleCharacteristic::on_write(
              schedule().start_time, schedule().watering_period,
              schedule().watering_duration, schedule().flow_speed,
              schedule().enabled);
-}
-
-BLEWateringTestCharacteristic::BLEWateringTestCharacteristic()
-    : BLECharacteristic{"BLEWateringTest", &watering_test_chr_uuid.u,
-                        BLE_GATT_CHR_F_WRITE, WateringTest::size} {
-}
-
-void BLEWateringTestCharacteristic::on_write(std::span<const std::byte> memory) {
-    std::memcpy(&test_, memory.data(), memory.size());
-
-    ESP_LOGI("BLEWateringService", "New test request: %u @ %u\n",
-             test().duration, test().flow_speed);
-}
-
-BLEWateringStateCharacteristic::BLEWateringStateCharacteristic()
-    : BLECharacteristic{"BLEWateringState", &watering_state_chr_uuid.u,
-                        BLE_GATT_CHR_F_READ | BLE_GATT_CHR_F_NOTIFY} {
-}
-
-std::span<const std::byte>
-BLEWateringStateCharacteristic::on_read_access(std::span<std::byte> memory) {
-    std::memcpy(memory.data(), &state_, WateringState::size);
-    return memory;
-}
-
-void BLEWateringStateCharacteristic::notify_watering_state_change() {
-    ESP_LOGI("BLEWateringService",
-             "Sending watering state change notification");
-    send_update_notification();
-}
-
-BLEWateringService::BLEWateringService()
-    : BLEServiceWrapper{BLE_GATT_SVC_TYPE_PRIMARY, &watering_svc_uuid.u} {
-}
-
-void BLEWateringService::service_added() {
-    watering_schedule().schedule() = WateringSchedule{};
-    watering_schedule().schedule().read_from_storage();
 }
 
 void WateringSchedule::read_from_storage() {

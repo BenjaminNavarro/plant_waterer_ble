@@ -41,7 +41,4 @@ constexpr ble_uuid128_t make_uuid128(std::string_view str) {
     return uuid;
 }
 
-int gatt_svr_write(struct os_mbuf* om, uint16_t min_len, uint16_t max_len,
-                   void* dst, uint16_t* len);
-
 } // namespace plant

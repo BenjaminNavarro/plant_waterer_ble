@@ -261,7 +261,20 @@ export class TinyDropBLEDevice extends TinyDropDevice {
     }
 
     override sendProgram(program: WateringProgram): void {
-
+        const buffer = new ArrayBuffer(16)
+        const dataView = new DataView(buffer)
+        dataView.setBigInt64(0, BigInt(program.startDate), true)
+        dataView.setUint32(8, program.period, true)
+        dataView.setUint16(8 + 4, program.duration, true)
+        dataView.setUint8(8 + 4 + 2, program.waterFlow)
+        dataView.setUint8(8 + 4 + 2 + 1, program.enabled ? 1 : 0)
+        ble.write(this.id(), '2f675585-e40a-c088-6941-b245883c4e3a', '3496dac7-7885-4c9c-8e54-0ffebd805485', dataView).then(
+            () => {
+                logger.log(`Program sent to device`)
+            }, (reason: any) => {
+                logger.log(`Can't send program to device`)
+                logger.log(reason)
+            })
     }
 
     override readProgram(onSuccess: programReadCallback): void {

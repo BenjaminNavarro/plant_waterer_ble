@@ -10,7 +10,6 @@ namespace plant {
 
 namespace {
 
-//
 constexpr auto watering_svc_uuid =
     make_uuid128("2f675585-e40a-c088-6941-b245883c4e3a");
 
@@ -130,7 +129,34 @@ int BLEWateringService::watering_chr_access(uint16_t conn_handle,
                      self.watering_schedule().watering_duration,
                      self.watering_schedule().flow_speed,
                      self.watering_schedule().enabled);
-            self.service_added();
+            ESP_LOGI("BLEWateringService",
+                     "Notification/Indication scheduled for "
+                     "all subscribed peers.\n");
+            return rc;
+        } else if (attr_handle == watering_test_chr_val_handle) {
+            constexpr auto packet_size = WateringTest::size;
+            const auto bytes_received = OS_MBUF_PKTLEN(ctxt->om);
+            if (bytes_received != packet_size) {
+                return error_handler();
+            }
+
+            uint16_t bytes_written{};
+            WateringTest test{};
+            auto rc = gatt_svr_write(ctxt->om, packet_size, packet_size, &test,
+                                     &bytes_written);
+
+            if (rc != 0) {
+                ESP_LOGI("BLEWateringService", "Cannot write test to memory\n");
+                return rc;
+            }
+
+            self.watering_test() = test;
+
+            ble_gatts_chr_updated(attr_handle);
+
+            ESP_LOGI("BLEWateringService", "New test request: %u @ %u\n",
+                     self.watering_test().duration,
+                     self.watering_test().flow_speed);
             ESP_LOGI("BLEWateringService",
                      "Notification/Indication scheduled for "
                      "all subscribed peers.\n");

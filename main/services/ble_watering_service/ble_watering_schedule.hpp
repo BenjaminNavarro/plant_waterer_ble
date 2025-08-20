@@ -30,7 +30,7 @@ struct WateringSchedule {
 };
 
 class BLEWateringScheduleCharacteristic
-    : public BLECharacteristic<sizeof(WateringSchedule)> {
+    : public BLECharacteristic<WateringSchedule::size> {
 public:
     BLEWateringScheduleCharacteristic();
 

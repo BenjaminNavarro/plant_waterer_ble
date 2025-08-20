@@ -13,7 +13,7 @@
 namespace plant {
 
 class BLENameCharacteristic
-    : public BLECharacteristic<ManufacturerData::Part2::name_max_size> {
+    : public BLECharacteristic<ManufacturerData::Part2::name_max_size, 0> {
 public:
     BLENameCharacteristic();
 

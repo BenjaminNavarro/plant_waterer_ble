@@ -114,7 +114,7 @@ int plant::BLECharacteristicBase::on_access(uint16_t conn_handle,
                                      self.write_memory_.data(), &bytes_written);
 
             if (rc != 0) {
-                ESP_LOGI(name, "Cannot write name to memory\n");
+                ESP_LOGI(name, "Cannot write data to memory\n");
                 return rc;
             }
 

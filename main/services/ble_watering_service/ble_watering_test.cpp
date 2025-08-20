@@ -19,14 +19,14 @@ constexpr auto watering_test_chr_uuid =
 
 BLEWateringTestCharacteristic::BLEWateringTestCharacteristic()
     : BLECharacteristic{"BLEWateringTest", &watering_test_chr_uuid.u,
-                        BLE_GATT_CHR_F_WRITE, WateringTest::size} {
+                        BLE_GATT_CHR_F_WRITE} {
 }
 
 void BLEWateringTestCharacteristic::on_write(std::span<const std::byte> memory) {
     std::memcpy(&test_, memory.data(), memory.size());
 
-    ESP_LOGI("BLEWateringService", "New test request: %u @ %u\n",
-             test().duration, test().flow_speed);
+    ESP_LOGI("BLEWateringTest", "New test request: %u @ %u\n", test().duration,
+             test().flow_speed);
 }
 
 } // namespace plant

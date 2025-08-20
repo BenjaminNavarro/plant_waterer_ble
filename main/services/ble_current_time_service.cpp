@@ -21,8 +21,7 @@ const auto current_time_chr_uuid =
 
 BLECurrentTimeCharacteristic::BLECurrentTimeCharacteristic()
     : BLECharacteristic{"BLECurrentTime", &current_time_chr_uuid.u,
-                        BLE_GATT_CHR_F_READ | BLE_GATT_CHR_F_WRITE,
-                        sizeof(std::int64_t)} {
+                        BLE_GATT_CHR_F_READ | BLE_GATT_CHR_F_WRITE} {
 }
 
 std::span<const std::byte>

@@ -22,7 +22,7 @@ struct WateringTest {
 };
 
 class BLEWateringTestCharacteristic
-    : public BLECharacteristic<sizeof(WateringTest)> {
+    : public BLECharacteristic<WateringTest::size> {
 public:
     BLEWateringTestCharacteristic();
 

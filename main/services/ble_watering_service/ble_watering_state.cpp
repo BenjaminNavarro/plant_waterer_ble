@@ -30,8 +30,7 @@ BLEWateringStateCharacteristic::on_read_access(std::span<std::byte> memory) {
 }
 
 void BLEWateringStateCharacteristic::notify_watering_state_change() {
-    ESP_LOGI("BLEWateringService",
-             "Sending watering state change notification");
+    ESP_LOGI("BLEWateringState", "Sending watering state change notification");
     send_update_notification();
 }
 

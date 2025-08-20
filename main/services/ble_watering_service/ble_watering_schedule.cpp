@@ -19,8 +19,7 @@ constexpr auto watering_schedule_chr_uuid =
 
 BLEWateringScheduleCharacteristic::BLEWateringScheduleCharacteristic()
     : BLECharacteristic{"BLEWateringSchedule", &watering_schedule_chr_uuid.u,
-                        BLE_GATT_CHR_F_READ | BLE_GATT_CHR_F_WRITE,
-                        WateringSchedule::size} {
+                        BLE_GATT_CHR_F_READ | BLE_GATT_CHR_F_WRITE} {
 }
 
 std::span<const std::byte>
@@ -33,7 +32,7 @@ void BLEWateringScheduleCharacteristic::on_write(
     std::span<const std::byte> memory) {
     std::memcpy(&schedule_, memory.data(), memory.size());
     schedule().write_to_storage();
-    ESP_LOGI("BLEWateringService", "New program: %lld / %lu / %u / %u / %d\n",
+    ESP_LOGI("BLEWateringSchedule", "New program: %lld / %lu / %u / %u / %d\n",
              schedule().start_time, schedule().watering_period,
              schedule().watering_duration, schedule().flow_speed,
              schedule().enabled);

@@ -59,14 +59,13 @@ private:
     std::uint16_t min_packet_size_;
 };
 
-template <int MaxPacketSize>
+template <int MaxPacketSize, int MinWriteSize = MaxPacketSize>
 class BLECharacteristic : public BLECharacteristicBase {
 public:
     BLECharacteristic(std::string_view name, const ble_uuid_t* uuid,
-                      ble_gatt_chr_flags flags,
-                      std::uint16_t min_packet_size = 0)
+                      ble_gatt_chr_flags flags)
         : BLECharacteristicBase{name,         uuid,          flags,
-                                read_buffer_, write_buffer_, min_packet_size} {
+                                read_buffer_, write_buffer_, MinWriteSize} {
         read_buffer_.fill(std::byte(0));
         write_buffer_.fill(std::byte(0));
     }

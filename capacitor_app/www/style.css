@@ -110,6 +110,7 @@
 .status-bar {
     position: absolute;
     right: 0;
+    margin-top: 5px;
 }
 
 .status-icon {

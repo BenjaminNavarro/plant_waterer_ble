@@ -1,5 +1,6 @@
 import 'bulma/css/versions/bulma-prefixed.min.css'
 import '@shoelace-style/shoelace/dist/themes/dark.css'
+import { EdgeToEdge } from '@capawesome/capacitor-android-edge-to-edge-support';
 
 import { qs } from './utils.ts'
 import { SlTabGroup, SlTab, SlIcon } from '@shoelace-style/shoelace'
@@ -52,6 +53,19 @@ function main() {
     manualTab.disabled = true
 
     document.body.classList.remove('is_hidden')
+
+    if (!window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        EdgeToEdge.setBackgroundColor({ color: '#ffffff' });
+    }
+
+    window.matchMedia('(prefers-color-scheme: dark)')
+        .addEventListener('change', ({ matches }) => {
+            if (matches) {
+                EdgeToEdge.setBackgroundColor({ color: '#14161a' });
+            } else {
+                EdgeToEdge.setBackgroundColor({ color: '#ffffff' });
+            }
+        })
 }
 
 function isMobile() {

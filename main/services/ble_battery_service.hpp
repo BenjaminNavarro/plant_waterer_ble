@@ -11,9 +11,10 @@
 
 namespace plant {
 
-class BLEBatteryService : public BLEService<1> {
+class BLEBatteryCharacteristic
+    : public BLECharacteristic<sizeof(std::uint8_t)> {
 public:
-    BLEBatteryService();
+    BLEBatteryCharacteristic();
 
     [[nodiscard]] const float& battery_level() const {
         return battery_level_;
@@ -24,12 +25,23 @@ public:
     };
 
 private:
-    static int battery_level_chr_access(uint16_t conn_handle,
-                                        uint16_t attr_handle,
-                                        struct ble_gatt_access_ctxt* ctxt,
-                                        void* arg);
+    [[nodiscard]] std::span<const std::byte>
+    on_read_access(std::span<std::byte> memory) override final;
 
     float battery_level_;
+};
+
+class BLEBatteryService : public BLEServiceWrapper<BLEBatteryCharacteristic> {
+public:
+    BLEBatteryService();
+
+    [[nodiscard]] const float& battery_level() const {
+        return get_characteristic<0>().battery_level();
+    }
+
+    [[nodiscard]] float& battery_level() {
+        return get_characteristic<0>().battery_level();
+    };
 };
 
 } // namespace plant

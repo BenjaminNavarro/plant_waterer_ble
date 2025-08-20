@@ -11,17 +11,26 @@
 
 #include <cstdint>
 
+#include <sys/time.h>
+
 namespace plant {
 
-class BLECurrentTimeService : public BLEService<1> {
+class BLECurrentTimeCharacteristic
+    : public BLECharacteristic<sizeof(std::int64_t)> {
 public:
-    BLECurrentTimeService();
+    BLECurrentTimeCharacteristic();
 
 private:
-    static int current_time_chr_access(uint16_t conn_handle,
-                                       uint16_t attr_handle,
-                                       struct ble_gatt_access_ctxt* ctxt,
-                                       void* arg);
+    [[nodiscard]] std::span<const std::byte>
+    on_read_access(std::span<std::byte> memory) override final;
+
+    void on_write(std::span<const std::byte> memory) override final;
+};
+
+class BLECurrentTimeService
+    : public BLEServiceWrapper<BLECurrentTimeCharacteristic> {
+public:
+    BLECurrentTimeService();
 };
 
 } // namespace plant

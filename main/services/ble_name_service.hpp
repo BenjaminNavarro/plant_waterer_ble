@@ -12,9 +12,10 @@
 
 namespace plant {
 
-class BLENameService : public BLEService<1> {
+class BLENameCharacteristic
+    : public BLECharacteristic<ManufacturerData::Part2::name_max_size> {
 public:
-    BLENameService();
+    BLENameCharacteristic();
 
     [[nodiscard]] const UserDefinedName& name() const {
         return name_;
@@ -25,10 +26,25 @@ public:
     };
 
 private:
-    static int name_chr_access(uint16_t conn_handle, uint16_t attr_handle,
-                               struct ble_gatt_access_ctxt* ctxt, void* arg);
+    [[nodiscard]] std::span<const std::byte>
+    on_read_access(std::span<std::byte> memory) override final;
+
+    void on_write(std::span<const std::byte> memory) override final;
 
     UserDefinedName name_;
+};
+
+class BLENameService : public BLEServiceWrapper<BLENameCharacteristic> {
+public:
+    BLENameService();
+
+    [[nodiscard]] const UserDefinedName& name() const {
+        return get_characteristic<0>().name();
+    }
+
+    [[nodiscard]] UserDefinedName& name() {
+        return get_characteristic<0>().name();
+    };
 };
 
 } // namespace plant

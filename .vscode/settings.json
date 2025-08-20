@@ -108,5 +108,6 @@
     "ESP_ROM_ELF_DIR": "F:\\ESP32\\Espressif\\tools\\esp-rom-elfs\\20230320/",
     "IDF_TARGET": "esp32c3"
   },
-  "clangd.path": "F:\\ESP32\\Espressif\\tools\\esp-clang\\esp-18.1.2_20240912\\esp-clang\\bin\\clangd.exe"
+  "clangd.path": "F:\\ESP32\\Espressif\\tools\\esp-clang\\esp-18.1.2_20240912\\esp-clang\\bin\\clangd.exe",
+  "clangd.checkUpdates": false
 }

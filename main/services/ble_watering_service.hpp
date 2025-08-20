@@ -47,47 +47,105 @@ struct WateringState {
         sizeof(start_time) + sizeof(watering_duration) + sizeof(watering);
 };
 
-class BLEWateringService : public BLEService<3> {
+class BLEWateringScheduleCharacteristic
+    : public BLECharacteristic<sizeof(WateringSchedule)> {
+public:
+    BLEWateringScheduleCharacteristic();
+
+    [[nodiscard]] const WateringSchedule& schedule() const {
+        return schedule_;
+    }
+
+    [[nodiscard]] WateringSchedule& schedule() {
+        return schedule_;
+    };
+
+private:
+    [[nodiscard]] std::span<const std::byte>
+    on_read_access(std::span<std::byte> memory) override final;
+
+    void on_write(std::span<const std::byte> memory) override final;
+
+    WateringSchedule schedule_;
+};
+
+class BLEWateringTestCharacteristic
+    : public BLECharacteristic<sizeof(WateringTest)> {
+public:
+    BLEWateringTestCharacteristic();
+
+    [[nodiscard]] const WateringTest& test() const {
+        return test_;
+    }
+
+    [[nodiscard]] WateringTest& test() {
+        return test_;
+    };
+
+private:
+    void on_write(std::span<const std::byte> memory) override final;
+
+    WateringTest test_;
+};
+
+class BLEWateringStateCharacteristic
+    : public BLECharacteristic<sizeof(WateringState)> {
+public:
+    BLEWateringStateCharacteristic();
+
+    [[nodiscard]] const WateringState& state() const {
+        return state_;
+    }
+
+    void set_state(const WateringState& state) {
+        state_ = state;
+        notify_watering_state_change();
+    };
+
+private:
+    [[nodiscard]] std::span<const std::byte>
+    on_read_access(std::span<std::byte> memory) override final;
+
+    void notify_watering_state_change();
+
+    WateringState state_;
+};
+
+class BLEWateringService
+    : public BLEServiceWrapper<BLEWateringScheduleCharacteristic,
+                               BLEWateringTestCharacteristic,
+                               BLEWateringStateCharacteristic> {
 public:
     BLEWateringService();
 
-    [[nodiscard]] const WateringSchedule& watering_schedule() const {
-        return watering_schedule_;
+    [[nodiscard]] const auto& watering_schedule() const {
+        return get_characteristic<0>();
     }
 
-    [[nodiscard]] WateringSchedule& watering_schedule() {
-        return watering_schedule_;
+    [[nodiscard]] auto& watering_schedule() {
+        return get_characteristic<0>();
     };
 
-    [[nodiscard]] const WateringTest& watering_test() const {
-        return watering_test_;
+    [[nodiscard]] const auto& watering_test() const {
+        return get_characteristic<1>();
     }
 
-    [[nodiscard]] WateringTest& watering_test() {
-        return watering_test_;
+    [[nodiscard]] auto& watering_test() {
+        return get_characteristic<1>();
     }
 
-    [[nodiscard]] const WateringState& watering_state() const {
-        return watering_state_;
+    [[nodiscard]] const auto& watering_state() const {
+        return get_characteristic<0>();
     }
 
-    void set_watering_state(const WateringState& state) {
-        watering_state_ = state;
-        notify_watering_state_change();
+    [[nodiscard]] auto& watering_state() {
+        return get_characteristic<0>();
     }
 
 private:
     friend class BLEServiceRegistrator;
 
     void service_added() final override;
-    void notify_watering_state_change();
-
-    static int watering_chr_access(uint16_t conn_handle, uint16_t attr_handle,
-                                   struct ble_gatt_access_ctxt* ctxt, void* arg);
-
-    WateringSchedule watering_schedule_;
-    WateringTest watering_test_;
-    WateringState watering_state_{};
 };
 
 } // namespace plant

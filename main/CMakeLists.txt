@@ -28,3 +28,11 @@ target_compile_definitions(
     PRIVATE
         PID_UTILS_CXX17_AVAILABLE=1
 )
+
+set_target_properties(
+    __idf_main
+    PROPERTIES
+        CXX_STANDARD 23
+        CXX_STANDARD_REQUIRED TRUE
+        CXX_EXTENSIONS FALSE
+)

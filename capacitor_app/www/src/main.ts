@@ -34,6 +34,7 @@ function main() {
 
     const connectPanel = new ConnectPanel(progressUI, scanner,
         (device: TinyDropDevice) => {
+            device.setProgressUI(progressUI)
             configTab.disabled = false
             manualTab.disabled = false
             configPanel.setDevice(device)

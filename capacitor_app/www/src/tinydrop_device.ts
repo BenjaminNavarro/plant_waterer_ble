@@ -2,6 +2,7 @@ import { BleClient as ble, type BleService } from '@capacitor-community/bluetoot
 import { StatusBar } from "./status_bar.ts"
 import type { timeoutId } from "./utils.ts"
 import { logger } from './logger.ts';
+import { ResultType, type ProgressUI } from './progress_ui.ts';
 
 namespace detail {
     export enum NotificationType {
@@ -60,6 +61,7 @@ export abstract class TinyDropDevice {
     connected = false
 
     protected deviceName: string = ''
+    protected progressUI: ProgressUI
     private deviceId: string = ''
     private wateringStateData = new WateringStateData()
     private statusBar: StatusBar
@@ -82,6 +84,10 @@ export abstract class TinyDropDevice {
 
     outputs(): number {
         return this.outputCount
+    }
+
+    setProgressUI(progressUI: ProgressUI) {
+        this.progressUI = progressUI
     }
 
     connect(onSuccess?: CallableFunction, onFailure?: CallableFunction, onDisconnect?: CallableFunction): void {
@@ -271,6 +277,8 @@ export class TinyDropBLEDevice extends TinyDropDevice {
     }
 
     override setName(new_name: string): void {
+        this.progressUI?.spin()
+
         logger.log(`setName: ${new_name} (${new_name.length})`)
         let asciiKeys = new Array<number>();
         for (var i = 0; i < new_name.length; i++) {
@@ -282,13 +290,17 @@ export class TinyDropBLEDevice extends TinyDropDevice {
         ble.write(this.id(), "4f736c21-2054-4786-93fe-a5c4b028dbef", "b8b4c3af-fa31-4de4-9fa1-a26ea5da7f0b", data).then(
             () => {
                 logger.log(`Name ${new_name} sent to device`)
+                this.progressUI?.stop(ResultType.Success)
             }, (reason: any) => {
                 logger.log(`Can't send name to device`)
                 logger.log(reason)
+                this.progressUI?.stop(ResultType.Error)
             })
     }
 
     override startWatering(durationSec: number, flowSpeed: number): void {
+        this.progressUI?.spin()
+
         const buffer = new ArrayBuffer(3)
         const dataView = new DataView(buffer)
         dataView.setUint16(0, durationSec, true)
@@ -296,9 +308,11 @@ export class TinyDropBLEDevice extends TinyDropDevice {
         ble.write(this.id(), '2f675585-e40a-c088-6941-b245883c4e3a', '198a6292-be81-4989-bd7d-a408d1b8b08a', dataView).then(
             () => {
                 logger.log(`Watering request sent to device`)
+                this.progressUI?.stop(ResultType.Success)
             }, (reason: any) => {
                 logger.log(`Can't send watering request to device`)
                 logger.log(reason)
+                this.progressUI?.stop(ResultType.Error)
             })
     }
 
@@ -307,6 +321,7 @@ export class TinyDropBLEDevice extends TinyDropDevice {
     }
 
     override sendProgram(program: WateringProgram): void {
+        this.progressUI?.spin()
         const buffer = new ArrayBuffer(16)
         const dataView = new DataView(buffer)
         dataView.setBigInt64(0, BigInt(program.startDate), true)
@@ -317,13 +332,16 @@ export class TinyDropBLEDevice extends TinyDropDevice {
         ble.write(this.id(), '2f675585-e40a-c088-6941-b245883c4e3a', '3496dac7-7885-4c9c-8e54-0ffebd805485', dataView).then(
             () => {
                 logger.log(`Program sent to device`)
+                this.progressUI?.stop(ResultType.Success)
             }, (reason: any) => {
                 logger.log(`Can't send program to device`)
                 logger.log(reason)
+                this.progressUI?.stop(ResultType.Error)
             })
     }
 
     override readProgram(onSuccess: programReadCallback): void {
+        this.progressUI?.spin()
         logger.log('Reading program from device...')
         ble.read(this.id(), '2f675585-e40a-c088-6941-b245883c4e3a', '3496dac7-7885-4c9c-8e54-0ffebd805485').then(
             (data: DataView) => {
@@ -340,13 +358,16 @@ export class TinyDropBLEDevice extends TinyDropDevice {
                 program.enabled = data.getUint8(8 + 4 + 2 + 1) != 0
                 logger.log('Program received: ' + JSON.stringify(program))
                 onSuccess(program)
+                this.progressUI?.stop(ResultType.Success)
             }, (reason: any) => {
                 logger.log(`Can't read program from device`)
                 logger.log(reason)
+                this.progressUI?.stop(ResultType.Error)
             })
     }
 
     private sendCurrentTime(): void {
+        this.progressUI?.spin()
         const now = Math.round(Date.now() / 1000)
         const buffer = new ArrayBuffer(8)
         const dataView = new DataView(buffer)
@@ -355,9 +376,11 @@ export class TinyDropBLEDevice extends TinyDropDevice {
         ble.write(this.id(), "87f4d02e-698f-4c46-91f2-5f714c877b0a", "21bc4af5-44f0-4a7b-aa36-a110a0ac0ad2", dataView).then(
             () => {
                 logger.log(`Time ${now} sent to device`)
+                this.progressUI?.stop(ResultType.Success)
             }, (reason: any) => {
                 logger.log(`Can't send time to device`)
                 logger.log(reason)
+                this.progressUI?.stop(ResultType.Error)
             })
     }
 

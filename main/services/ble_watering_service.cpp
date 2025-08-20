@@ -6,6 +6,8 @@
 #include "ble_utils.hpp"
 #include "ble_watering_service.hpp"
 
+#include <sys/time.h>
+
 namespace plant {
 
 namespace {
@@ -20,6 +22,10 @@ constexpr auto watering_test_chr_uuid =
 uint16_t watering_schedule_chr_val_handle;
 constexpr auto watering_schedule_chr_uuid =
     make_uuid128("3496dac7-7885-4c9c-8e54-0ffebd805485");
+
+uint16_t watering_state_chr_val_handle;
+constexpr auto watering_state_chr_uuid =
+    make_uuid128("ed4cb13c-71cc-460b-a781-5530878f7aa5");
 
 } // namespace
 
@@ -37,12 +43,24 @@ BLEWateringService::BLEWateringService()
                          .access_cb = watering_chr_access,
                          .arg = this,
                          .flags = BLE_GATT_CHR_F_READ | BLE_GATT_CHR_F_WRITE,
-                         .val_handle = &watering_schedule_chr_val_handle}}} {
+                         .val_handle = &watering_schedule_chr_val_handle},
+                     ble_gatt_chr_def{
+                         .uuid = &watering_state_chr_uuid.u,
+                         .access_cb = watering_chr_access,
+                         .arg = this,
+                         .flags = BLE_GATT_CHR_F_READ | BLE_GATT_CHR_F_NOTIFY,
+                         .val_handle = &watering_state_chr_val_handle}}} {
 }
 
 void BLEWateringService::service_added() {
     watering_schedule() = WateringSchedule{};
     watering_schedule().read_from_storage();
+}
+
+void BLEWateringService::notify_watering_state_change() {
+    ESP_LOGI("BLEWateringService",
+             "Sending watering state change notification");
+    ble_gatts_chr_updated(watering_state_chr_val_handle);
 }
 
 int BLEWateringService::watering_chr_access(uint16_t conn_handle,
@@ -85,6 +103,10 @@ int BLEWateringService::watering_chr_access(uint16_t conn_handle,
         } else if (attr_handle == watering_schedule_chr_val_handle) {
             int res = os_mbuf_append(ctxt->om, &self.watering_schedule(),
                                      WateringSchedule::size);
+            return res == 0 ? 0 : BLE_ATT_ERR_INSUFFICIENT_RES;
+        } else if (attr_handle == watering_state_chr_val_handle) {
+            int res = os_mbuf_append(ctxt->om, &self.watering_state(),
+                                     WateringState::size);
             return res == 0 ? 0 : BLE_ATT_ERR_INSUFFICIENT_RES;
         } else {
             return error_handler();
@@ -151,6 +173,16 @@ int BLEWateringService::watering_chr_access(uint16_t conn_handle,
             }
 
             self.watering_test() = test;
+            {
+                struct timeval now_tv;
+                gettimeofday(&now_tv, nullptr);
+
+                WateringState state;
+                state.start_time = now_tv.tv_sec;
+                state.watering_duration = test.duration;
+                state.watering = test.duration > 0;
+                self.set_watering_state(state);
+            }
 
             ble_gatts_chr_updated(attr_handle);
 

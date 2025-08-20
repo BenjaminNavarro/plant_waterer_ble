@@ -37,7 +37,17 @@ struct WateringTest {
     static const auto size = sizeof(duration) + sizeof(flow_speed);
 };
 
-class BLEWateringService : public BLEService<2> {
+// Make sure the data is packed
+struct WateringState {
+    std::uint64_t start_time{}; // UNIX time
+    std::uint16_t watering_duration{};
+    bool watering{};
+
+    static const auto size =
+        sizeof(start_time) + sizeof(watering_duration) + sizeof(watering);
+};
+
+class BLEWateringService : public BLEService<3> {
 public:
     BLEWateringService();
 
@@ -57,16 +67,27 @@ public:
         return watering_test_;
     }
 
+    [[nodiscard]] const WateringState& watering_state() const {
+        return watering_state_;
+    }
+
+    void set_watering_state(const WateringState& state) {
+        watering_state_ = state;
+        notify_watering_state_change();
+    }
+
 private:
     friend class BLEServiceRegistrator;
 
     void service_added() final override;
+    void notify_watering_state_change();
 
     static int watering_chr_access(uint16_t conn_handle, uint16_t attr_handle,
                                    struct ble_gatt_access_ctxt* ctxt, void* arg);
 
     WateringSchedule watering_schedule_;
     WateringTest watering_test_;
+    WateringState watering_state_{};
 };
 
 } // namespace plant

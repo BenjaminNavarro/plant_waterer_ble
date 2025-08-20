@@ -39,6 +39,11 @@ public:
         return service_;
     }
 
+protected:
+    friend class BLEServiceRegistrator;
+    virtual void service_added() {
+    }
+
 private:
     std::array<ble_gatt_chr_def, N + 1> characteristics_;
     ble_gatt_svc_def service_;
@@ -46,8 +51,9 @@ private:
 
 class BLEServiceRegistrator {
 public:
-    template <int N> void add_service(const BLEService<N>& service) {
+    template <int N> void add_service(BLEService<N>& service) {
         add_service(service.service());
+        service.service_added();
     }
 
     void add_service(const ble_gatt_svc_def& service);

@@ -129,18 +129,14 @@ export class ConfigPanel {
     }
 
     private startWatering() {
-        if (this.device != null && !this.device.wateringState().watering) {
-            this.device.startWatering(this.program.duration, this.program.waterFlow)
-        }
+        this.device?.startWatering(this.program.duration, this.program.waterFlow)
     }
 
     private stopWatering() {
-        if (this.device != null && this.device.wateringState().watering) {
-            this.device.stopWatering()
-        }
+        this.device?.stopWatering()
     }
 
     private sendProgram() {
-        this.device.sendProgram(this.program)
+        this.device?.sendProgram(this.program)
     }
 }

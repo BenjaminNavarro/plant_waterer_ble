@@ -53,14 +53,10 @@ export class ManualPanel {
     }
 
     private startWatering() {
-        if (this.device != null && !this.device.wateringState().watering) {
-            this.device.startWatering(this.duration, this.waterFlow)
-        }
+        this.device?.startWatering(this.duration, this.waterFlow)
     }
 
     private stopWatering() {
-        if (this.device != null && this.device.wateringState().watering) {
-            this.device.stopWatering()
-        }
+        this.device?.stopWatering()
     }
 }

@@ -253,11 +253,21 @@ export class TinyDropBLEDevice extends TinyDropDevice {
     }
 
     override startWatering(durationSec: number, flowSpeed: number): void {
-
+        const buffer = new ArrayBuffer(3)
+        const dataView = new DataView(buffer)
+        dataView.setUint16(0, durationSec, true)
+        dataView.setUint8(2, flowSpeed)
+        ble.write(this.id(), '2f675585-e40a-c088-6941-b245883c4e3a', '198a6292-be81-4989-bd7d-a408d1b8b08a', dataView).then(
+            () => {
+                logger.log(`Watering request sent to device`)
+            }, (reason: any) => {
+                logger.log(`Can't send watering request to device`)
+                logger.log(reason)
+            })
     }
 
     override stopWatering(): void {
-
+        this.startWatering(0, 0)
     }
 
     override sendProgram(program: WateringProgram): void {

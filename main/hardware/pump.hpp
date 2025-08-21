@@ -1,9 +1,11 @@
 #pragma once
 
-#include <data/watering_schedule.hpp>
+#include <data/flow_speed.hpp>
 
 #include <driver/gpio.h>
 #include <driver/ledc.h>
+
+#include <cstdint>
 
 namespace plant {
 

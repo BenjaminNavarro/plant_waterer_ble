@@ -1,5 +1,6 @@
 #include <services/ble_watering_service/ble_watering_schedule.hpp>
 #include <services/ble_utils.hpp>
+#include <data/watering_program.hpp>
 
 #include <host/ble_hs.h>
 #include <host/ble_gatt.h>
@@ -36,6 +37,11 @@ void BLEWateringScheduleCharacteristic::on_write(
              schedule().start_time, schedule().watering_period,
              schedule().watering_duration, schedule().flow_speed,
              schedule().enabled);
+
+    plant::WateringProgram program;
+    program.output = 0;
+    program.schedule = schedule();
+    xQueueSendToBack(watering_schedule_queue_, &program, 0);
 }
 
 void WateringSchedule::read_from_storage() {

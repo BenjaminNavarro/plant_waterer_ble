@@ -1,5 +1,6 @@
 #include <services/ble_watering_service/ble_watering_test.hpp>
 #include <services/ble_utils.hpp>
+#include <data/watering_request.hpp>
 
 #include <host/ble_hs.h>
 #include <host/ble_gatt.h>
@@ -27,6 +28,19 @@ void BLEWateringTestCharacteristic::on_write(std::span<const std::byte> memory) 
 
     ESP_LOGI("BLEWateringTest", "New test request: %u @ %u\n", test().duration,
              test().flow_speed);
+
+    WateringRequest request;
+    request.duration = test().duration;
+    request.flow_speed = test().flow_speed;
+    request.output = 0;
+
+    if (request.duration == 0) {
+        // Ask the task to stop any watering in progress
+        xTaskNotifyGive(watering_task_);
+    } else {
+        // Send the request to the watering task
+        xQueueSendToBack(watering_requests_queue_, &request, 0);
+    }
 }
 
 } // namespace plant

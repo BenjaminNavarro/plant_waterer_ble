@@ -83,7 +83,8 @@
   "clangd.arguments": [
     "--background-index",
     "--query-driver=F:\\ESP32\\Espressif\\tools\\riscv32-esp-elf\\esp-14.2.0_20241119\\riscv32-esp-elf\\bin\\riscv32-esp-elf-gcc.exe",
-    "--compile-commands-dir=f:\\ESP32\\plant_waterer_ble\\build"
+    "--compile-commands-dir=f:\\ESP32\\plant_waterer_ble\\build",
+    "--header-insertion=never"
   ],
   "idf.adapterTargetName": "esp32",
   "spellright.language": [

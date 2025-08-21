@@ -1,7 +1,6 @@
 idf_component_register(
     SRCS
         main.cpp
-        data/watering_schedule.cpp
         data/user_defined_name.cpp
         services/ble_service.cpp
         services/ble_characteristic.cpp
@@ -15,15 +14,12 @@ idf_component_register(
         tasks/blink.cpp
         tasks/watering.cpp
         tasks/hardware.cpp
-        main_ble/main.cpp
-        main_ble/src/gap.cpp
-        main_ble/src/gatt_svc.cpp
-        # main_ble/src/led.cpp
+        tasks/schedule.cpp
+        ble/gap.cpp
     INCLUDE_DIRS
         .
         pid-utils/hashed-string
         pid-utils/unreachable
-        main_ble/include
 )
 
 target_compile_definitions(

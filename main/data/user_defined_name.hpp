@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../main_ble/include/gap.hpp"
+#include <ble/gap.hpp>
 
 #include <optional>
 #include <string_view>

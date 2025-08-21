@@ -38,11 +38,11 @@ public:
     }
 
     [[nodiscard]] const auto& watering_state() const {
-        return get_characteristic<0>();
+        return get_characteristic<2>();
     }
 
     [[nodiscard]] auto& watering_state() {
-        return get_characteristic<0>();
+        return get_characteristic<2>();
     }
 
 private:

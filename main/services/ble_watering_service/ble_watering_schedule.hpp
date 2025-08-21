@@ -42,6 +42,10 @@ public:
         return schedule_;
     };
 
+    void set_watering_schedule_queue(QueueHandle_t watering_schedule_queue) {
+        watering_schedule_queue_ = watering_schedule_queue;
+    }
+
 private:
     [[nodiscard]] std::span<const std::byte>
     on_read_access(std::span<std::byte> memory) override final;
@@ -49,6 +53,7 @@ private:
     void on_write(std::span<const std::byte> memory) override final;
 
     WateringSchedule schedule_;
+    QueueHandle_t watering_schedule_queue_;
 };
 
 } // namespace plant

@@ -34,10 +34,20 @@ public:
         return test_;
     };
 
+    void set_watering_requests_queue(QueueHandle_t watering_requests_queue) {
+        watering_requests_queue_ = watering_requests_queue;
+    }
+
+    void set_watering_task_handle(TaskHandle_t watering_task) {
+        watering_task_ = watering_task;
+    }
+
 private:
     void on_write(std::span<const std::byte> memory) override final;
 
     WateringTest test_;
+    QueueHandle_t watering_requests_queue_{};
+    TaskHandle_t watering_task_{};
 };
 
 } // namespace plant

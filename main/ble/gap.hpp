@@ -78,7 +78,7 @@ struct ManufacturerData {
 };
 
 /* Public function declarations */
-void adv_init(void);
+void adv_init();
 int gap_init(const ManufacturerData& manufacturer_data);
 
 ManufacturerData getCurrentManufacturerData();

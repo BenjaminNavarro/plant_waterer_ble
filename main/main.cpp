@@ -7,17 +7,28 @@
    CONDITIONS OF ANY KIND, either express or implied.
 */
 
-#include <tasks/blink.hpp>
-#include <tasks/watering.hpp>
+// #include <tasks/blink.hpp>
 #include <tasks/hardware.hpp>
+#include <tasks/watering.hpp>
+#include <tasks/schedule.hpp>
 
-#include <data/watering_schedule.hpp>
+#include <data/hardware_state.hpp>
+#include <data/watering_request.hpp>
 
-#include <driver/gpio.h>
+#include <services/ble_service.hpp>
+#include <services/ble_current_time_service.hpp>
+#include <services/ble_battery_service.hpp>
+#include <services/ble_watering_service.hpp>
+#include <services/ble_name_service.hpp>
+#include <data/user_defined_name.hpp>
+#include <data/watering_program.hpp>
+
+#include "ble/common.h"
+#include "ble/gap.hpp"
+
 #include <esp_event.h>
 #include <esp_log.h>
 #include <nvs_flash.h>
-#include <protocol_examples_common.h>
 #include <sdkconfig.h>
 
 #include <freertos/FreeRTOS.h>
@@ -27,67 +38,132 @@
 #include <ctime>
 #include <sys/time.h>
 
-extern void app_main_ble();
+/* Library function declarations */
+extern "C" void ble_store_config_init();
 
-esp_err_t start_rest_server();
+/* Private function declarations */
+static void on_stack_reset(int reason);
+static void on_stack_sync();
+static void nimble_host_config_init();
+static void nimble_host_task(void* param);
+
+/* Private functions */
+/*
+ *  Stack event callback functions
+ *      - on_stack_reset is called when host resets BLE stack due to errors
+ *      - on_stack_sync is called when host has synced with controller
+ */
+static void on_stack_reset(int reason) {
+    /* On reset, print reset reason to console */
+    ESP_LOGI(TAG, "nimble stack reset, reset reason: %d", reason);
+}
+
+static void on_stack_sync(void) {
+    /* On stack sync, do advertising initialization */
+    adv_init();
+}
+static void nimble_host_config_init(void) {
+    /* Set host callbacks */
+    ble_hs_cfg.reset_cb = on_stack_reset;
+    ble_hs_cfg.sync_cb = on_stack_sync;
+    ble_hs_cfg.gatts_register_cb = nullptr;
+    ble_hs_cfg.store_status_cb = ble_store_util_status_rr;
+
+    /* Store host configuration */
+    ble_store_config_init();
+}
+static void nimble_host_task(void* param) {
+    /* Task entry log */
+    ESP_LOGI(TAG, "nimble host task has been started!");
+
+    /* This function won't return until nimble_port_stop() is executed */
+    nimble_port_run();
+
+    /* Clean up at exit */
+    vTaskDelete(NULL);
+}
+
+plant::BLEServiceRegistrator ble_services;
+plant::BLECurrentTimeService current_time_service;
+plant::BLEBatteryService battery_service;
+plant::BLEWateringService watering_service;
+plant::BLENameService name_service;
 
 extern "C" void app_main(void) {
-    ESP_LOGI("app_main", "calling app_main_ble()");
-    app_main_ble();
-    ESP_LOGI("app_main", "app_main_ble() executed (they shall be remembered)");
-    return;
+    {
+        auto ret = nvs_flash_init();
+        if (ret == ESP_ERR_NVS_NO_FREE_PAGES ||
+            ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+            ESP_ERROR_CHECK(nvs_flash_erase());
+            ret = nvs_flash_init();
+        }
+        if (ret != ESP_OK) {
+            ESP_LOGE(TAG, "failed to initialize nvs flash, error code: %d ",
+                     ret);
+            return;
+        }
+    }
 
-    // ESP_ERROR_CHECK(nvs_flash_init());
-    // ESP_ERROR_CHECK(esp_netif_init());
-    // ESP_ERROR_CHECK(esp_event_loop_create_default());
+    ManufacturerData manufacturer_data;
 
-    // netbiosns_init();
-    // netbiosns_set_name(CONFIG_EXAMPLE_MDNS_HOST_NAME);
+    if (auto saved_name = plant::read_user_defined_name_from_storage()) {
+        ESP_LOGI(TAG, "Name read from storage");
+        manufacturer_data.part2.user_defined_name = saved_name->as_array();
+    }
 
-    // ESP_ERROR_CHECK(example_connect());
-    // ESP_ERROR_CHECK(plant::start_mdns_service());
+    if (auto ret = nimble_port_init(); ret != ESP_OK) {
+        ESP_LOGE(TAG, "failed to initialize nimble stack, error code: %d ", ret);
+        return;
+    }
 
-    // QueueHandle_t watering_schedule_queue =
-    //     xQueueCreate(1, sizeof(plant::WateringSchedule));
-    // {
-    //     if (auto saved_schedule = plant::read_schedule_from_storage()) {
-    //         ESP_LOGI("main", "Schedule read from storage");
-    //         xQueueSendToBack(watering_schedule_queue, &saved_schedule.value(),
-    //                          0);
-    //     } else {
-    //         ESP_LOGI("main",
-    //                  "No schedule saved in storage, creating a default one");
-    //         plant::WateringSchedule default_schedule;
-    //         xQueueSendToBack(watering_schedule_queue, &default_schedule, 0);
-    //     }
-    // }
+    if (auto error_code = gap_init(manufacturer_data); error_code != 0) {
+        ESP_LOGE(TAG, "failed to initialize GAP service, error code: %d",
+                 error_code);
+        return;
+    }
 
-    // QueueHandle_t mode_switch_queue = xQueueCreate(1, sizeof(plant::Mode));
+    ble_services.add_service(current_time_service);
+    ble_services.add_service(battery_service);
+    ble_services.add_service(watering_service);
+    ble_services.add_service(name_service);
 
-    // QueueHandle_t hardware_queue =
-    //     xQueueCreate(1, sizeof(plant::HardwareState));
+    name_service.name().set(manufacturer_data.part2.user_defined_name);
 
-    // QueueHandle_t test_configuration_queue =
-    //     xQueueCreate(1, sizeof(plant::HardwareState));
+    ble_services.register_all_services();
 
-    // QueueHandle_t program_test_queue =
-    //     xQueueCreate(1, sizeof(plant::WateringTest));
+    if (not ble_services.registration_done()) {
+        ESP_LOGE(TAG, "failed to register BLE services");
+        return;
+    }
 
-    // plant::create_hardware_task(hardware_queue);
+    nimble_host_config_init();
 
-    // plant::create_watering_task(
-    //     {.mode_switch_queue = mode_switch_queue,
-    //      .hardware_queue = hardware_queue,
-    //      .watering_schedule_queue = watering_schedule_queue,
-    //      .test_configuration_queue = test_configuration_queue,
-    //      .program_test_queue = program_test_queue});
+    QueueHandle_t hardware_queue =
+        xQueueCreate(1, sizeof(plant::HardwareState));
 
-    // ESP_ERROR_CHECK(plant::start_ntp_service(mode_switch_queue));
-    // ESP_ERROR_CHECK(plant::start_http_service(
-    //     {.mode_switch_queue = mode_switch_queue,
-    //      .watering_schedule_queue = watering_schedule_queue,
-    //      .test_configuration_queue = test_configuration_queue,
-    //      .program_test_queue = program_test_queue}));
+    QueueHandle_t watering_requests_queue =
+        xQueueCreate(10, sizeof(plant::WateringRequest));
 
-    // plant::create_blink_task();
+    QueueHandle_t watering_schedule_queue =
+        xQueueCreate(10, sizeof(plant::WateringProgram));
+
+    plant::create_hardware_task(hardware_queue);
+
+    auto* watering_task = plant::create_watering_task(
+        {.watering_queue = watering_requests_queue,
+         .hardware_queue = hardware_queue,
+         .watering_state_characteristic = &watering_service.watering_state()});
+
+    plant::create_schedule_task(
+        {.watering_schedule_queue = watering_schedule_queue,
+         .watering_requests_queue = watering_requests_queue});
+
+    watering_service.watering_test().set_watering_requests_queue(
+        watering_requests_queue);
+    watering_service.watering_test().set_watering_task_handle(watering_task);
+
+    watering_service.watering_schedule().set_watering_schedule_queue(
+        watering_schedule_queue);
+
+    xTaskCreate(nimble_host_task, "NimBLE Host", 4 * 1024, nullptr, 5, nullptr);
 }

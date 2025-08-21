@@ -6,7 +6,6 @@
 /* Includes */
 #include "gap.hpp"
 #include "common.h"
-#include "gatt_svc.hpp"
 
 #include <array>
 
@@ -247,7 +246,7 @@ static int gap_event_handler(struct ble_gap_event* event, void* arg) {
                  event->subscribe.cur_indicate);
 
         /* GATT subscribe event callback */
-        gatt_svr_subscribe_cb(event);
+        // gatt_svr_subscribe_cb(event);
         return rc;
 
     /* MTU update event */

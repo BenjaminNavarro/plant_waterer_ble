@@ -184,7 +184,7 @@ export abstract class TinyDropDevice {
         this.statusBar.setWateringState(this.wateringState().watering)
 
         const nowSec = Date.now() / 1000
-        if (this.wateringStateData.duration > 0) {
+        if (this.wateringStateData.duration > 0 && this.wateringStateData.watering) {
             this.statusBar.startWateringProgressAutoUpdate(
                 this.wateringStateData.duration,
                 ((nowSec - this.wateringStateData.startDate) /

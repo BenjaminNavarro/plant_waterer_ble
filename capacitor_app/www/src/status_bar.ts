@@ -39,6 +39,8 @@ export class StatusBar {
             startValue = 0
         }
         durationSec = Math.max(durationSec, 0)
+        const remainingDuration = durationSec * (100 - startValue) / 100
+        const remainingDurationMs = remainingDuration * 1000
 
         let progress = startValue
         this.stopWateringProgressAutoUpdate()
@@ -47,7 +49,7 @@ export class StatusBar {
         this.autoUpdateInterval = setInterval(() => {
             this.setWateringProgress(progress)
 
-            progress += 100 / (durationSec * 1000 / this.updateRateMs);
+            progress += (100 - startValue) / (remainingDurationMs / this.updateRateMs);
             if (progress >= 100) {
                 progress = 100
                 this.stopWateringProgressAutoUpdate()

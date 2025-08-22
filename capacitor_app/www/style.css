@@ -1,5 +1,6 @@
 :root {
     --header-font-size: 24px;
+    --progress-track_width: 3px;
 }
 
 .is_hidden {
@@ -12,8 +13,7 @@
 
 /* Inside the tabs header, height is 53px */
 .progress-container {
-    position: fixed;
-    right: 1rem;
+    max-height: var(--header-font-size);
 }
 
 .progress {
@@ -23,20 +23,16 @@
     font-size: 46px;
 }
 
-#progress_result {
-    position: absolute;
-    top: 6px;
-    right: 6px;
-    font-size: 40px;
-}
-
 #progress_ring {
-    --size: 46px;
+    --size: var(--header-font-size);
+    --track-width: var(--progress-track_width);
+    margin-top: calc(-1 * var(--progress-track_width));
 }
 
 #progress_spinner {
-    font-size: 46px;
-    --track-width: 4px;
+    --font-size: var(--header-font-size);
+    --track-width: var(--progress-track_width);
+    margin-top: calc(-1 * var(--progress-track_width));
 }
 
 .card-header {

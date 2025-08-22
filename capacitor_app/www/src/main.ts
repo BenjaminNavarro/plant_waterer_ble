@@ -6,7 +6,7 @@ import { qs } from './utils.ts'
 import { SlTabGroup, SlTab, SlIcon } from '@shoelace-style/shoelace'
 import type { SlTabShowEvent } from '@shoelace-style/shoelace'
 
-import { ProgressUI } from './progress_ui.ts'
+import { ProgressUI, ResultType } from './progress_ui.ts'
 import { ConnectPanel } from './connect_panel.ts'
 import { ConfigPanel } from './config_panel.ts'
 import { ManualPanel } from './test_panel.ts'
@@ -25,17 +25,16 @@ function main() {
         console.log(`Tab ${ev.detail.name} is shown`);
     })
 
-    const progressUI = new ProgressUI()
     const statusBar = new StatusBar()
 
     const scanner = isMobile() ? new TinyDropBLEScanner(statusBar) : new TinyDropFakeScanner(statusBar)
 
-    const configPanel = new ConfigPanel(progressUI)
-    const testPanel = new ManualPanel(progressUI)
+    const configPanel = new ConfigPanel(statusBar.progress)
+    const testPanel = new ManualPanel(statusBar.progress)
 
-    const connectPanel = new ConnectPanel(progressUI, scanner,
+    const connectPanel = new ConnectPanel(statusBar.progress, scanner,
         (device: TinyDropDevice) => {
-            device.setProgressUI(progressUI)
+            device.setProgressUI(statusBar.progress)
             configTab.disabled = false
             manualTab.disabled = false
             configPanel.setDevice(device)

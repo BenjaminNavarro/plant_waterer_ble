@@ -1,8 +1,11 @@
 import { SlProgressBar } from "@shoelace-style/shoelace"
 import { qs } from "./utils.ts"
 import type { timeoutId } from "./utils.ts"
+import { ProgressUI } from "./progress_ui.ts"
 
 export class StatusBar {
+    progress = new ProgressUI()
+
     constructor() {
         this.setBluetoothState(false)
         this.setWateringState(false)

@@ -48,15 +48,12 @@ class ProgressRing {
     }
 
     hide() {
-        if (!this.progressRing.classList.contains("is_hidden")) {
-            this.progressRing.classList.add("is_hidden")
-        }
+        this.progressRing.style.display = 'none'
+
     }
 
     show() {
-        if (this.progressRing.classList.contains("is_hidden")) {
-            this.progressRing.classList.remove("is_hidden")
-        }
+        this.progressRing.style.display = 'block'
     }
 
     startAutoUpdate(durationMs: number) {
@@ -97,15 +94,11 @@ class ProgressSpinner {
 
 
     hide() {
-        if (!this.progressSpinner.classList.contains("is_hidden")) {
-            this.progressSpinner.classList.add("is_hidden")
-        }
+        this.progressSpinner.style.display = 'none'
     }
 
     show() {
-        if (this.progressSpinner.classList.contains("is_hidden")) {
-            this.progressSpinner.classList.remove("is_hidden")
-        }
+        this.progressSpinner.style.display = 'block'
     }
 
     private progressSpinner: HTMLInputElement
@@ -134,14 +127,12 @@ class ProgressResult {
     }
 
     hide() {
-        if (!this.progressResultElem.classList.contains("is_hidden")) {
-            this.progressResultElem.classList.add("is_hidden")
-        }
+        this.progressResultElem.style.display = 'none'
     }
 
     show(type: ResultType) {
-        if (this.progressResultElem.classList.contains("is_hidden")) {
-            this.progressResultElem.classList.remove("is_hidden")
+        if (this.progressResultElem.style.display == 'none') {
+            this.progressResultElem.style.display = 'block'
             let durationMs = ResultDuration.Infinite
             switch (type) {
                 case ResultType.None:

@@ -42,6 +42,11 @@
         </div>
         <div class="status-bar bulma-column bulma-is-tree-quarters">
             <div style="display: flex; flex-direction: row;">
+                <div class="progress-container">
+                    <sl-icon id="progress_result" name="info-circle"></sl-icon>
+                    <sl-progress-ring id="progress_ring" value="0"></sl-progress-ring>
+                    <sl-spinner id="progress_spinner"></sl-spinner>
+                </div>
                 <sl-icon id="bluetooth_status" class="status-icon bluetooth-disconnected" name="bluetooth"></sl-icon>
                 <sl-icon id="watering_status" class="status-icon watering-off" name="droplet-half"></sl-icon>
                 <sl-progress-bar value="0" id="watering_progress" class="status-icon"></sl-progress-bar>
@@ -50,15 +55,10 @@
     </div>
 
     <div class="app-content">
-        <div class="progress-container">
-            <sl-progress-ring id="progress_ring" class="progress" value="0"></sl-progress-ring>
-            <sl-spinner id="progress_spinner" class="progress"></sl-spinner>
-            <sl-icon id="progress_result" name="info-circle"></sl-icon>
-        </div>
 
         <sl-tab-group id="tabs">
             <sl-tab slot="nav" panel="connect" id="connect_tab">Connexion</sl-tab>
-            <sl-tab slot="nav" panel="config" id="config_tab">Automatique</sl-tab>
+            <sl-tab slot="nav" panel="config" id="config_tab">Configuration</sl-tab>
             <sl-tab slot="nav" panel="manual" id="manual_tab">Manuel</sl-tab>
 
             <sl-tab-panel class="main-tabs" name="connect">
@@ -69,8 +69,15 @@
             </sl-tab-panel>
 
             <sl-tab-panel class="main-tabs" name="config">
-                <input label="Nom personnalisé" id="custom_name_input" type="text" pattern="[\x00-\x7F]+"
-                    class="bulma-input"></input>
+                <div class="bulma-columns bulma-is-mobile bulma-is-vcentered" style="margin-bottom: -12px !important;">
+                    <div class="bulma-column bulma-is-one-quarter">
+                        Nom
+                    </div>
+                    <div class="bulma-column bulma-is-three-quarters">
+                        <input label="Nom personnalisé" id="custom_name_input" type="text" pattern="[\x00-\x7F]+"
+                            class="bulma-input"></input>
+                    </div>
+                </div>
                 <sl-divider></sl-divider>
                 <div class="bulma-columns bulma-is-mobile bulma-is-vcentered">
                     <div class="bulma-column bulma-is-one-quarter">

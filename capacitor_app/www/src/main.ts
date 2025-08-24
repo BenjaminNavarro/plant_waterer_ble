@@ -32,24 +32,41 @@ function main() {
     const configPanel = new ConfigPanel(statusBar.progress)
     const testPanel = new ManualPanel(statusBar.progress)
 
-    const connectPanel = new ConnectPanel(statusBar.progress, scanner,
-        (device: TinyDropDevice) => {
-            device.setProgressUI(statusBar.progress)
-            configTab.disabled = false
-            manualTab.disabled = false
-            configPanel.setDevice(device)
-            testPanel.setDevice(device)
-            tabs.show('config')
-        }, () => {
-            configTab.disabled = true
-            manualTab.disabled = true
-            configPanel.setDevice(null)
-            testPanel.setDevice(null)
-            tabs.show('connect')
-        })
+    const onConnect = (device: TinyDropDevice) => {
+        device.setProgressUI(statusBar.progress)
+        configTab.disabled = false
+        manualTab.disabled = false
+        configPanel.setDevice(device)
+        testPanel.setDevice(device)
+        tabs.show('config')
+    }
+
+    const onDisconnect = () => {
+        configTab.disabled = true
+        manualTab.disabled = true
+        configPanel.setDevice(null)
+        testPanel.setDevice(null)
+        tabs.show('connect')
+    }
+
+    const connectPanel = new ConnectPanel(statusBar.progress, scanner, onConnect, onDisconnect)
 
     configTab.disabled = true
     manualTab.disabled = true
+
+    let visibilityTimeoutHandle = -1
+    document.addEventListener("visibilitychange", function () {
+        if (document.hidden) {
+            clearTimeout(visibilityTimeoutHandle)
+            visibilityTimeoutHandle = window.setTimeout(() => {
+                connectPanel.disconnect(onDisconnect)
+            }, 30000)
+        }
+        else {
+            clearTimeout(visibilityTimeoutHandle)
+        }
+        logger.log(`visibility changed: hidden=${document.hidden}, state=${document.visibilityState}`)
+    }, false);
 
     document.body.classList.remove('is_hidden')
 

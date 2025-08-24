@@ -9,6 +9,7 @@
 #include <freertos/task.h>
 
 #include <esp_log.h>
+#include <esp_pm.h>
 
 #include <sys/time.h>
 

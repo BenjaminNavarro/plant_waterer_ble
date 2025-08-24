@@ -96,8 +96,8 @@
     "latex",
     "plaintext"
   ],
-  "idf.portWin": "COM5",
-  "idf.pythonInstallPath": "F:\\Espressif\\tools\\idf-python\\3.11.2\\python.exe",
+  "idf.portWin": "COM9",
+  "idf.pythonInstallPath": "F:\\ESP32\\Espressif\\tools\\idf-python\\3.11.2\\python.exe",
   "idf.espIdfPathWin": "F:\\ESP32\\v5.4.2\\esp-idf",
   "idf.toolsPathWin": "F:\\ESP32\\Espressif",
   "idf.openOcdConfigs": [

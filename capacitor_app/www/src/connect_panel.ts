@@ -5,11 +5,12 @@ import { TinyDropDevice } from './tinydrop_device.ts'
 import type { SlTabShowEvent } from '@shoelace-style/shoelace'
 
 export class ConnectPanel {
-    searchButton = qs('#search_button')
-    searchDurationMs = 30000
+    connectedDevice: TinyDropDevice = null
 
-    deviceList = qs('#device_list')
-    deviceListEntryTemplate = qs('#device_list_entry_template')
+    private searchDurationMs = 30000
+    private searchButton = qs('#search_button')
+    private deviceList = qs('#device_list')
+    private deviceListEntryTemplate = qs('#device_list_entry_template')
 
     constructor(progressUI: ProgressUI, scanner: TinyDropScanner, onConnect: CallableFunction, onDisconnect: CallableFunction) {
         this.searchButton.addEventListener('click', () => {
@@ -50,6 +51,8 @@ export class ConnectPanel {
                                     btn.innerHTML = 'Déconnexion'
                                     btn.disabled = false
 
+                                    this.connectedDevice = device
+
                                     onConnect(device)
                                     connecting = false
 
@@ -58,6 +61,8 @@ export class ConnectPanel {
                                 () => {
                                     progressUI.stop(ResultType.Error)
 
+                                    this.connectedDevice = null
+
                                     connectButtons.forEach(other_btn => {
                                         other_btn.disabled = false
                                     })
@@ -65,6 +70,8 @@ export class ConnectPanel {
                                     console.log('failed to connect');
                                 },
                                 () => {
+                                    this.connectedDevice = null
+
                                     connectButtons.forEach(other_btn => {
                                         other_btn.disabled = false
                                     })
@@ -106,5 +113,24 @@ export class ConnectPanel {
                 this.searchDurationMs)
 
         })
+    }
+
+    disconnect(onDisconnect?: CallableFunction) {
+        if (this.connectedDevice) {
+            this.connectedDevice.disconnect(() => {
+                this.connectedDevice = null
+
+                const connectButtons = qsa<HTMLButtonElement>('.connect-button')
+                connectButtons.forEach(btn => {
+                    btn.disabled = false
+                    btn.setAttribute('connected', 'false')
+                    btn.innerHTML = 'Connexion'
+                })
+
+                if (onDisconnect) {
+                    onDisconnect()
+                }
+            })
+        }
     }
 }

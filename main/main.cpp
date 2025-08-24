@@ -28,6 +28,7 @@
 
 #include <esp_event.h>
 #include <esp_log.h>
+#include <esp_pm.h>
 #include <nvs_flash.h>
 #include <sdkconfig.h>
 
@@ -90,6 +91,23 @@ plant::BLEWateringService watering_service;
 plant::BLENameService name_service;
 
 extern "C" void app_main(void) {
+    {
+        esp_pm_config_t pm_config;
+        pm_config.light_sleep_enable = false;
+        pm_config.max_freq_mhz = CONFIG_ESP32C3_DEFAULT_CPU_FREQ_MHZ;
+        pm_config.min_freq_mhz = CONFIG_XTAL_FREQ;
+        ESP_ERROR_CHECK(esp_pm_configure(&pm_config));
+    }
+
+    xTaskCreate(
+        [](void*) {
+            while (true) {
+                esp_pm_dump_locks(stdout);
+                vTaskDelay(10000 / portTICK_PERIOD_MS);
+            }
+        },
+        "PM Stats", 4 * 1024, nullptr, 5, nullptr);
+
     {
         auto ret = nvs_flash_init();
         if (ret == ESP_ERR_NVS_NO_FREE_PAGES ||
